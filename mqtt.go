@@ -16,6 +16,32 @@
 // Both expose a constructor that satisfies this package's Client interface.
 package mqtt
 
+//fusa:req REQ-MSG-001
+//fusa:req REQ-MSG-002
+//fusa:req REQ-MSG-003
+//fusa:req REQ-MSG-004
+//fusa:req REQ-MSG-005
+//fusa:req REQ-V5-MSG-001
+//fusa:req REQ-V5-MSG-002
+//fusa:req REQ-V5-MSG-003
+//fusa:req REQ-V5-MSG-004
+//fusa:req REQ-V5-MSG-005
+//fusa:req REQ-QOS-001
+//fusa:req REQ-QOS-002
+//fusa:req REQ-QOS-003
+//fusa:req REQ-QOS-004
+//fusa:req REQ-SUB-003
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SUB-005
+//fusa:req REQ-WILD-001
+//fusa:req REQ-WILD-002
+//fusa:req REQ-WILD-003
+//fusa:req REQ-WILD-004
+//fusa:req REQ-WILD-005
+//fusa:req REQ-WILD-006
+//fusa:req REQ-WILD-007
+//fusa:req REQ-WILD-008
+
 import (
 	"context"
 	"errors"
@@ -41,7 +67,10 @@ var ErrQoSUnsupported = errors.New("mqtt: QoS level not supported")
 
 // ── QoS ──────────────────────────────────────────────────────────────────────
 
-//fusa:req REQ-MSG-002
+//fusa:req REQ-QOS-001
+//fusa:req REQ-QOS-002
+//fusa:req REQ-QOS-003
+//fusa:req REQ-QOS-004
 
 // QoS is the MQTT Quality of Service delivery guarantee.
 type QoS byte
@@ -65,10 +94,17 @@ const (
 //fusa:req REQ-MSG-001
 //fusa:req REQ-MSG-002
 //fusa:req REQ-MSG-003
+//fusa:req REQ-MSG-004
+//fusa:req REQ-MSG-005
+//fusa:req REQ-V5-MSG-001
+//fusa:req REQ-V5-MSG-002
+//fusa:req REQ-V5-MSG-003
+//fusa:req REQ-V5-MSG-004
+//fusa:req REQ-V5-MSG-005
 
 // UserProperty is an MQTT v5 user-defined key/value property pair.
 //
-//fusa:req REQ-V5-PUB-001
+//fusa:req REQ-V5-MSG-003
 type UserProperty struct {
 	Key   string
 	Value string
@@ -97,7 +133,8 @@ type Message struct {
 
 // ── Subscription options ──────────────────────────────────────────────────────
 
-//fusa:req REQ-SUB-006
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SUB-005
 
 // SubscriberConfig holds per-subscription options applied at creation time.
 type SubscriberConfig struct {
@@ -135,14 +172,17 @@ func (c SubscriberConfig) ChanDepth(defaultDepth int) int {
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
-//fusa:req REQ-CLIENT-001
-//fusa:req REQ-CLIENT-002
-//fusa:req REQ-CLIENT-003
 //fusa:req REQ-PUB-001
 //fusa:req REQ-PUB-002
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
 //fusa:req REQ-SUB-001
 //fusa:req REQ-SUB-002
 //fusa:req REQ-SUB-003
+//fusa:req REQ-CONN-008
+//fusa:req REQ-CONC-001
+//fusa:req REQ-CONC-002
+//fusa:req REQ-CONC-003
 
 // Client connects to an MQTT broker and provides publish/subscribe operations.
 // A Client is safe for concurrent use from multiple goroutines.
@@ -178,21 +218,20 @@ type Subscription interface {
 
 // ── Topic wildcard matching ───────────────────────────────────────────────────
 
-//fusa:req REQ-SUB-002
-//fusa:req REQ-MOCK-001
-
 // MatchTopic reports whether filter matches topic per MQTT §4.7.
 //
 // filter may contain '+' (matches exactly one topic level) and '#' (matches
 // zero or more topic levels, must be the last character). Topics beginning
 // with '$' are not matched by wildcards at the top level, per §4.7.2.
 //
-//fusa:req REQ-SUB-002
-//fusa:req REQ-SUB-003
 //fusa:req REQ-WILD-001
 //fusa:req REQ-WILD-002
 //fusa:req REQ-WILD-003
 //fusa:req REQ-WILD-004
+//fusa:req REQ-WILD-005
+//fusa:req REQ-WILD-006
+//fusa:req REQ-WILD-007
+//fusa:req REQ-WILD-008
 func MatchTopic(filter, topic string) bool {
 	if filter == topic {
 		return true

@@ -10,13 +10,27 @@ package v5
 //fusa:req REQ-WIRE-003
 //fusa:req REQ-WIRE-004
 //fusa:req REQ-WIRE-005
+//fusa:req REQ-WIRE-006
+//fusa:req REQ-WIRE-007
+//fusa:req REQ-WIRE-008
+//fusa:req REQ-WIRE-009
+//fusa:req REQ-WIRE-010
+//fusa:req REQ-WIRE-011
+//fusa:req REQ-WIRE-012
+//fusa:req REQ-V5-WIRE-001
+//fusa:req REQ-V5-WIRE-002
+//fusa:req REQ-V5-WIRE-003
+//fusa:req REQ-V5-WIRE-004
 //fusa:req REQ-V5-PUB-001
 //fusa:req REQ-V5-PUB-002
 //fusa:req REQ-V5-PUB-003
+//fusa:req REQ-V5-PUB-004
+//fusa:req REQ-V5-PUB-005
+//fusa:req REQ-V5-PUB-006
 //fusa:req REQ-V5-SUB-001
 //fusa:req REQ-V5-SUB-002
 //fusa:req REQ-V5-SUB-003
-//fusa:req REQ-V5-ALIAS-001
+//fusa:req REQ-V5-SUB-004
 //fusa:req REQ-V5-SESSION-001
 
 import (
@@ -120,6 +134,8 @@ var propKinds = map[byte]propKind{
 
 // ── Wire encoding helpers ──────────────────────────────────────────────────
 
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-002
 func encodeVarLen(n int) []byte {
 	if n == 0 {
 		return []byte{0}
@@ -136,6 +152,9 @@ func encodeVarLen(n int) []byte {
 	return buf
 }
 
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-003
+//fusa:req REQ-FAULT-001
 func readVarLen(r io.Reader) (int, error) {
 	multiplier := 1
 	n := 0
@@ -153,6 +172,8 @@ func readVarLen(r io.Reader) (int, error) {
 	return 0, fmt.Errorf("mqtt/v5: malformed remaining length")
 }
 
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-003
 func decodeVarLen(data []byte) (val int, n int, err error) {
 	multiplier := 1
 	for i, b := range data {
@@ -169,6 +190,7 @@ func decodeVarLen(data []byte) (val int, n int, err error) {
 	return 0, 0, fmt.Errorf("mqtt/v5: truncated variable length integer")
 }
 
+//fusa:req REQ-WIRE-004
 func encodeStr(s string) []byte {
 	b := make([]byte, 2+len(s))
 	binary.BigEndian.PutUint16(b, uint16(len(s)))
@@ -195,7 +217,8 @@ func pkt(header byte, body []byte) []byte {
 
 // ── Property encoding ──────────────────────────────────────────────────────
 
-// encodeProps wraps property byte slices with a variable-length length prefix.
+//fusa:req REQ-V5-WIRE-001
+//fusa:req REQ-V5-WIRE-002
 func encodeProps(parts ...[]byte) []byte {
 	var body []byte
 	for _, p := range parts {
@@ -234,7 +257,12 @@ type parsedProps struct {
 	userProps        []mqtt.UserProperty
 }
 
-// readPropSet parses a property set from data and returns parsed props plus remaining bytes.
+//fusa:req REQ-V5-WIRE-003
+//fusa:req REQ-V5-MSG-001
+//fusa:req REQ-V5-MSG-002
+//fusa:req REQ-V5-MSG-003
+//fusa:req REQ-V5-MSG-004
+//fusa:req REQ-V5-MSG-005
 func readPropSet(data []byte) (parsedProps, []byte, error) {
 	var pp parsedProps
 	if len(data) == 0 {
@@ -468,7 +496,9 @@ type SubscribeOpts struct {
 
 // ── Packet builders ────────────────────────────────────────────────────────
 
-// buildCONNECT builds an MQTT v5.0 CONNECT packet with CleanStart=true.
+//fusa:req REQ-WIRE-005
+//fusa:req REQ-V5-WIRE-004
+//fusa:req REQ-V5-SESSION-001
 func buildCONNECT(clientID string, keepaliveSecs uint16, sessionExpiry uint32, receiveMax uint16) []byte {
 	var connProps [][]byte
 	if sessionExpiry > 0 {
@@ -489,7 +519,16 @@ func buildCONNECT(clientID string, keepaliveSecs uint16, sessionExpiry uint32, r
 	return pkt(pktCONNECT, body)
 }
 
-// buildPUBLISH builds an MQTT v5 PUBLISH packet with optional properties.
+//fusa:req REQ-WIRE-007
+//fusa:req REQ-WIRE-008
+//fusa:req REQ-WIRE-009
+//fusa:req REQ-WIRE-010
+//fusa:req REQ-V5-PUB-001
+//fusa:req REQ-V5-PUB-002
+//fusa:req REQ-V5-PUB-003
+//fusa:req REQ-V5-PUB-004
+//fusa:req REQ-V5-PUB-005
+//fusa:req REQ-V5-PUB-006
 func buildPUBLISH(topic string, payload []byte, qos byte, retain bool, packetID uint16, props PublishProps) []byte {
 	header := pktPUBLISH | (qos << 1)
 	if retain {
@@ -524,7 +563,11 @@ func buildPUBLISH(topic string, payload []byte, qos byte, retain bool, packetID 
 	return pkt(header, body)
 }
 
-// buildSUBSCRIBE builds an MQTT v5 SUBSCRIBE packet with subscription options.
+//fusa:req REQ-WIRE-011
+//fusa:req REQ-V5-SUB-001
+//fusa:req REQ-V5-SUB-002
+//fusa:req REQ-V5-SUB-003
+//fusa:req REQ-V5-SUB-004
 func buildSUBSCRIBE(filter string, qos byte, packetID uint16, opts SubscribeOpts) []byte {
 	body := encodeU16(packetID)
 	body = append(body, encodeProps()...) // empty properties
@@ -541,7 +584,7 @@ func buildSUBSCRIBE(filter string, qos byte, packetID uint16, opts SubscribeOpts
 	return pkt(pktSUBSCRIBE, body)
 }
 
-// buildUNSUBSCRIBE builds an MQTT v5 UNSUBSCRIBE packet.
+//fusa:req REQ-WIRE-012
 func buildUNSUBSCRIBE(filter string, packetID uint16) []byte {
 	body := encodeU16(packetID)
 	body = append(body, encodeProps()...) // empty properties

@@ -33,19 +33,71 @@
 // ErrQoSUnsupported and will be added in v0.5.
 package v5
 
-//fusa:req REQ-V5-CLIENT-001
-//fusa:req REQ-V5-CLIENT-002
-//fusa:req REQ-V5-CLIENT-003
+//fusa:req REQ-V5-CONN-001
+//fusa:req REQ-V5-CONN-002
+//fusa:req REQ-V5-CONN-003
+//fusa:req REQ-V5-CONN-004
 //fusa:req REQ-V5-PUB-001
 //fusa:req REQ-V5-PUB-002
 //fusa:req REQ-V5-PUB-003
+//fusa:req REQ-V5-PUB-004
+//fusa:req REQ-V5-PUB-005
+//fusa:req REQ-V5-PUB-006
 //fusa:req REQ-V5-SUB-001
 //fusa:req REQ-V5-SUB-002
 //fusa:req REQ-V5-SUB-003
+//fusa:req REQ-V5-SUB-004
 //fusa:req REQ-V5-ALIAS-001
+//fusa:req REQ-V5-ALIAS-002
+//fusa:req REQ-V5-ALIAS-003
 //fusa:req REQ-V5-SESSION-001
 //fusa:req REQ-MSG-001
 //fusa:req REQ-MSG-002
+//fusa:req REQ-MSG-003
+//fusa:req REQ-MSG-004
+//fusa:req REQ-MSG-005
+//fusa:req REQ-V5-MSG-001
+//fusa:req REQ-V5-MSG-002
+//fusa:req REQ-V5-MSG-003
+//fusa:req REQ-V5-MSG-004
+//fusa:req REQ-V5-MSG-005
+//fusa:req REQ-PUB-001
+//fusa:req REQ-PUB-002
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
+//fusa:req REQ-PUB-005
+//fusa:req REQ-PUB-006
+//fusa:req REQ-SUB-001
+//fusa:req REQ-SUB-002
+//fusa:req REQ-SUB-003
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SUB-006
+//fusa:req REQ-SUB-007
+//fusa:req REQ-SUB-008
+//fusa:req REQ-CONN-006
+//fusa:req REQ-CONN-007
+//fusa:req REQ-CONN-008
+//fusa:req REQ-CONN-009
+//fusa:req REQ-CONN-010
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-002
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-004
+//fusa:req REQ-SAFETY-005
+//fusa:req REQ-SAFETY-006
+//fusa:req REQ-SAFETY-007
+//fusa:req REQ-SAFETY-008
+//fusa:req REQ-CONC-001
+//fusa:req REQ-CONC-002
+//fusa:req REQ-CONC-003
+//fusa:req REQ-LEAK-001
+//fusa:req REQ-LEAK-002
+//fusa:req REQ-LEAK-003
+//fusa:req REQ-ORDER-001
+//fusa:req REQ-ORDER-002
+//fusa:req REQ-FAULT-001
+//fusa:req REQ-FAULT-002
+//fusa:req REQ-FAULT-003
 
 import (
 	"context"
@@ -122,8 +174,12 @@ type Client struct {
 // Dial connects to the MQTT v5.0 broker at addr (e.g. "localhost:1883") and
 // performs the CONNECT/CONNACK handshake before returning.
 //
-//fusa:req REQ-V5-CLIENT-001
-//fusa:req REQ-V5-CLIENT-002
+//fusa:req REQ-V5-CONN-001
+//fusa:req REQ-V5-CONN-002
+//fusa:req REQ-V5-CONN-003
+//fusa:req REQ-V5-CONN-004
+//fusa:req REQ-CONN-003
+//fusa:req REQ-CONN-004
 //fusa:req REQ-V5-SESSION-001
 func Dial(addr string, opts ...Option) (*Client, error) {
 	o := defaultOptions()
@@ -200,18 +256,33 @@ func (c *Client) readCONNACK() error {
 	return nil
 }
 
-// Publish sends a message with no additional v5 properties. Implements mqtt.Client.
-//
-//fusa:req REQ-V5-PUB-001
+//fusa:req REQ-PUB-001
+//fusa:req REQ-PUB-002
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-004
 func (c *Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payload []byte) error {
 	return c.PublishV5(ctx, topic, qos, payload, PublishProps{})
 }
 
-// PublishV5 sends a message with MQTT v5 properties.
-//
+//fusa:req REQ-PUB-001
+//fusa:req REQ-PUB-002
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
+//fusa:req REQ-PUB-005
+//fusa:req REQ-PUB-006
 //fusa:req REQ-V5-PUB-001
 //fusa:req REQ-V5-PUB-002
 //fusa:req REQ-V5-PUB-003
+//fusa:req REQ-V5-PUB-004
+//fusa:req REQ-V5-PUB-005
+//fusa:req REQ-V5-PUB-006
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-004
+//fusa:req REQ-ORDER-002
 func (c *Client) PublishV5(ctx context.Context, topic string, qos mqtt.QoS, payload []byte, props PublishProps) error {
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
@@ -233,18 +304,29 @@ func (c *Client) PublishV5(ctx context.Context, topic string, qos mqtt.QoS, payl
 	return c.send(buildPUBLISH(topic, payload, byte(qos), false, packetID, props))
 }
 
-// Subscribe creates a subscription with default options. Implements mqtt.Client.
-//
-//fusa:req REQ-V5-SUB-001
+//fusa:req REQ-SUB-001
+//fusa:req REQ-SUB-002
+//fusa:req REQ-SUB-003
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SAFETY-002
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-005
 func (c *Client) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.SubscriberOption) (mqtt.Subscription, error) {
 	return c.SubscribeV5(topic, qos, SubscribeOpts{}, opts...)
 }
 
-// SubscribeV5 creates a subscription with MQTT v5 subscription options.
-//
+//fusa:req REQ-SUB-001
+//fusa:req REQ-SUB-002
+//fusa:req REQ-SUB-003
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SUB-006
 //fusa:req REQ-V5-SUB-001
 //fusa:req REQ-V5-SUB-002
 //fusa:req REQ-V5-SUB-003
+//fusa:req REQ-V5-SUB-004
+//fusa:req REQ-SAFETY-002
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-005
 func (c *Client) SubscribeV5(topic string, qos mqtt.QoS, sopts SubscribeOpts, opts ...mqtt.SubscriberOption) (mqtt.Subscription, error) {
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
@@ -276,7 +358,10 @@ func (c *Client) SubscribeV5(topic string, qos mqtt.QoS, sopts SubscribeOpts, op
 	return sub, nil
 }
 
-// Close disconnects from the broker and releases all resources.
+//fusa:req REQ-CONN-006
+//fusa:req REQ-CONN-007
+//fusa:req REQ-CONN-008
+//fusa:req REQ-SAFETY-007
 func (c *Client) Close() error {
 	var connErr error
 	c.once.Do(func() {
@@ -321,6 +406,10 @@ func (c *Client) removeSubscription(sub *v5Subscription) {
 	}
 }
 
+//fusa:req REQ-SAFETY-006
+//fusa:req REQ-FAULT-002
+//fusa:req REQ-FAULT-003
+//fusa:req REQ-LEAK-001
 func (c *Client) readLoop() {
 	defer func() {
 		c.mu.RLock()
@@ -373,11 +462,23 @@ func (c *Client) readLoop() {
 	}
 }
 
-// handlePUBLISH processes an incoming PUBLISH packet, resolving topic aliases
-// and delivering the message to all matching subscriptions.
-//
-//fusa:req REQ-V5-ALIAS-001
 //fusa:req REQ-MSG-001
+//fusa:req REQ-MSG-003
+//fusa:req REQ-MSG-004
+//fusa:req REQ-MSG-005
+//fusa:req REQ-V5-MSG-001
+//fusa:req REQ-V5-MSG-002
+//fusa:req REQ-V5-MSG-003
+//fusa:req REQ-V5-MSG-004
+//fusa:req REQ-V5-MSG-005
+//fusa:req REQ-SUB-007
+//fusa:req REQ-SUB-008
+//fusa:req REQ-SAFETY-008
+//fusa:req REQ-V5-ALIAS-001
+//fusa:req REQ-V5-ALIAS-002
+//fusa:req REQ-V5-ALIAS-003
+//fusa:req REQ-LEAK-003
+//fusa:req REQ-ORDER-001
 func (c *Client) handlePUBLISH(hdr byte, body []byte) {
 	qos := mqtt.QoS((hdr >> 1) & 0x03)
 	retain := hdr&0x01 != 0
@@ -464,6 +565,8 @@ func (c *Client) handlePUBLISH(hdr byte, body []byte) {
 	}
 }
 
+//fusa:req REQ-CONN-009
+//fusa:req REQ-CONN-010
 func (c *Client) pingLoop() {
 	ticker := time.NewTicker(c.opts.keepalive)
 	defer ticker.Stop()
