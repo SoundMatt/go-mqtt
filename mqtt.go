@@ -66,6 +66,14 @@ const (
 //fusa:req REQ-MSG-002
 //fusa:req REQ-MSG-003
 
+// UserProperty is an MQTT v5 user-defined key/value property pair.
+//
+//fusa:req REQ-V5-PUB-001
+type UserProperty struct {
+	Key   string
+	Value string
+}
+
 // Message is a single MQTT publish message delivered to a Subscription.
 type Message struct {
 	// Topic is the MQTT topic the message was published on.
@@ -78,6 +86,13 @@ type Message struct {
 	Retained bool
 	// PacketID is non-zero for QoS 1 and QoS 2 messages.
 	PacketID uint16
+
+	// MQTT v5 properties — zero values mean "not set".
+	ResponseTopic   string        // REQ-V5-PUB-002
+	CorrelationData []byte        // REQ-V5-PUB-002
+	UserProperties  []UserProperty // REQ-V5-PUB-001
+	ContentType     string
+	ExpiryInterval  uint32 // seconds; 0 = no expiry
 }
 
 // ── Subscription options ──────────────────────────────────────────────────────

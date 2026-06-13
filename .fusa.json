@@ -6,6 +6,104 @@
     "standard": "iso26262",
     "asil": "ASIL-B"
   },
+  "requirements": {
+    "REQ-MSG-001": {
+      "description": "A Message must carry Topic, Payload, QoS, Retained flag, and PacketID.",
+      "asil": "ASIL-B"
+    },
+    "REQ-MSG-002": {
+      "description": "QoS levels AtMostOnce(0), AtLeastOnce(1), ExactlyOnce(2) must be defined and distinct.",
+      "asil": "ASIL-B"
+    },
+    "REQ-MSG-003": {
+      "description": "Message must carry MQTT v5 properties: ResponseTopic, CorrelationData, UserProperties, ContentType, ExpiryInterval.",
+      "asil": "ASIL-B"
+    },
+    "REQ-CLIENT-001": {
+      "description": "Client.Publish must return ErrTopicEmpty when topic is empty string.",
+      "asil": "ASIL-B"
+    },
+    "REQ-CLIENT-002": {
+      "description": "Client.Subscribe must return ErrTopicEmpty when topic filter is empty string.",
+      "asil": "ASIL-B"
+    },
+    "REQ-CLIENT-003": {
+      "description": "Client.Close must be idempotent: multiple calls must not panic or return unexpected errors.",
+      "asil": "ASIL-B"
+    },
+    "REQ-PUB-001": {
+      "description": "Publish must reject QoS ExactlyOnce with ErrQoSUnsupported until QoS-2 is implemented.",
+      "asil": "ASIL-B"
+    },
+    "REQ-PUB-002": {
+      "description": "Publish must return ErrClosed when called on a closed Client.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SUB-001": {
+      "description": "Subscribe must route messages to all matching topic-filter subscriptions.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SUB-002": {
+      "description": "MatchTopic must implement MQTT §4.7 wildcard semantics: '+' single-level, '#' multi-level.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SUB-003": {
+      "description": "MatchTopic must not match '$SYS' or other '$'-prefixed topics with bare '#' or leading '+'.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SUB-006": {
+      "description": "Subscription channel depth must be configurable; default must be at least 64.",
+      "asil": "ASIL-B"
+    },
+    "REQ-MOCK-001": {
+      "description": "Mock broker must deliver retained messages to new subscribers immediately on Subscribe.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-CLIENT-001": {
+      "description": "v5.Dial must perform an MQTT 5.0 CONNECT/CONNACK handshake before returning.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-CLIENT-002": {
+      "description": "v5.Dial must return an error if the broker sends a non-zero CONNACK reason code.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-CLIENT-003": {
+      "description": "v5 Client must parse CONNACK properties and apply negotiated TopicAliasMax and ServerKeepalive.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-PUB-001": {
+      "description": "PublishV5 must encode User Properties in the PUBLISH packet properties section.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-PUB-002": {
+      "description": "PublishV5 must encode ResponseTopic and CorrelationData in the PUBLISH packet properties.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-PUB-003": {
+      "description": "PublishV5 must encode Message Expiry Interval in the PUBLISH packet properties when non-zero.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-SUB-001": {
+      "description": "SubscribeV5 must encode subscription options (QoS, NoLocal, RetainAsPublished, RetainHandling) in the SUBSCRIBE packet.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-SUB-002": {
+      "description": "When NoLocal=true, the broker must not deliver a client's own publishes back to it.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-SUB-003": {
+      "description": "When RetainAsPublished=true, the RETAIN flag in delivered messages must reflect the publisher's setting.",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-ALIAS-001": {
+      "description": "v5 Client must resolve incoming topic aliases per MQTT v5 §3.3.2.3.4: register alias on first use (non-empty topic), resolve on subsequent use (empty topic).",
+      "asil": "ASIL-B"
+    },
+    "REQ-V5-SESSION-001": {
+      "description": "v5.WithSessionExpiry must encode a Session Expiry Interval in the CONNECT properties.",
+      "asil": "ASIL-B"
+    }
+  },
   "rules": {
     "exclude": [],
     "severity": {}

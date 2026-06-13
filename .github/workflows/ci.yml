@@ -82,12 +82,28 @@ jobs:
             echo "::notice::FuzzMatchTopic not yet in repo — skipping"
           fi
 
-      - name: FuzzPublish
+      - name: FuzzPublish (mock)
         run: |
           if [ -d mock ] && grep -qr FuzzPublish mock/ 2>/dev/null; then
             go test -fuzz=^FuzzPublish$ -fuzztime=10s ./mock/...
           else
             echo "::notice::FuzzPublish not yet in repo — skipping"
+          fi
+
+      - name: FuzzReadPropSet (v5)
+        run: |
+          if [ -d v5 ] && grep -qr FuzzReadPropSet v5/ 2>/dev/null; then
+            go test -fuzz=^FuzzReadPropSet$ -fuzztime=10s ./v5/...
+          else
+            echo "::notice::FuzzReadPropSet not yet in repo — skipping"
+          fi
+
+      - name: FuzzBuildPublish (v5)
+        run: |
+          if [ -d v5 ] && grep -qr FuzzBuildPublish v5/ 2>/dev/null; then
+            go test -fuzz=^FuzzBuildPublish$ -fuzztime=10s ./v5/...
+          else
+            echo "::notice::FuzzBuildPublish not yet in repo — skipping"
           fi
 
   # ── Integration test against Mosquitto (optional, Docker-gated) ───────────
@@ -104,9 +120,9 @@ jobs:
       - name: Check prerequisites
         id: prereqs
         run: |
-          if [ ! -d v3 ] || [ ! -f docker/mosquitto.conf ]; then
+          if [ ! -f docker/mosquitto.conf ]; then
             echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::v3/ or docker/mosquitto.conf not yet in repo — skipping integration tests"
+            echo "::notice::docker/mosquitto.conf not yet in repo — skipping integration tests"
           elif docker pull eclipse-mosquitto:2 2>/dev/null; then
             echo "available=true" >> "$GITHUB_OUTPUT"
           else
@@ -123,9 +139,15 @@ jobs:
             eclipse-mosquitto:2
           sleep 2
 
-      - name: go test (integration)
-        if: steps.prereqs.outputs.available == 'true'
+      - name: go test v3 (integration)
+        if: steps.prereqs.outputs.available == 'true' && hashFiles('v3/*.go') != ''
         run: go test -tags integration -v -timeout 30s ./v3/...
+        env:
+          MQTT_BROKER: localhost:1883
+
+      - name: go test v5 (integration)
+        if: steps.prereqs.outputs.available == 'true' && hashFiles('v5/*.go') != ''
+        run: go test -tags integration -v -timeout 30s ./v5/...
         env:
           MQTT_BROKER: localhost:1883
 
