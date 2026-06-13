@@ -46,6 +46,11 @@ a future milestone.
 | v0.10 | OpenTelemetry adapter (`otel/`) — spans, metrics for publish/subscribe operations |
 | v0.11 | go-FuSa safety case, FMEA table, SBOM, provenance |
 | v1.0 | Stable API, safety certification artefacts |
+| v1.1 | DDS bridge (`bridge/dds/`) — bidirectional MQTT ↔ DDS topic routing via go-DDS |
+| v1.2 | SOME-IP bridge (`bridge/someip/`) — SOME-IP service ↔ MQTT topic translation |
+| v1.3 | gRPC bridge (`bridge/grpc/`) — gRPC bidirectional streaming ↔ MQTT topics |
+| v1.4 | REST bridge (`bridge/rest/`) — HTTP pub/sub gateway over MQTT |
+| v1.5 | MQTT federation bridge (`bridge/mqtt/`) — broker-to-broker topic forwarding |
 
 ---
 
@@ -75,3 +80,45 @@ Specification Reference) implements W3C VISSv2 for vehicle data access.
 - Provide a `VISSRClient` that subscribes to any VSS signal by path
 
 This package will make go-mqtt a first-class COVESA/VISSR transport.
+
+### v1.1 — DDS bridge (`bridge/dds/`)
+
+Bidirectional routing between MQTT topics and DDS topics using
+[go-DDS](https://github.com/SoundMatt/go-DDS). Topic names are mapped
+using a configurable translation table (e.g. `Vehicle/Speed` →
+`Vehicle_Speed` DDS topic). QoS policies are translated: MQTT AtLeastOnce
+→ DDS RELIABLE, AtMostOnce → DDS BEST_EFFORT.
+
+### v1.2 — SOME-IP bridge (`bridge/someip/`)
+
+Bridges SOME-IP service events and methods (AUTOSAR AP / Classic) to MQTT
+topics. Incoming SOME-IP event notifications are published as MQTT messages;
+outgoing MQTT messages trigger SOME-IP method calls or field updates. Intended
+for automotive ECU environments where SOME-IP is the on-vehicle bus and MQTT
+is the cloud or off-board transport.
+
+### v1.3 — gRPC bridge (`bridge/grpc/`)
+
+Exposes MQTT topics as a gRPC bidirectional streaming service. Clients can
+subscribe to topic filters and publish messages over a single gRPC stream,
+enabling gRPC-native applications to interact with an MQTT broker without
+a direct broker connection. Useful for microservice architectures where gRPC
+is the internal RPC layer.
+
+### v1.4 — REST bridge (`bridge/rest/`)
+
+HTTP gateway that maps REST endpoints to MQTT operations:
+
+- `POST /publish/{topic}` → MQTT PUBLISH
+- `GET  /subscribe/{filter}` → SSE (Server-Sent Events) stream of matching messages
+- `GET  /retain/{topic}` → fetch last retained message
+
+Suitable for web clients and tools that cannot speak MQTT directly.
+
+### v1.5 — MQTT federation bridge (`bridge/mqtt/`)
+
+Broker-to-broker topic forwarding. Subscribes to a local broker on
+configurable filters and republishes matching messages to a remote broker
+(and vice versa). Handles reconnect, QoS downgrade policies, and topic
+prefix remapping. Equivalent to Mosquitto's built-in bridge feature but
+implemented as a portable Go library.
