@@ -24,6 +24,9 @@ linters:
       enable-all: true
       disable:
         - fieldalignment
-    misspell:
-      ignore-words:
-        - Mosquitto   # Eclipse Mosquitto is the correct product spelling
+
+exclusions:
+  rules:
+    # "Mosquitto" is the correct spelling of the Eclipse Mosquitto MQTT broker.
+    - linters: [misspell]
+      text: "Mosquitto"
