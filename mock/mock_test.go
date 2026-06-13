@@ -18,13 +18,13 @@ import (
 func TestPublishSubscribe(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	sub, err := c.Subscribe("sensors/temperature", mqtt.AtMostOnce)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sub.Close()
+	t.Cleanup(func() { _ = sub.Close() })
 
 	ctx := context.Background()
 	want := []byte(`{"temp":21.5}`)
@@ -48,13 +48,13 @@ func TestPublishSubscribe(t *testing.T) {
 func TestWildcardSingleLevel(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	sub, err := c.Subscribe("sensors/+", mqtt.AtMostOnce)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sub.Close()
+	t.Cleanup(func() { _ = sub.Close() })
 
 	ctx := context.Background()
 	topics := []string{"sensors/temperature", "sensors/pressure", "sensors/humidity"}
@@ -87,13 +87,13 @@ func TestWildcardSingleLevel(t *testing.T) {
 func TestWildcardMultiLevel(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	sub, err := c.Subscribe("Vehicle/#", mqtt.AtMostOnce)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sub.Close()
+	t.Cleanup(func() { _ = sub.Close() })
 
 	ctx := context.Background()
 	topics := []string{
@@ -126,13 +126,13 @@ func TestWildcardMultiLevel(t *testing.T) {
 func TestNoMatchNoDelivery(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	sub, err := c.Subscribe("sensors/temperature", mqtt.AtMostOnce)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sub.Close()
+	t.Cleanup(func() { _ = sub.Close() })
 
 	ctx := context.Background()
 	if err := c.Publish(ctx, "sensors/pressure", mqtt.AtMostOnce, []byte("val")); err != nil {
@@ -149,7 +149,7 @@ func TestNoMatchNoDelivery(t *testing.T) {
 func TestMultipleSubscribers(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	const n = 5
 	subs := make([]mqtt.Subscription, n)
@@ -159,7 +159,8 @@ func TestMultipleSubscribers(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer subs[i].Close()
+		sub := subs[i]
+		t.Cleanup(func() { _ = sub.Close() })
 	}
 
 	ctx := context.Background()
@@ -182,29 +183,23 @@ func TestMultipleSubscribers(t *testing.T) {
 func TestRetainedMessage(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	ctx := context.Background()
-	retained := mqtt.Message{
-		Topic:    "status/online",
-		Payload:  []byte("true"),
-		QoS:      mqtt.AtMostOnce,
-		Retained: true,
-	}
-	// Publish a retained message by passing Retained=true via a second client.
-	// We route the retained flag through a helper publish call.
-	if err := c.Publish(ctx, retained.Topic, retained.QoS, retained.Payload); err != nil {
+	// Normal (non-retained) publish — late subscriber should NOT receive it.
+	if err := c.Publish(ctx, "status/online", mqtt.AtMostOnce, []byte("true")); err != nil {
 		t.Fatal(err)
 	}
-	// Subscribe after publish — should NOT receive (retained not set via normal Publish).
+
 	sub, err := c.Subscribe("status/online", mqtt.AtMostOnce)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sub.Close()
+	t.Cleanup(func() { _ = sub.Close() })
+
 	select {
 	case <-sub.C():
-		t.Error("unexpected retained delivery for non-retained publish")
+		t.Error("late subscriber received non-retained message")
 	case <-time.After(30 * time.Millisecond):
 	}
 }
@@ -228,7 +223,7 @@ func TestClosedClientErrors(t *testing.T) {
 func TestEmptyTopicErrors(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	ctx := context.Background()
 	if err := c.Publish(ctx, "", mqtt.AtMostOnce, nil); err != mqtt.ErrTopicEmpty {
@@ -242,7 +237,7 @@ func TestEmptyTopicErrors(t *testing.T) {
 func TestUnsubscribe(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	sub, err := c.Subscribe("test/unsub", mqtt.AtMostOnce)
 	if err != nil {
@@ -268,7 +263,7 @@ func TestUnsubscribe(t *testing.T) {
 func TestContextCancellation(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -282,13 +277,13 @@ func TestContextCancellation(t *testing.T) {
 func TestConcurrentPublish(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	sub, err := c.Subscribe("concurrent/#", mqtt.AtMostOnce)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sub.Close()
+	t.Cleanup(func() { _ = sub.Close() })
 
 	const goroutines = 10
 	const msgsPerGoroutine = 20
@@ -310,13 +305,13 @@ func TestConcurrentPublish(t *testing.T) {
 func TestChannelDepthOption(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
-	defer c.Close()
+	t.Cleanup(func() { _ = c.Close() })
 
 	sub, err := c.Subscribe("depth/test", mqtt.AtMostOnce, mqtt.WithChannelDepth(2))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sub.Close()
+	t.Cleanup(func() { _ = sub.Close() })
 
 	ctx := context.Background()
 	// Publish 3 messages — 3rd should be dropped (channel depth=2).

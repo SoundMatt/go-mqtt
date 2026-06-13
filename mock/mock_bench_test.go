@@ -16,10 +16,10 @@ import (
 func BenchmarkPublish(b *testing.B) {
 	broker := mock.New()
 	c := broker.Dial()
-	defer c.Close()
+	b.Cleanup(func() { _ = c.Close() })
 
 	sub, _ := c.Subscribe("bench/topic", mqtt.AtMostOnce, mqtt.WithChannelDepth(b.N+1))
-	defer sub.Close()
+	b.Cleanup(func() { _ = sub.Close() })
 
 	payload := []byte(`{"value":42}`)
 	ctx := context.Background()
@@ -34,7 +34,7 @@ func BenchmarkPublish(b *testing.B) {
 func BenchmarkPublishParallel(b *testing.B) {
 	broker := mock.New()
 	c := broker.Dial()
-	defer c.Close()
+	b.Cleanup(func() { _ = c.Close() })
 
 	payload := []byte(`{"value":42}`)
 	ctx := context.Background()

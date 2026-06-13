@@ -23,7 +23,7 @@ func FuzzPublish(f *testing.F) {
 	f.Fuzz(func(t *testing.T, topic string, payload []byte) {
 		b := mock.New()
 		c := b.Dial()
-		defer c.Close()
+		t.Cleanup(func() { _ = c.Close() })
 
 		ctx := context.Background()
 		// Must not panic — ErrTopicEmpty is expected for empty topic.

@@ -153,7 +153,7 @@ func (s *mockSubscription) Unsubscribe() error {
 }
 
 func (s *mockSubscription) Close() error {
-	s.Unsubscribe()
+	_ = s.Unsubscribe()
 	s.once.Do(func() { close(s.ch) })
 	return nil
 }
