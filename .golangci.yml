@@ -24,3 +24,8 @@ linters:
       enable-all: true
       disable:
         - fieldalignment
+  exclusions:
+    rules:
+      # Eclipse Mosquitto is the correct product spelling (not "Mosquito").
+      - linters: [misspell]
+        text: "Mosquitto"
