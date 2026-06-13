@@ -8,6 +8,11 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to regenerate artifacts for (e.g. v0.1.0)"
+        required: true
 
 permissions:
   contents: write
@@ -46,7 +51,7 @@ jobs:
 
       - name: Commit regenerated artifacts
         run: |
-          TAG="${{ github.ref_name }}"
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
           git add -f fmea.csv fmea.json \
                      safety-case.json safety-case.md safety-case.mermaid \
                      sbom.json provenance.json artifact-manifest.json
