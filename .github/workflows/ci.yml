@@ -40,6 +40,7 @@ jobs:
 
   # ── Benchmark smoke ────────────────────────────────────────────────────────
   # Run each benchmark once to catch panics and allocation regressions.
+  # Skips gracefully when mock/ is not yet present (bootstrap phase).
   benchmark-smoke:
     name: Benchmark smoke (ubuntu-latest)
     runs-on: ubuntu-latest
@@ -51,15 +52,15 @@ jobs:
           go-version: "1.25"
 
       - name: go test -bench (mock)
-        run: >
-          go test
-          -bench=.
-          -benchtime=1x
-          -benchmem
-          -run=^$
-          ./mock/...
+        run: |
+          if [ -d mock ]; then
+            go test -bench=. -benchtime=1x -benchmem -run=^$ ./mock/...
+          else
+            echo "::notice::mock/ not yet in repo — skipping benchmark smoke"
+          fi
 
   # ── Short fuzz run ────────────────────────────────────────────────────────
+  # Skips targets that do not yet exist in the repo (bootstrap phase).
   fuzz-short:
     name: Fuzz (short, ubuntu-latest)
     runs-on: ubuntu-latest
@@ -74,10 +75,20 @@ jobs:
         run: go clean -fuzzcache
 
       - name: FuzzMatchTopic
-        run: go test -fuzz=^FuzzMatchTopic$ -fuzztime=10s .
+        run: |
+          if [ -f mqtt_fuzz_test.go ]; then
+            go test -fuzz=^FuzzMatchTopic$ -fuzztime=10s .
+          else
+            echo "::notice::FuzzMatchTopic not yet in repo — skipping"
+          fi
 
       - name: FuzzPublish
-        run: go test -fuzz=^FuzzPublish$ -fuzztime=10s ./mock/...
+        run: |
+          if [ -d mock ] && grep -qr FuzzPublish mock/ 2>/dev/null; then
+            go test -fuzz=^FuzzPublish$ -fuzztime=10s ./mock/...
+          else
+            echo "::notice::FuzzPublish not yet in repo — skipping"
+          fi
 
   # ── Integration test against Mosquitto (optional, Docker-gated) ───────────
   test-mosquitto:
@@ -90,10 +101,13 @@ jobs:
         with:
           go-version: "1.25"
 
-      - name: Probe Mosquitto image
-        id: probe
+      - name: Check prerequisites
+        id: prereqs
         run: |
-          if docker pull eclipse-mosquitto:2 2>/dev/null; then
+          if [ ! -d v3 ] || [ ! -f docker/mosquitto.conf ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::v3/ or docker/mosquitto.conf not yet in repo — skipping integration tests"
+          elif docker pull eclipse-mosquitto:2 2>/dev/null; then
             echo "available=true" >> "$GITHUB_OUTPUT"
           else
             echo "available=false" >> "$GITHUB_OUTPUT"
@@ -101,7 +115,7 @@ jobs:
           fi
 
       - name: Start Mosquitto broker
-        if: steps.probe.outputs.available == 'true'
+        if: steps.prereqs.outputs.available == 'true'
         run: |
           docker run -d --name mosquitto \
             -p 1883:1883 \
@@ -110,13 +124,13 @@ jobs:
           sleep 2
 
       - name: go test (integration)
-        if: steps.probe.outputs.available == 'true'
+        if: steps.prereqs.outputs.available == 'true'
         run: go test -tags integration -v -timeout 30s ./v3/...
         env:
           MQTT_BROKER: localhost:1883
 
       - name: Stop Mosquitto
-        if: steps.probe.outputs.available == 'true'
+        if: steps.prereqs.outputs.available == 'true'
         run: docker stop mosquitto && docker rm mosquitto
 
   # ── go generate check ─────────────────────────────────────────────────────
