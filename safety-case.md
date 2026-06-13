@@ -1,0 +1,41 @@
+# Safety Case: github.com/SoundMatt/go-mqtt
+
+Generated: 2026-06-13T18:57:43Z  
+Standard: generic
+
+## Top Claim
+
+**G1:** The software `github.com/SoundMatt/go-mqtt` is acceptably safe for use in `generic` context,
+argued by demonstrating compliance with the safety development lifecycle.
+
+## Evidence Summary
+
+| ID | Description | Status | Detail |
+|---|---|---|---|
+| Sn1 | Coding standard and static analysis checks | ⚠ absent | run 'gofusa check --output check-report.json' to generate |
+| Sn2 | Requirements traceability matrix | ⚠ absent | run 'gofusa trace' and add requirements to .fusa-reqs.json |
+| Sn3 | Test evidence bundle | ⚠ absent | run 'gofusa verify' to generate |
+| Sn4 | Tool qualification report | ⚠ absent | run 'gofusa qualify' to generate |
+| Sn5 | SBOM (SPDX 3.0.1) | ⚠ absent | run 'gofusa release' to generate sbom.json |
+| Sn6 | Build provenance | ⚠ absent | run 'gofusa release' to generate provenance.json |
+
+## Compliance Mapping
+
+| Standard | Clause | Title | Evidence |
+|---|---|---|---|
+| Generic | CS-1 | Coding standard compliance | check |
+| Generic | CS-2 | Requirements traceability | trace |
+| Generic | CS-3 | Test evidence | verify |
+| Generic | CS-4 | Tool qualification | qualify |
+| Generic | CS-5 | Release inventory | sbom, provenance |
+
+## Gaps
+
+The following evidence items are absent:
+
+- `check`
+- `trace`
+- `verify`
+- `qualify`
+- `sbom`
+- `provenance`

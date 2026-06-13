@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.9",
+  "kind": "sbom",
+  "tool": "go-FuSa",
+  "toolVersion": "0.30.0",
+  "language": "go",
+  "generatedAt": "2026-06-13T18:57:43.303621518Z",
+  "format": "x-FuSa SBOM v1",
+  "module": "github.com/SoundMatt/go-mqtt",
+  "goVersion": "1.25.0",
+  "components": []
+}
