@@ -59,6 +59,78 @@
       "description": "Mock broker must deliver retained messages to new subscribers immediately on Subscribe.",
       "asil": "ASIL-B"
     },
+    "REQ-MOCK-002": {
+      "description": "Broker.route must store or clear retained messages before delivering to current subscribers.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-001": {
+      "description": "Variable-length integer encoding must comply with MQTT §2.2.3: 7-bit LSB groups, MSB=1 continuation, max 4 bytes.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-002": {
+      "description": "String fields must be encoded with a 2-byte big-endian length prefix per MQTT §1.5.4.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-003": {
+      "description": "CONNECT packet must encode protocol name 'MQTT' and the correct protocol level byte (0x04 for v3.1.1, 0x05 for v5.0).",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-004": {
+      "description": "PUBLISH fixed header must encode QoS in bits [2:1], DUP in bit 3, RETAIN in bit 0 per MQTT §3.3.1.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-005": {
+      "description": "SUBSCRIBE and UNSUBSCRIBE packets must include a non-zero 2-byte big-endian packet identifier.",
+      "asil": "ASIL-B"
+    },
+    "REQ-CONN-001": {
+      "description": "Dial must complete a CONNECT/CONNACK handshake atomically before returning the Client to the caller.",
+      "asil": "ASIL-B"
+    },
+    "REQ-CONN-002": {
+      "description": "Dial must return an error and close the TCP connection when the broker sends a non-zero CONNACK return/reason code.",
+      "asil": "ASIL-B"
+    },
+    "REQ-CONN-003": {
+      "description": "Close must send a DISCONNECT packet before closing the TCP connection.",
+      "asil": "ASIL-B"
+    },
+    "REQ-CONN-004": {
+      "description": "The client must send PINGREQ at the negotiated keepalive interval when no other packets are in-flight.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WILD-001": {
+      "description": "MatchTopic('#') must match all topics that do not start with '$'.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WILD-002": {
+      "description": "MatchTopic('prefix/#') must match the exact prefix topic and all subtopics beneath it.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WILD-003": {
+      "description": "MatchTopic with '+' must match exactly one topic level; '+' at position 0 must not match '$'-prefixed topics.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WILD-004": {
+      "description": "MatchTopic must return true when filter and topic are equal with no wildcard characters.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SAFETY-001": {
+      "description": "Closed clients must return ErrClosed from Publish and Subscribe; they must not panic.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SAFETY-002": {
+      "description": "Empty topic must cause Publish and Subscribe to return ErrTopicEmpty without side effects.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SAFETY-003": {
+      "description": "The client must close all subscription channels when the TCP connection is lost or Close is called.",
+      "asil": "ASIL-B"
+    },
+    "REQ-SAFETY-004": {
+      "description": "Message routing must never block a caller: a full subscription channel must drop the message silently.",
+      "asil": "ASIL-B"
+    },
     "REQ-V5-CLIENT-001": {
       "description": "v5.Dial must perform an MQTT 5.0 CONNECT/CONNACK handshake before returning.",
       "asil": "ASIL-B"

@@ -5,6 +5,20 @@
 
 package v5
 
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-002
+//fusa:req REQ-WIRE-003
+//fusa:req REQ-WIRE-004
+//fusa:req REQ-WIRE-005
+//fusa:req REQ-V5-PUB-001
+//fusa:req REQ-V5-PUB-002
+//fusa:req REQ-V5-PUB-003
+//fusa:req REQ-V5-SUB-001
+//fusa:req REQ-V5-SUB-002
+//fusa:req REQ-V5-SUB-003
+//fusa:req REQ-V5-ALIAS-001
+//fusa:req REQ-V5-SESSION-001
+
 import (
 	"encoding/binary"
 	"fmt"

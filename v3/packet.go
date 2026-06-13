@@ -5,6 +5,12 @@
 
 package v3
 
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-002
+//fusa:req REQ-WIRE-003
+//fusa:req REQ-WIRE-004
+//fusa:req REQ-WIRE-005
+
 import (
 	"encoding/binary"
 	"fmt"

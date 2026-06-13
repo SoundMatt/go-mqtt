@@ -186,6 +186,13 @@ type Subscription interface {
 // filter may contain '+' (matches exactly one topic level) and '#' (matches
 // zero or more topic levels, must be the last character). Topics beginning
 // with '$' are not matched by wildcards at the top level, per §4.7.2.
+//
+//fusa:req REQ-SUB-002
+//fusa:req REQ-SUB-003
+//fusa:req REQ-WILD-001
+//fusa:req REQ-WILD-002
+//fusa:req REQ-WILD-003
+//fusa:req REQ-WILD-004
 func MatchTopic(filter, topic string) bool {
 	if filter == topic {
 		return true

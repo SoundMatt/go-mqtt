@@ -70,6 +70,10 @@ type mockClient struct {
 	closed bool
 }
 
+//fusa:req REQ-CLIENT-001
+//fusa:req REQ-PUB-002
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-002
 func (c *mockClient) Publish(ctx context.Context, topic string, qos mqtt.QoS, payload []byte) error {
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
@@ -91,6 +95,11 @@ func (c *mockClient) Publish(ctx context.Context, topic string, qos mqtt.QoS, pa
 	return nil
 }
 
+//fusa:req REQ-CLIENT-002
+//fusa:req REQ-SUB-001
+//fusa:req REQ-MOCK-001
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-002
 func (c *mockClient) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.SubscriberOption) (mqtt.Subscription, error) {
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
@@ -129,6 +138,7 @@ func (c *mockClient) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.Subscrib
 	return sub, nil
 }
 
+//fusa:req REQ-CLIENT-003
 func (c *mockClient) Close() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -178,6 +188,10 @@ func (b *Broker) deregister(sub *mockSubscription) {
 	}
 }
 
+//fusa:req REQ-SUB-001
+//fusa:req REQ-SUB-002
+//fusa:req REQ-SAFETY-004
+//fusa:req REQ-MOCK-002
 func (b *Broker) route(msg mqtt.Message) {
 	// Store/clear retained message.
 	if msg.Retained {
