@@ -35,7 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("dial %s: %v", addr, err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	log.Printf("connected to %s, publishing on %s every second", addr, topic)
 

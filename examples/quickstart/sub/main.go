@@ -35,13 +35,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("dial %s: %v", addr, err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	sub, err := client.Subscribe(filter, mqtt.AtMostOnce)
 	if err != nil {
 		log.Fatalf("subscribe %s: %v", filter, err)
 	}
-	defer sub.Close()
+	defer func() { _ = sub.Close() }()
 
 	log.Printf("connected to %s, subscribed to %s", addr, filter)
 
