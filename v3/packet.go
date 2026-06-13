@@ -74,20 +74,6 @@ func encodeU16(n uint16) []byte {
 	return []byte{byte(n >> 8), byte(n)}
 }
 
-// readStr reads a 2-byte length-prefixed UTF-8 string from r.
-func readStr(r io.Reader) (string, error) {
-	var hdr [2]byte
-	if _, err := io.ReadFull(r, hdr[:]); err != nil {
-		return "", err
-	}
-	n := int(binary.BigEndian.Uint16(hdr[:]))
-	buf := make([]byte, n)
-	if _, err := io.ReadFull(r, buf); err != nil {
-		return "", err
-	}
-	return string(buf), nil
-}
-
 // packet assembles a complete MQTT packet from a fixed-header byte and a body.
 func packet(header byte, body []byte) []byte {
 	pkt := append([]byte{header}, encodeVarLen(len(body))...)

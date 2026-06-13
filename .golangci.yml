@@ -24,3 +24,6 @@ linters:
       enable-all: true
       disable:
         - fieldalignment
+    misspell:
+      ignore-words:
+        - Mosquitto   # Eclipse Mosquitto is the correct product spelling

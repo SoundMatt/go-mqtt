@@ -86,7 +86,9 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 		opt(o)
 	}
 
-	conn, err := net.DialTimeout("tcp", addr, o.dialTimeout)
+	dialCtx, cancel := context.WithTimeout(context.Background(), o.dialTimeout)
+	defer cancel()
+	conn, err := (&net.Dialer{}).DialContext(dialCtx, "tcp", addr)
 	if err != nil {
 		return nil, fmt.Errorf("mqtt/v3: dial %s: %w", addr, err)
 	}
@@ -99,11 +101,11 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 	}
 
 	if err := c.send(buildCONNECT(o.clientID, uint16(o.keepalive.Seconds()))); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("mqtt/v3: send CONNECT: %w", err)
 	}
 	if err := c.readCONNACK(); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("mqtt/v3: CONNACK: %w", err)
 	}
 
@@ -378,7 +380,7 @@ func (s *v3Subscription) Unsubscribe() error {
 }
 
 func (s *v3Subscription) Close() error {
-	s.Unsubscribe()
+	_ = s.Unsubscribe()
 	s.closeOnce()
 	return nil
 }
