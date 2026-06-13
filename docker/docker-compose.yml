@@ -1,0 +1,55 @@
+# go-mqtt quickstart — MQTT pub/sub in under two minutes.
+#
+# Uses Eclipse Mosquitto as the broker on a named bridge network so this
+# works on macOS and Windows Docker Desktop.
+#
+# Usage:
+#   docker compose -f docker/docker-compose.yml up --build
+#
+# The pub container publishes a Vehicle/Speed reading every second;
+# the sub container logs each received message to stdout.
+#
+# Mosquitto broker is available at localhost:1883 from your host machine.
+
+networks:
+  mqtt:
+    driver: bridge
+
+services:
+  broker:
+    image: eclipse-mosquitto:2
+    networks:
+      - mqtt
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    restart: unless-stopped
+
+  pub:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: pub
+    networks:
+      - mqtt
+    environment:
+      - MQTT_BROKER=broker:1883
+      - MQTT_TOPIC=Vehicle/Speed
+    restart: unless-stopped
+    depends_on:
+      - broker
+
+  sub:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: sub
+    networks:
+      - mqtt
+    environment:
+      - MQTT_BROKER=broker:1883
+      - MQTT_TOPIC=Vehicle/#
+    restart: unless-stopped
+    depends_on:
+      - broker
