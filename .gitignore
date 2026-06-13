@@ -1,0 +1,41 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of `go env GOPATH`
+/go/
+
+# Coverage
+coverage.out
+coverage.html
+*.out
+
+# Fuzzcache
+testdata/fuzz/
+
+# go-FuSa artifacts
+check-report.json
+qualify-report.json
+fmea.csv
+fmea.json
+safety-case.json
+safety-case.md
+safety-case.mermaid
+sbom.json
+sbom-spdx-3.0.1.json
+provenance.json
+artifact-manifest.json
+audit-pack.zip
+vuln.json
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
