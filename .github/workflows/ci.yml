@@ -77,7 +77,7 @@ jobs:
       - name: FuzzMatchTopic
         run: |
           if [ -f mqtt_fuzz_test.go ]; then
-            go test -fuzz=^FuzzMatchTopic$ -fuzztime=10s .
+            go test -fuzz=^FuzzMatchTopic$ -fuzztime=500000x .
           else
             echo "::notice::FuzzMatchTopic not yet in repo — skipping"
           fi
@@ -85,7 +85,7 @@ jobs:
       - name: FuzzPublish (mock)
         run: |
           if [ -d mock ] && grep -qr FuzzPublish mock/ 2>/dev/null; then
-            go test -fuzz=^FuzzPublish$ -fuzztime=10s ./mock/...
+            go test -fuzz=^FuzzPublish$ -fuzztime=500000x ./mock/...
           else
             echo "::notice::FuzzPublish not yet in repo — skipping"
           fi
@@ -93,7 +93,7 @@ jobs:
       - name: FuzzReadPropSet (v5)
         run: |
           if [ -d v5 ] && grep -qr FuzzReadPropSet v5/ 2>/dev/null; then
-            go test -fuzz=^FuzzReadPropSet$ -fuzztime=10s ./v5/...
+            go test -fuzz=^FuzzReadPropSet$ -fuzztime=500000x ./v5/...
           else
             echo "::notice::FuzzReadPropSet not yet in repo — skipping"
           fi
@@ -101,7 +101,7 @@ jobs:
       - name: FuzzBuildPublish (v5)
         run: |
           if [ -d v5 ] && grep -qr FuzzBuildPublish v5/ 2>/dev/null; then
-            go test -fuzz=^FuzzBuildPublish$ -fuzztime=10s ./v5/...
+            go test -fuzz=^FuzzBuildPublish$ -fuzztime=500000x ./v5/...
           else
             echo "::notice::FuzzBuildPublish not yet in repo — skipping"
           fi
