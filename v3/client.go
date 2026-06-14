@@ -22,16 +22,53 @@
 // not implemented in v0.1; use AtLeastOnce for acknowledged delivery.
 package v3
 
-//fusa:req REQ-CLIENT-001
-//fusa:req REQ-CLIENT-002
-//fusa:req REQ-CLIENT-003
+//fusa:req REQ-CONN-001
+//fusa:req REQ-CONN-002
+//fusa:req REQ-CONN-003
+//fusa:req REQ-CONN-004
+//fusa:req REQ-CONN-005
+//fusa:req REQ-CONN-006
+//fusa:req REQ-CONN-007
+//fusa:req REQ-CONN-008
+//fusa:req REQ-CONN-009
+//fusa:req REQ-CONN-010
 //fusa:req REQ-PUB-001
 //fusa:req REQ-PUB-002
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
+//fusa:req REQ-PUB-005
+//fusa:req REQ-PUB-006
 //fusa:req REQ-SUB-001
 //fusa:req REQ-SUB-002
 //fusa:req REQ-SUB-003
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SUB-006
+//fusa:req REQ-SUB-007
+//fusa:req REQ-SUB-008
 //fusa:req REQ-MSG-001
 //fusa:req REQ-MSG-002
+//fusa:req REQ-MSG-003
+//fusa:req REQ-MSG-004
+//fusa:req REQ-MSG-005
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-002
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-004
+//fusa:req REQ-SAFETY-005
+//fusa:req REQ-SAFETY-006
+//fusa:req REQ-SAFETY-007
+//fusa:req REQ-SAFETY-008
+//fusa:req REQ-CONC-001
+//fusa:req REQ-CONC-002
+//fusa:req REQ-CONC-003
+//fusa:req REQ-LEAK-001
+//fusa:req REQ-LEAK-002
+//fusa:req REQ-LEAK-003
+//fusa:req REQ-ORDER-001
+//fusa:req REQ-ORDER-002
+//fusa:req REQ-FAULT-001
+//fusa:req REQ-FAULT-002
+//fusa:req REQ-FAULT-003
 
 import (
 	"context"
@@ -76,6 +113,12 @@ func WithDialTimeout(d time.Duration) Option {
 //
 // Dial performs the CONNECT/CONNACK handshake before returning. The connection
 // uses CleanSession=true and no authentication.
+//
+//fusa:req REQ-CONN-001
+//fusa:req REQ-CONN-002
+//fusa:req REQ-CONN-003
+//fusa:req REQ-CONN-004
+//fusa:req REQ-CONN-005
 func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 	o := &options{
 		clientID:    fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
@@ -143,6 +186,8 @@ func (c *v3Client) send(pkt []byte) error {
 	return err
 }
 
+//fusa:req REQ-CONN-002
+//fusa:req REQ-CONN-005
 func (c *v3Client) readCONNACK() error {
 	// CONNACK: fixed header 0x20, remaining length 0x02, flags byte, return code
 	hdr := make([]byte, 4)
@@ -158,6 +203,16 @@ func (c *v3Client) readCONNACK() error {
 	return nil
 }
 
+//fusa:req REQ-PUB-001
+//fusa:req REQ-PUB-002
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
+//fusa:req REQ-PUB-005
+//fusa:req REQ-PUB-006
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-004
+//fusa:req REQ-ORDER-002
 func (c *v3Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payload []byte) error {
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
@@ -181,6 +236,14 @@ func (c *v3Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payl
 	return c.send(pkt)
 }
 
+//fusa:req REQ-SUB-001
+//fusa:req REQ-SUB-002
+//fusa:req REQ-SUB-003
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SUB-006
+//fusa:req REQ-SAFETY-002
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-005
 func (c *v3Client) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.SubscriberOption) (mqtt.Subscription, error) {
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
@@ -212,6 +275,10 @@ func (c *v3Client) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.Subscriber
 	return sub, nil
 }
 
+//fusa:req REQ-CONN-006
+//fusa:req REQ-CONN-007
+//fusa:req REQ-CONN-008
+//fusa:req REQ-SAFETY-007
 func (c *v3Client) Close() error {
 	var connErr error
 	c.once.Do(func() {
@@ -241,6 +308,10 @@ func (c *v3Client) removeSubscription(sub *v3Subscription) {
 	}
 }
 
+//fusa:req REQ-SAFETY-006
+//fusa:req REQ-FAULT-002
+//fusa:req REQ-FAULT-003
+//fusa:req REQ-LEAK-001
 func (c *v3Client) readLoop() {
 	defer func() {
 		c.mu.RLock()
@@ -292,6 +363,15 @@ func (c *v3Client) readLoop() {
 	}
 }
 
+//fusa:req REQ-MSG-001
+//fusa:req REQ-MSG-003
+//fusa:req REQ-MSG-004
+//fusa:req REQ-MSG-005
+//fusa:req REQ-SUB-007
+//fusa:req REQ-SUB-008
+//fusa:req REQ-SAFETY-008
+//fusa:req REQ-LEAK-003
+//fusa:req REQ-ORDER-001
 func (c *v3Client) handlePUBLISH(hdr byte, body []byte) {
 	qos := mqtt.QoS((hdr >> 1) & 0x03)
 	retain := hdr&0x01 != 0
@@ -349,6 +429,8 @@ func (c *v3Client) handlePUBLISH(hdr byte, body []byte) {
 	}
 }
 
+//fusa:req REQ-CONN-009
+//fusa:req REQ-CONN-010
 func (c *v3Client) pingLoop() {
 	ticker := time.NewTicker(c.opts.keepalive)
 	defer ticker.Stop()

@@ -21,18 +21,32 @@
 //	msg := <-sub.C()
 package mock
 
-//fusa:req REQ-MOCK-001
-//fusa:req REQ-MOCK-002
-//fusa:req REQ-CLIENT-001
-//fusa:req REQ-CLIENT-002
-//fusa:req REQ-CLIENT-003
 //fusa:req REQ-PUB-001
-//fusa:req REQ-PUB-002
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
 //fusa:req REQ-SUB-001
 //fusa:req REQ-SUB-002
 //fusa:req REQ-SUB-003
-//fusa:req REQ-MSG-001
-//fusa:req REQ-MSG-002
+//fusa:req REQ-SUB-004
+//fusa:req REQ-SUB-005
+//fusa:req REQ-SUB-007
+//fusa:req REQ-SUB-008
+//fusa:req REQ-CONN-008
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-002
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-004
+//fusa:req REQ-SAFETY-005
+//fusa:req REQ-SAFETY-008
+//fusa:req REQ-MOCK-001
+//fusa:req REQ-MOCK-002
+//fusa:req REQ-MOCK-003
+//fusa:req REQ-MOCK-004
+//fusa:req REQ-MOCK-005
+//fusa:req REQ-CONC-001
+//fusa:req REQ-CONC-002
+//fusa:req REQ-LEAK-002
+//fusa:req REQ-LEAK-003
 
 import (
 	"context"
@@ -70,6 +84,12 @@ type mockClient struct {
 	closed bool
 }
 
+//fusa:req REQ-PUB-001
+//fusa:req REQ-PUB-003
+//fusa:req REQ-PUB-004
+//fusa:req REQ-SAFETY-001
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-004
 func (c *mockClient) Publish(ctx context.Context, topic string, qos mqtt.QoS, payload []byte) error {
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
@@ -91,6 +111,14 @@ func (c *mockClient) Publish(ctx context.Context, topic string, qos mqtt.QoS, pa
 	return nil
 }
 
+//fusa:req REQ-SUB-001
+//fusa:req REQ-SUB-002
+//fusa:req REQ-SUB-003
+//fusa:req REQ-SUB-004
+//fusa:req REQ-MOCK-001
+//fusa:req REQ-SAFETY-002
+//fusa:req REQ-SAFETY-003
+//fusa:req REQ-SAFETY-005
 func (c *mockClient) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.SubscriberOption) (mqtt.Subscription, error) {
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
@@ -129,6 +157,7 @@ func (c *mockClient) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.Subscrib
 	return sub, nil
 }
 
+//fusa:req REQ-CONN-008
 func (c *mockClient) Close() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -178,6 +207,13 @@ func (b *Broker) deregister(sub *mockSubscription) {
 	}
 }
 
+//fusa:req REQ-SUB-007
+//fusa:req REQ-SUB-008
+//fusa:req REQ-SAFETY-008
+//fusa:req REQ-MOCK-002
+//fusa:req REQ-MOCK-003
+//fusa:req REQ-MOCK-004
+//fusa:req REQ-LEAK-003
 func (b *Broker) route(msg mqtt.Message) {
 	// Store/clear retained message.
 	if msg.Retained {

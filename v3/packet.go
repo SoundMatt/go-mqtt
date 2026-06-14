@@ -5,6 +5,19 @@
 
 package v3
 
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-002
+//fusa:req REQ-WIRE-003
+//fusa:req REQ-WIRE-004
+//fusa:req REQ-WIRE-005
+//fusa:req REQ-WIRE-006
+//fusa:req REQ-WIRE-007
+//fusa:req REQ-WIRE-008
+//fusa:req REQ-WIRE-009
+//fusa:req REQ-WIRE-010
+//fusa:req REQ-WIRE-011
+//fusa:req REQ-WIRE-012
+
 import (
 	"encoding/binary"
 	"fmt"
@@ -26,7 +39,8 @@ const (
 	pktDISCONNECT byte = 0xE0
 )
 
-// encodeVarLen encodes n as a variable-length integer per MQTT §2.2.3.
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-002
 func encodeVarLen(n int) []byte {
 	if n == 0 {
 		return []byte{0}
@@ -43,7 +57,9 @@ func encodeVarLen(n int) []byte {
 	return buf
 }
 
-// readVarLen reads a variable-length integer from r per MQTT §2.2.3.
+//fusa:req REQ-WIRE-001
+//fusa:req REQ-WIRE-003
+//fusa:req REQ-FAULT-001
 func readVarLen(r io.Reader) (int, error) {
 	multiplier := 1
 	n := 0
@@ -61,7 +77,7 @@ func readVarLen(r io.Reader) (int, error) {
 	return 0, fmt.Errorf("mqtt/v3: malformed remaining length")
 }
 
-// encodeStr encodes s as a UTF-8 string with a 2-byte length prefix.
+//fusa:req REQ-WIRE-004
 func encodeStr(s string) []byte {
 	b := make([]byte, 2+len(s))
 	binary.BigEndian.PutUint16(b, uint16(len(s)))
@@ -80,7 +96,8 @@ func packet(header byte, body []byte) []byte {
 	return append(pkt, body...)
 }
 
-// buildCONNECT builds an MQTT v3.1.1 CONNECT packet with CleanSession=true.
+//fusa:req REQ-WIRE-005
+//fusa:req REQ-WIRE-006
 func buildCONNECT(clientID string, keepaliveSecs uint16) []byte {
 	// Variable header: protocol name "MQTT" + level 4 + flags + keepalive
 	body := []byte{
@@ -94,8 +111,10 @@ func buildCONNECT(clientID string, keepaliveSecs uint16) []byte {
 	return packet(pktCONNECT, body)
 }
 
-// buildPUBLISH builds a PUBLISH packet.
-// packetID must be non-zero for QoS > 0.
+//fusa:req REQ-WIRE-007
+//fusa:req REQ-WIRE-008
+//fusa:req REQ-WIRE-009
+//fusa:req REQ-WIRE-010
 func buildPUBLISH(topic string, payload []byte, qos byte, retain bool, packetID uint16) []byte {
 	header := pktPUBLISH | (qos << 1)
 	if retain {
@@ -109,7 +128,7 @@ func buildPUBLISH(topic string, payload []byte, qos byte, retain bool, packetID 
 	return packet(header, body)
 }
 
-// buildSUBSCRIBE builds a SUBSCRIBE packet for a single topic filter.
+//fusa:req REQ-WIRE-011
 func buildSUBSCRIBE(filter string, qos byte, packetID uint16) []byte {
 	body := encodeU16(packetID)
 	body = append(body, encodeStr(filter)...)
@@ -117,7 +136,7 @@ func buildSUBSCRIBE(filter string, qos byte, packetID uint16) []byte {
 	return packet(pktSUBSCRIBE, body)
 }
 
-// buildUNSUBSCRIBE builds an UNSUBSCRIBE packet for a single topic filter.
+//fusa:req REQ-WIRE-012
 func buildUNSUBSCRIBE(filter string, packetID uint16) []byte {
 	body := encodeU16(packetID)
 	body = append(body, encodeStr(filter)...)
