@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-13T18:57:43.140535484Z",
+  "generated_at": "2026-06-14T00:42:29.887517913Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
@@ -39,8 +39,18 @@
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-WILD-001",
+        "REQ-WILD-002",
+        "REQ-WILD-003",
+        "REQ-WILD-004",
+        "REQ-WILD-005",
+        "REQ-WILD-006",
+        "REQ-WILD-007",
+        "REQ-WILD-008"
+      ]
     },
     {
       "component": "go-mqtt (mqtt)",
@@ -78,8 +88,11 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-008"
+      ]
     },
     {
       "component": "mock",
@@ -130,8 +143,16 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-PUB-001",
+        "REQ-PUB-003",
+        "REQ-PUB-004",
+        "REQ-SAFETY-001",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-004"
+      ]
     },
     {
       "component": "mock",
@@ -143,8 +164,18 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-SUB-001",
+        "REQ-SUB-002",
+        "REQ-SUB-003",
+        "REQ-SUB-004",
+        "REQ-MOCK-001",
+        "REQ-SAFETY-002",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-005"
+      ]
     },
     {
       "component": "mock",
@@ -190,8 +221,14 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -234,8 +271,15 @@
         "Silent failure propagated to caller",
         "Memory leak or deadlock"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-001",
+        "REQ-CONN-002",
+        "REQ-CONN-003",
+        "REQ-CONN-004",
+        "REQ-CONN-005"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -255,8 +299,20 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-PUB-001",
+        "REQ-PUB-002",
+        "REQ-PUB-003",
+        "REQ-PUB-004",
+        "REQ-PUB-005",
+        "REQ-PUB-006",
+        "REQ-SAFETY-001",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-004",
+        "REQ-ORDER-002"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -276,8 +332,18 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-SUB-001",
+        "REQ-SUB-002",
+        "REQ-SUB-003",
+        "REQ-SUB-004",
+        "REQ-SUB-006",
+        "REQ-SAFETY-002",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-005"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -367,6 +433,367 @@
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "C",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "Dial",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error",
+        "Goroutine not terminated"
+      ],
+      "effects": [
+        "Silent failure propagated to caller",
+        "Memory leak or deadlock"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-V5-CONN-001",
+        "REQ-V5-CONN-002",
+        "REQ-V5-CONN-003",
+        "REQ-V5-CONN-004",
+        "REQ-CONN-003",
+        "REQ-CONN-004",
+        "REQ-V5-SESSION-001"
+      ],
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "Publish",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-PUB-001",
+        "REQ-PUB-002",
+        "REQ-PUB-003",
+        "REQ-PUB-004",
+        "REQ-SAFETY-001",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-004"
+      ],
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "PublishV5",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-PUB-001",
+        "REQ-PUB-002",
+        "REQ-PUB-003",
+        "REQ-PUB-004",
+        "REQ-PUB-005",
+        "REQ-PUB-006",
+        "REQ-V5-PUB-001",
+        "REQ-V5-PUB-002",
+        "REQ-V5-PUB-003",
+        "REQ-V5-PUB-004",
+        "REQ-V5-PUB-005",
+        "REQ-V5-PUB-006",
+        "REQ-SAFETY-001",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-004",
+        "REQ-ORDER-002"
+      ],
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "Subscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-SUB-001",
+        "REQ-SUB-002",
+        "REQ-SUB-003",
+        "REQ-SUB-004",
+        "REQ-SAFETY-002",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-005"
+      ],
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "SubscribeV5",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-SUB-001",
+        "REQ-SUB-002",
+        "REQ-SUB-003",
+        "REQ-SUB-004",
+        "REQ-SUB-006",
+        "REQ-V5-SUB-001",
+        "REQ-V5-SUB-002",
+        "REQ-V5-SUB-003",
+        "REQ-V5-SUB-004",
+        "REQ-SAFETY-002",
+        "REQ-SAFETY-003",
+        "REQ-SAFETY-005"
+      ],
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "Unsubscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "WithClientID",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "WithDialTimeout",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "WithKeepalive",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "WithReceiveMax",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v5",
+      "function": "WithSessionExpiry",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests",
+      "cyber_risks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
       ]

@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa Safety Case v1",
-  "generatedAt": "2026-06-13T18:57:43.235162213Z",
+  "generatedAt": "2026-06-14T00:42:29.99009182Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "standard": "generic",
   "evidence": [
@@ -36,15 +36,13 @@
       "id": "sbom",
       "description": "SBOM (SPDX 3.0.1)",
       "file": "sbom.json",
-      "status": "absent",
-      "detail": "run 'gofusa release' to generate sbom.json"
+      "status": "present"
     },
     {
       "id": "provenance",
       "description": "Build provenance",
       "file": "provenance.json",
-      "status": "absent",
-      "detail": "run 'gofusa release' to generate provenance.json"
+      "status": "present"
     }
   ],
   "clauses": [
@@ -94,8 +92,6 @@
     "check",
     "trace",
     "verify",
-    "qualify",
-    "sbom",
-    "provenance"
+    "qualify"
   ]
 }
