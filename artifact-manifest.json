@@ -4,16 +4,16 @@
   "tool": "go-FuSa",
   "toolVersion": "0.30.0",
   "language": "go",
-  "generatedAt": "2026-06-17T02:41:43.242334557Z",
+  "generatedAt": "2026-06-17T02:48:13.456530922Z",
   "format": "x-FuSa manifest v1",
   "artifacts": [
     {
       "path": "/home/runner/work/go-mqtt/go-mqtt/sbom.json",
-      "sha256": "0f652454aa46e5e1fd25e939aff2163d6cb382eef009e11665252e0c27226dd5"
+      "sha256": "8c386179e3f63d3e3f3223c52cca2302b5f2bc50487d26cb3cc7a14c8ee0407b"
     },
     {
       "path": "/home/runner/work/go-mqtt/go-mqtt/provenance.json",
-      "sha256": "3edfe279fb97913443d80db3a9ab1158c7fd9d16bb60f8cc164b738418142498"
+      "sha256": "60d3a55e848149cc177f3126d74d176657d7e8801582d4eee9b4ab974507ed12"
     }
   ]
 }

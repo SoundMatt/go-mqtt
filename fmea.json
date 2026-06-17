@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-17T02:41:43.096670226Z",
+  "generated_at": "2026-06-17T02:48:13.292518427Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
@@ -394,14 +394,8 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-006",
-        "REQ-CONN-007",
-        "REQ-CONN-008",
-        "REQ-SAFETY-007"
-      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -421,8 +415,14 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -665,8 +665,14 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -686,14 +692,8 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-006",
-        "REQ-CONN-007",
-        "REQ-CONN-008",
-        "REQ-SAFETY-007"
-      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -993,6 +993,248 @@
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "Bool",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-004"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "C",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-009"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-008"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-010"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "Float",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-004"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "New",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-005"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "PathToTopic",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-001"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "Set",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-006"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "SetBool",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-006"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "SetFloat",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-006"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "SetString",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-006"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "String",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-004"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "Subscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error",
+        "Goroutine not terminated"
+      ],
+      "effects": [
+        "Silent failure propagated to caller",
+        "Memory leak or deadlock"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-007"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "TopicToPath",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-002"
+      ]
+    },
+    {
+      "component": "vissr",
+      "function": "Unsubscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-VISSR-010"
       ]
     }
   ]
