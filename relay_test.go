@@ -204,3 +204,81 @@ func TestAdaptClose(t *testing.T) {
 	// Second close should be a no-op (idempotent).
 	_ = node.Close()
 }
+
+// ── Optional interfaces (§9) ──────────────────────────────────────────────────
+
+func TestBrokerHealthOK(t *testing.T) {
+	b := mock.New()
+	var hp mqtt.HealthProvider = b
+	h := hp.Health()
+	if h.Status != mqtt.HealthOK {
+		t.Errorf("Health.Status = %v, want HealthOK", h.Status)
+	}
+}
+
+func TestBrokerHealthDownAfterDrain(t *testing.T) {
+	b := mock.New()
+	if err := b.CloseWithDrain(context.Background()); err != nil {
+		t.Fatalf("CloseWithDrain: %v", err)
+	}
+	h := b.Health()
+	if h.Status != mqtt.HealthDown {
+		t.Errorf("Health.Status = %v after close, want HealthDown", h.Status)
+	}
+}
+
+func TestBrokerMetricsCountsWrites(t *testing.T) {
+	b := mock.New()
+	c := b.Dial()
+	defer func() { _ = c.Close() }()
+
+	ctx := context.Background()
+	_ = c.Publish(ctx, "a/b", mqtt.AtMostOnce, []byte("hello"))
+	_ = c.Publish(ctx, "a/b", mqtt.AtMostOnce, []byte("world"))
+
+	var mp mqtt.MetricsProvider = b
+	m := mp.Metrics()
+	if m.WriteCount != 2 {
+		t.Errorf("WriteCount = %d, want 2", m.WriteCount)
+	}
+	if m.BytesWritten != 10 {
+		t.Errorf("BytesWritten = %d, want 10", m.BytesWritten)
+	}
+}
+
+func TestBrokerMetricsCountsDelivers(t *testing.T) {
+	b := mock.New()
+	c := b.Dial()
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("a/#", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	defer func() { _ = sub.Close() }()
+
+	ctx := context.Background()
+	_ = c.Publish(ctx, "a/b", mqtt.AtMostOnce, []byte("hi"))
+	<-sub.C() // wait for delivery
+
+	m := b.Metrics()
+	if m.DeliverCount != 1 {
+		t.Errorf("DeliverCount = %d, want 1", m.DeliverCount)
+	}
+	if m.BytesDelivered != 2 {
+		t.Errorf("BytesDelivered = %d, want 2", m.BytesDelivered)
+	}
+}
+
+func TestAdaptCloseWithDrain(t *testing.T) {
+	b := mock.New()
+	c := b.Dial()
+	node := mqtt.Adapt(c)
+	d, ok := node.(mqtt.Drainer)
+	if !ok {
+		t.Fatal("Adapt result does not implement mqtt.Drainer")
+	}
+	if err := d.CloseWithDrain(context.Background()); err != nil {
+		t.Errorf("CloseWithDrain: %v", err)
+	}
+}

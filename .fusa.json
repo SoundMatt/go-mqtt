@@ -459,6 +459,26 @@
     "REQ-RELAY-009": {
       "description": "FromMessage must set Message.Topic from relay.Message.ID and parse mqtt.qos/mqtt.retained from Meta (RELAY spec §15.7.4).",
       "asil": "ASIL-B"
+    },
+    "REQ-RELAY-010": {
+      "description": "HealthStatus must define HealthOK=0, HealthDegraded=1, HealthDown=2 matching RELAY spec §9.",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-011": {
+      "description": "HealthProvider interface must expose Health() returning a Health struct with Status and Details (RELAY spec §9).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-012": {
+      "description": "Metrics struct must carry WriteCount, DeliverCount, DropCount, BytesWritten, BytesDelivered, ErrorCount (RELAY spec §9).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-013": {
+      "description": "MetricsProvider interface must expose Metrics() returning a Metrics struct (RELAY spec §9).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-014": {
+      "description": "Drainer interface must expose CloseWithDrain(ctx context.Context) error that blocks until in-flight messages drain (RELAY spec §9).",
+      "asil": "ASIL-B"
     }
   },
   "rules": {

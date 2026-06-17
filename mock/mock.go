@@ -51,16 +51,29 @@ package mock
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 
 	mqtt "github.com/SoundMatt/go-mqtt"
 )
 
 // Broker is an in-process MQTT broker. Create one with New and connect
 // clients with Dial. A Broker is safe for concurrent use.
+//
+// Broker implements mqtt.HealthProvider, mqtt.MetricsProvider, and
+// mqtt.Drainer per RELAY spec §9.
 type Broker struct {
 	mu       sync.RWMutex
-	retained map[string]mqtt.Message       // retained messages by topic
+	retained map[string]mqtt.Message        // retained messages by topic
 	subs     map[string][]*mockSubscription // filter → subscriptions
+	closed   atomic.Bool
+
+	// metrics counters — updated atomically by route().
+	writeCount     atomic.Uint64
+	deliverCount   atomic.Uint64
+	dropCount      atomic.Uint64
+	bytesWritten   atomic.Uint64
+	bytesDelivered atomic.Uint64
+	errorCount     atomic.Uint64
 }
 
 // New creates a new in-process Broker ready for use.
@@ -69,6 +82,47 @@ func New() *Broker {
 		retained: make(map[string]mqtt.Message),
 		subs:     make(map[string][]*mockSubscription),
 	}
+}
+
+// ── mqtt.HealthProvider ───────────────────────────────────────────────────────
+
+//fusa:req REQ-RELAY-010
+//fusa:req REQ-RELAY-011
+
+// Health returns the current health of the broker (RELAY spec §9).
+func (b *Broker) Health() mqtt.Health {
+	if b.closed.Load() {
+		return mqtt.Health{Status: mqtt.HealthDown, Details: "broker closed"}
+	}
+	return mqtt.Health{Status: mqtt.HealthOK}
+}
+
+// ── mqtt.MetricsProvider ──────────────────────────────────────────────────────
+
+//fusa:req REQ-RELAY-012
+//fusa:req REQ-RELAY-013
+
+// Metrics returns runtime counters for this broker (RELAY spec §9).
+func (b *Broker) Metrics() mqtt.Metrics {
+	return mqtt.Metrics{
+		WriteCount:     b.writeCount.Load(),
+		DeliverCount:   b.deliverCount.Load(),
+		DropCount:      b.dropCount.Load(),
+		BytesWritten:   b.bytesWritten.Load(),
+		BytesDelivered: b.bytesDelivered.Load(),
+		ErrorCount:     b.errorCount.Load(),
+	}
+}
+
+// ── mqtt.Drainer ──────────────────────────────────────────────────────────────
+
+//fusa:req REQ-RELAY-014
+
+// CloseWithDrain marks the broker as closed (RELAY spec §9). Since routing is
+// synchronous, all in-flight deliveries are already complete when this returns.
+func (b *Broker) CloseWithDrain(_ context.Context) error {
+	b.closed.Store(true)
+	return nil
 }
 
 // Dial creates and returns a new Client connected to this Broker.
@@ -215,6 +269,10 @@ func (b *Broker) deregister(sub *mockSubscription) {
 //fusa:req REQ-MOCK-004
 //fusa:req REQ-LEAK-003
 func (b *Broker) route(msg mqtt.Message) {
+	size := uint64(len(msg.Payload))
+	b.writeCount.Add(1)
+	b.bytesWritten.Add(size)
+
 	// Store/clear retained message.
 	if msg.Retained {
 		b.mu.Lock()
@@ -238,7 +296,10 @@ func (b *Broker) route(msg mqtt.Message) {
 	for _, sub := range matched {
 		select {
 		case sub.ch <- msg:
-		default: // drop if channel is full
+			b.deliverCount.Add(1)
+			b.bytesDelivered.Add(size)
+		default:
+			b.dropCount.Add(1)
 		}
 	}
 }
