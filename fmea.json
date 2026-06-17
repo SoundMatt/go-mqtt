@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-17T00:11:47.738626403Z",
+  "generated_at": "2026-06-17T00:21:21.215217646Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
@@ -57,6 +57,22 @@
       ],
       "severity": "medium",
       "detection_control": "unit tests"
+    },
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "CloseWithDrain",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-RELAY-014"
+      ]
     },
     {
       "component": "go-mqtt (mqtt)",
@@ -227,7 +243,46 @@
     },
     {
       "component": "mock",
+      "function": "CloseWithDrain",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "medium",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "mock",
       "function": "Dial",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "mock",
+      "function": "Health",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "mock",
+      "function": "Metrics",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
       "failure_modes": [
         "Incorrect output"

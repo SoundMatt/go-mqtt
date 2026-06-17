@@ -4,15 +4,15 @@
   "tool": "go-FuSa",
   "toolVersion": "0.30.0",
   "language": "go",
-  "generatedAt": "2026-06-17T00:11:47.866160974Z",
+  "generatedAt": "2026-06-17T00:21:21.354340123Z",
   "format": "x-FuSa SBOM v1",
   "module": "github.com/SoundMatt/go-mqtt",
   "goVersion": "1.25.0",
   "components": [
     {
       "name": "github.com/SoundMatt/RELAY",
-      "version": "v0.1.0",
-      "hash": "sha256:8e9db8b5464e3d25518302272a712d980c5ad9241b37dce7282ca1330c165662"
+      "version": "v0.2.0",
+      "hash": "sha256:daca5a5631e624c3aaf6b368c1cf5d97a3c7293334c7bee29b55e7ad31d207f1"
     }
   ]
 }
