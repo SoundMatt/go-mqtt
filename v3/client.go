@@ -18,8 +18,9 @@
 //	client.Publish(ctx, "Vehicle/Speed", mqtt.AtMostOnce, []byte(`{"speed":60}`))
 //	msg := <-sub.C()
 //
-// The client supports QoS 0 (AtMostOnce) and QoS 1 (AtLeastOnce). QoS 2 is
-// not implemented in v0.1; use AtLeastOnce for acknowledged delivery.
+// The client supports QoS 0 (AtMostOnce), QoS 1 (AtLeastOnce), and QoS 2
+// (ExactlyOnce). QoS 2 performs the full PUBLISH → PUBREC → PUBREL → PUBCOMP
+// handshake; configure the per-step timeout with WithQoS2Timeout.
 package v3
 
 //fusa:req REQ-CONN-001
@@ -70,6 +71,10 @@ package v3
 //fusa:req REQ-FAULT-001
 //fusa:req REQ-FAULT-002
 //fusa:req REQ-FAULT-003
+//fusa:req REQ-QOS2-001
+//fusa:req REQ-QOS2-002
+//fusa:req REQ-QOS2-003
+//fusa:req REQ-QOS2-004
 
 import (
 	"context"
@@ -99,6 +104,7 @@ type options struct {
 	keepalive   time.Duration
 	dialTimeout time.Duration
 	will        *will
+	qos2Timeout time.Duration
 }
 
 // WithClientID sets the MQTT client identifier sent in the CONNECT packet.
@@ -116,6 +122,16 @@ func WithKeepalive(d time.Duration) Option {
 // WithDialTimeout sets the TCP dial timeout. Default: 10s.
 func WithDialTimeout(d time.Duration) Option {
 	return func(o *options) { o.dialTimeout = d }
+}
+
+// WithQoS2Timeout sets the maximum time to wait for each step of the QoS 2
+// handshake (PUBREC, PUBCOMP). If a step is not answered within this window,
+// Publish returns ErrTimeout. Default: 10s. The publish context deadline, if
+// sooner, takes precedence.
+//
+//fusa:req REQ-QOS2-004
+func WithQoS2Timeout(d time.Duration) Option {
+	return func(o *options) { o.qos2Timeout = d }
 }
 
 // WithWill configures a last-will-and-testament message. The broker publishes
@@ -147,6 +163,7 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 		clientID:    fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
 		keepalive:   30 * time.Second,
 		dialTimeout: 10 * time.Second,
+		qos2Timeout: 10 * time.Second,
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -160,10 +177,12 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 	}
 
 	c := &v3Client{
-		conn: conn,
-		opts: o,
-		subs: make(map[string][]*v3Subscription),
-		done: make(chan struct{}),
+		conn:    conn,
+		opts:    o,
+		subs:    make(map[string][]*v3Subscription),
+		done:    make(chan struct{}),
+		qos2Out: make(map[uint16]*qos2Outbound),
+		qos2In:  make(map[uint16]mqtt.Message),
 	}
 
 	if err := c.send(buildCONNECT(o.clientID, uint16(o.keepalive.Seconds()), o.will)); err != nil {
@@ -192,6 +211,18 @@ type v3Client struct {
 	once   sync.Once
 	sendMu sync.Mutex
 	pktID  atomic.Uint32
+
+	// QoS 2 in-flight state, guarded by qos2Mu.
+	qos2Mu  sync.Mutex
+	qos2Out map[uint16]*qos2Outbound // outbound publishes awaiting PUBREC/PUBCOMP
+	qos2In  map[uint16]mqtt.Message  // inbound QoS 2 messages awaiting PUBREL (dedup)
+}
+
+// qos2Outbound tracks an outbound QoS 2 publish through the four-way handshake.
+// rec is closed when the matching PUBREC arrives; comp is closed on PUBCOMP.
+type qos2Outbound struct {
+	rec  chan struct{}
+	comp chan struct{}
 }
 
 func (c *v3Client) nextID() uint16 {
@@ -240,9 +271,6 @@ func (c *v3Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payl
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
 	}
-	if qos == mqtt.ExactlyOnce {
-		return mqtt.ErrQoSUnsupported
-	}
 	select {
 	case <-c.done:
 		return mqtt.ErrClosed
@@ -251,12 +279,70 @@ func (c *v3Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payl
 	default:
 	}
 
+	if qos == mqtt.ExactlyOnce {
+		return c.publishQoS2(ctx, topic, payload)
+	}
+
 	var packetID uint16
 	if qos == mqtt.AtLeastOnce {
 		packetID = c.nextID()
 	}
 	pkt := buildPUBLISH(topic, payload, byte(qos), false, packetID)
 	return c.send(pkt)
+}
+
+// publishQoS2 performs the outbound QoS 2 four-way handshake:
+// PUBLISH → (wait) PUBREC → PUBREL → (wait) PUBCOMP.
+//
+//fusa:req REQ-QOS2-001
+//fusa:req REQ-QOS2-002
+//fusa:req REQ-QOS2-004
+func (c *v3Client) publishQoS2(ctx context.Context, topic string, payload []byte) error {
+	packetID := c.nextID()
+	out := &qos2Outbound{rec: make(chan struct{}), comp: make(chan struct{})}
+
+	c.qos2Mu.Lock()
+	c.qos2Out[packetID] = out
+	c.qos2Mu.Unlock()
+	defer func() {
+		c.qos2Mu.Lock()
+		delete(c.qos2Out, packetID)
+		c.qos2Mu.Unlock()
+	}()
+
+	if err := c.send(buildPUBLISH(topic, payload, byte(mqtt.ExactlyOnce), false, packetID)); err != nil {
+		return err
+	}
+
+	// Wait for PUBREC, then send PUBREL.
+	if err := c.waitQoS2(ctx, out.rec); err != nil {
+		return err
+	}
+	if err := c.send(buildPUBREL(packetID)); err != nil {
+		return err
+	}
+
+	// Wait for PUBCOMP.
+	return c.waitQoS2(ctx, out.comp)
+}
+
+// waitQoS2 blocks until done is closed, the client closes, the context is
+// cancelled, or the QoS 2 step timeout elapses (whichever is first).
+//
+//fusa:req REQ-QOS2-004
+func (c *v3Client) waitQoS2(ctx context.Context, done <-chan struct{}) error {
+	timer := time.NewTimer(c.opts.qos2Timeout)
+	defer timer.Stop()
+	select {
+	case <-done:
+		return nil
+	case <-c.done:
+		return mqtt.ErrClosed
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return mqtt.ErrTimeout
+	}
 }
 
 //fusa:req REQ-SUB-001
@@ -270,9 +356,6 @@ func (c *v3Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payl
 func (c *v3Client) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.SubscriberOption) (mqtt.Subscription, error) {
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
-	}
-	if qos == mqtt.ExactlyOnce {
-		return nil, mqtt.ErrQoSUnsupported
 	}
 	select {
 	case <-c.done:
@@ -376,6 +459,12 @@ func (c *v3Client) readLoop() {
 			c.handlePUBLISH(hdr, body)
 		case pktPUBACK & 0xF0:
 			// QoS 1 ACK — no in-flight tracking in v0.1
+		case pktPUBREC & 0xF0:
+			c.handlePUBREC(body)
+		case pktPUBREL & 0xF0:
+			c.handlePUBREL(body)
+		case pktPUBCOMP & 0xF0:
+			c.handlePUBCOMP(body)
 		case pktSUBACK & 0xF0:
 			// SUBACK — no pending-subscribe verification in v0.1
 		case pktUNSUBACK & 0xF0:
@@ -435,6 +524,28 @@ func (c *v3Client) handlePUBLISH(hdr byte, body []byte) {
 		PacketID: packetID,
 	}
 
+	// QoS 2 inbound: store the message and acknowledge with PUBREC. Delivery is
+	// deferred until the matching PUBREL arrives, ensuring exactly-once.
+	if qos == mqtt.ExactlyOnce {
+		c.qos2Mu.Lock()
+		// Dedup: if we have already seen this packet ID, do not re-store; the
+		// broker is retransmitting. Re-send PUBREC regardless.
+		if _, dup := c.qos2In[packetID]; !dup {
+			c.qos2In[packetID] = msg
+		}
+		c.qos2Mu.Unlock()
+		_ = c.send(buildPUBREC(packetID))
+		return
+	}
+
+	c.deliver(topic, msg)
+}
+
+// deliver fans a message out to every matching subscription.
+//
+//fusa:req REQ-SUB-007
+//fusa:req REQ-SUB-008
+func (c *v3Client) deliver(topic string, msg mqtt.Message) {
 	c.mu.RLock()
 	var matched []*v3Subscription
 	for filter, subs := range c.subs {
@@ -448,6 +559,67 @@ func (c *v3Client) handlePUBLISH(hdr byte, body []byte) {
 		select {
 		case sub.ch <- msg:
 		default: // drop if full
+		}
+	}
+}
+
+// handlePUBREC processes a PUBREC (outbound QoS 2, step 2): signal the waiting
+// publisher so it can send PUBREL.
+//
+//fusa:req REQ-QOS2-002
+func (c *v3Client) handlePUBREC(body []byte) {
+	if len(body) < 2 {
+		return
+	}
+	packetID := uint16(body[0])<<8 | uint16(body[1])
+	c.qos2Mu.Lock()
+	out := c.qos2Out[packetID]
+	c.qos2Mu.Unlock()
+	if out != nil {
+		select {
+		case <-out.rec:
+		default:
+			close(out.rec)
+		}
+	}
+}
+
+// handlePUBREL processes a PUBREL (inbound QoS 2, step 3): deliver the stored
+// message exactly once, then acknowledge with PUBCOMP.
+//
+//fusa:req REQ-QOS2-003
+func (c *v3Client) handlePUBREL(body []byte) {
+	if len(body) < 2 {
+		return
+	}
+	packetID := uint16(body[0])<<8 | uint16(body[1])
+	c.qos2Mu.Lock()
+	msg, ok := c.qos2In[packetID]
+	delete(c.qos2In, packetID)
+	c.qos2Mu.Unlock()
+	if ok {
+		c.deliver(msg.Topic, msg)
+	}
+	_ = c.send(buildPUBCOMP(packetID))
+}
+
+// handlePUBCOMP processes a PUBCOMP (outbound QoS 2, step 4): signal the waiting
+// publisher that the handshake is complete.
+//
+//fusa:req REQ-QOS2-002
+func (c *v3Client) handlePUBCOMP(body []byte) {
+	if len(body) < 2 {
+		return
+	}
+	packetID := uint16(body[0])<<8 | uint16(body[1])
+	c.qos2Mu.Lock()
+	out := c.qos2Out[packetID]
+	c.qos2Mu.Unlock()
+	if out != nil {
+		select {
+		case <-out.comp:
+		default:
+			close(out.comp)
 		}
 	}
 }

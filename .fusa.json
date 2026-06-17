@@ -64,6 +64,22 @@
       "description": "The three QoS constant values must be mutually distinct.",
       "asil": "ASIL-B"
     },
+    "REQ-QOS2-001": {
+      "description": "An outbound QoS 2 Publish must send PUBLISH then complete only after the PUBLISH → PUBREC → PUBREL → PUBCOMP handshake succeeds.",
+      "asil": "ASIL-B"
+    },
+    "REQ-QOS2-002": {
+      "description": "On receiving PUBREC for an in-flight outbound publish the client must send PUBREL; on PUBCOMP it must resolve the publish as complete.",
+      "asil": "ASIL-B"
+    },
+    "REQ-QOS2-003": {
+      "description": "An inbound QoS 2 PUBLISH must be acknowledged with PUBREC and delivered to subscribers exactly once, on receipt of PUBREL, deduplicated by packet identifier.",
+      "asil": "ASIL-B"
+    },
+    "REQ-QOS2-004": {
+      "description": "Each QoS 2 handshake step must fail with ErrTimeout if unanswered within the configured per-step timeout, and must honour context cancellation and client close.",
+      "asil": "ASIL-B"
+    },
     "REQ-WIRE-001": {
       "description": "VarLen encoding must use 7-bit LSB groups with MSB=1 as the continuation marker (MQTT §2.2.3).",
       "asil": "ASIL-B"
@@ -110,6 +126,18 @@
     },
     "REQ-WIRE-012": {
       "description": "UNSUBSCRIBE packets must include a non-zero 2-byte big-endian packet identifier.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-013": {
+      "description": "PUBREC packets must carry the 2-byte big-endian packet identifier of the PUBLISH being acknowledged.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-014": {
+      "description": "PUBREL packets must use fixed-header flags 0b0010 and carry the 2-byte big-endian packet identifier.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WIRE-015": {
+      "description": "PUBCOMP packets must carry the 2-byte big-endian packet identifier completing the QoS 2 handshake.",
       "asil": "ASIL-B"
     },
     "REQ-CONN-001": {

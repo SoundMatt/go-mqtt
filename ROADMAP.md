@@ -38,7 +38,7 @@ a future milestone.
 | v0.2 | MQTT v5.0 client (`v5/`) — user properties, response topic, correlation data |
 | v0.3 | TLS / mTLS transport support (`v3.WithTLS`, `v5.WithTLS`) |
 | v0.4 | WebSocket transport — MQTT-over-WS for browser and VISSR compatibility |
-| v0.5 | QoS 2 (ExactlyOnce) in v3 and v5 clients |
+| v0.5 | QoS 2 (ExactlyOnce) in v3 and v5 clients — v3 done ✅ |
 | v0.6 | Retained message support in mock broker |
 | v0.7 | Will message support (`LWT`) |
 | v0.8 | COVESA VISSR bridge (`bridge/vissr/`) — map VSS signal paths to MQTT topics ✅ |
