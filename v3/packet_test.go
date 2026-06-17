@@ -92,7 +92,7 @@ func TestEncodeStr(t *testing.T) {
 }
 
 func TestBuildCONNECT(t *testing.T) {
-	pkt := buildCONNECT("test-client", 30)
+	pkt := buildCONNECT("test-client", 30, nil)
 
 	// Fixed header: 0x10 (CONNECT)
 	if pkt[0] != pktCONNECT {

@@ -32,6 +32,7 @@ package v3
 //fusa:req REQ-CONN-008
 //fusa:req REQ-CONN-009
 //fusa:req REQ-CONN-010
+//fusa:req REQ-CONN-011
 //fusa:req REQ-PUB-001
 //fusa:req REQ-PUB-002
 //fusa:req REQ-PUB-003
@@ -85,10 +86,19 @@ import (
 // Option configures a v3 Client.
 type Option func(*options)
 
+// will holds the last-will-and-testament parameters set by WithWill.
+type will struct {
+	topic   string
+	payload []byte
+	qos     mqtt.QoS
+	retain  bool
+}
+
 type options struct {
-	clientID  string
-	keepalive time.Duration
+	clientID    string
+	keepalive   time.Duration
 	dialTimeout time.Duration
+	will        *will
 }
 
 // WithClientID sets the MQTT client identifier sent in the CONNECT packet.
@@ -106,6 +116,19 @@ func WithKeepalive(d time.Duration) Option {
 // WithDialTimeout sets the TCP dial timeout. Default: 10s.
 func WithDialTimeout(d time.Duration) Option {
 	return func(o *options) { o.dialTimeout = d }
+}
+
+// WithWill configures a last-will-and-testament message. The broker publishes
+// topic with payload at qos (optionally retained) when the client disconnects
+// unexpectedly without sending a DISCONNECT packet.
+//
+// The will is encoded in the CONNECT packet per MQTT §3.1.2.5–3.1.2.7.
+//
+//fusa:req REQ-CONN-011
+func WithWill(topic string, payload []byte, qos mqtt.QoS, retain bool) Option {
+	return func(o *options) {
+		o.will = &will{topic: topic, payload: payload, qos: qos, retain: retain}
+	}
 }
 
 // Dial connects to the MQTT broker at addr (e.g. "localhost:1883") and
@@ -143,7 +166,7 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 		done: make(chan struct{}),
 	}
 
-	if err := c.send(buildCONNECT(o.clientID, uint16(o.keepalive.Seconds()))); err != nil {
+	if err := c.send(buildCONNECT(o.clientID, uint16(o.keepalive.Seconds()), o.will)); err != nil {
 		_ = conn.Close()
 		return nil, fmt.Errorf("mqtt/v3: send CONNECT: %w", err)
 	}
