@@ -11,68 +11,53 @@ package mqtt
 //fusa:req REQ-RELAY-013
 //fusa:req REQ-RELAY-014
 
-import "context"
+import relay "github.com/SoundMatt/RELAY"
 
 // ── §9 Optional interfaces ────────────────────────────────────────────────────
 //
-// These are optional per RELAY spec §9. When implemented they MUST conform to
-// these exact signatures. Presence is declared in the capabilities document
-// (§12.2) under "optional_interfaces".
+// These are optional per RELAY spec §9. As of RELAY v0.3 (module v0.9.x) the
+// canonical types are exported from github.com/SoundMatt/RELAY, so go-mqtt
+// aliases them rather than redefining them (the local definitions used through
+// RELAY v0.2 are gone). A value of type mqtt.Health is therefore identical to
+// relay.Health, and an mqtt.HealthProvider is a relay.HealthProvider — so a
+// broker that implements these satisfies the RELAY interfaces directly.
 //
-// Local definitions are used until github.com/SoundMatt/RELAY exports them
-// (tracked in SoundMatt/RELAY#11).
+// Presence is declared in the capabilities document (§12.2) under
+// "optional_interfaces".
 
-// HealthStatus is the health state of a node or broker.
+// HealthStatus is the health state of a node or broker (RELAY spec §9).
 //
 //fusa:req REQ-RELAY-010
-type HealthStatus int
+type HealthStatus = relay.HealthStatus
 
+// HealthStatus values, re-exported from RELAY.
 const (
-	HealthOK       HealthStatus = 0 // node is operating normally
-	HealthDegraded HealthStatus = 1 // node is operating with reduced capability
-	HealthDown     HealthStatus = 2 // node is not operational
+	HealthOK       = relay.HealthOK       // node is operating normally
+	HealthDegraded = relay.HealthDegraded // node is operating with reduced capability
+	HealthDown     = relay.HealthDown     // node is not operational
 )
 
-// Health is the health report returned by HealthProvider.
+// Health is the health report returned by HealthProvider (RELAY spec §9).
 //
 //fusa:req REQ-RELAY-010
-type Health struct {
-	Status  HealthStatus `json:"status"`
-	Details string       `json:"details,omitempty"`
-}
+type Health = relay.Health
 
 // HealthProvider exposes node health (RELAY spec §9).
-// Implementations returning HealthDown MUST also return errors from operations.
 //
 //fusa:req REQ-RELAY-011
-type HealthProvider interface {
-	Health() Health
-}
+type HealthProvider = relay.HealthProvider
 
-// Metrics holds runtime counters for a node or broker.
+// Metrics holds runtime counters for a node or broker (RELAY spec §9.1).
 //
 //fusa:req REQ-RELAY-012
-type Metrics struct {
-	WriteCount     uint64 `json:"write_count"`
-	DeliverCount   uint64 `json:"deliver_count"`
-	DropCount      uint64 `json:"drop_count"`
-	BytesWritten   uint64 `json:"bytes_written"`
-	BytesDelivered uint64 `json:"bytes_delivered"`
-	ErrorCount     uint64 `json:"error_count"`
-}
+type Metrics = relay.Metrics
 
 // MetricsProvider exposes runtime counters (RELAY spec §9).
 //
 //fusa:req REQ-RELAY-013
-type MetricsProvider interface {
-	Metrics() Metrics
-}
+type MetricsProvider = relay.MetricsProvider
 
-// Drainer extends a node with graceful shutdown (RELAY spec §9).
-// CloseWithDrain blocks until all in-flight messages are delivered or ctx expires,
-// then closes the node. It MUST be idempotent.
+// Drainer extends a node with graceful shutdown (RELAY spec §9.2).
 //
 //fusa:req REQ-RELAY-014
-type Drainer interface {
-	CloseWithDrain(ctx context.Context) error
-}
+type Drainer = relay.Drainer

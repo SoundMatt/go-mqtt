@@ -10,16 +10,20 @@ import (
 	"errors"
 	"testing"
 
+	relay "github.com/SoundMatt/RELAY"
 	mqtt "github.com/SoundMatt/go-mqtt"
 	"github.com/SoundMatt/go-mqtt/mock"
-	relay "github.com/SoundMatt/RELAY"
 )
 
 // ── SpecVersion ───────────────────────────────────────────────────────────────
 
 func TestSpecVersion(t *testing.T) {
-	if mqtt.SpecVersion != "0.2" {
-		t.Errorf("SpecVersion = %q, want %q", mqtt.SpecVersion, "0.2")
+	if mqtt.SpecVersion != "0.3" {
+		t.Errorf("SpecVersion = %q, want %q", mqtt.SpecVersion, "0.3")
+	}
+	// go-mqtt must track the RELAY package's own SpecVersion exactly.
+	if mqtt.SpecVersion != relay.SpecVersion {
+		t.Errorf("SpecVersion = %q, want relay.SpecVersion %q", mqtt.SpecVersion, relay.SpecVersion)
 	}
 }
 
