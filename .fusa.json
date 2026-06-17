@@ -623,6 +623,38 @@
     "REQ-FED-008": {
       "description": "A republish failure must increment the dropped counter and must not stop the forwarding goroutine.",
       "asil": "ASIL-B"
+    },
+    "REQ-REST-001": {
+      "description": "rest.New must wrap an mqtt.Client and Handler must serve POST /publish, GET /subscribe, and GET /retain routes with multi-level topic/filter path segments.",
+      "asil": "ASIL-B"
+    },
+    "REQ-REST-002": {
+      "description": "POST /publish/{topic} must publish the request body to the topic and return 202 Accepted; a body exceeding the configured maximum must return 413.",
+      "asil": "ASIL-B"
+    },
+    "REQ-REST-003": {
+      "description": "The optional ?qos query parameter must select the publish QoS (0, 1, or 2); an out-of-range or non-numeric value must return 400.",
+      "asil": "ASIL-B"
+    },
+    "REQ-REST-004": {
+      "description": "GET /subscribe/{filter} must subscribe to the filter and stream matching messages as Server-Sent Events with Content-Type text/event-stream.",
+      "asil": "ASIL-B"
+    },
+    "REQ-REST-005": {
+      "description": "Each forwarded SSE event must be a JSON-encoded mqtt.Message prefixed with 'data: ' and flushed immediately.",
+      "asil": "ASIL-B"
+    },
+    "REQ-REST-006": {
+      "description": "The SSE stream must terminate and unsubscribe when the request context is cancelled or the subscription channel closes.",
+      "asil": "ASIL-B"
+    },
+    "REQ-REST-007": {
+      "description": "GET /retain/{topic} must return the retained message for the topic within the configured timeout, or 404 if none arrives.",
+      "asil": "ASIL-B"
+    },
+    "REQ-REST-008": {
+      "description": "GET /retain/{topic} must ignore live (non-retained) traffic and only return a message whose Retained flag is set.",
+      "asil": "ASIL-B"
     }
   },
   "rules": {

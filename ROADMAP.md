@@ -49,7 +49,7 @@ a future milestone.
 | v1.1 | DDS bridge (`bridge/dds/`) — bidirectional MQTT ↔ DDS topic routing via go-DDS |
 | v1.2 | SOME-IP bridge (`bridge/someip/`) — SOME-IP service ↔ MQTT topic translation |
 | v1.3 | gRPC bridge (`bridge/grpc/`) — gRPC bidirectional streaming ↔ MQTT topics |
-| v1.4 | REST bridge (`bridge/rest/`) — HTTP pub/sub gateway over MQTT |
+| v1.4 | REST bridge (`bridge/rest/`) — HTTP pub/sub gateway over MQTT ✅ |
 | v1.5 | MQTT federation bridge (`bridge/mqtt/`) — broker-to-broker topic forwarding ✅ |
 
 ---
