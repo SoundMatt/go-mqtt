@@ -579,6 +579,38 @@
     "REQ-VISSR-010": {
       "description": "Subscription.Unsubscribe and Subscription.Close must delegate to the underlying mqtt.Subscription.",
       "asil": "ASIL-B"
+    },
+    "REQ-FED-001": {
+      "description": "A federation Route must declare source topic Filters and an optional MaxQoS cap, StripPrefix, and AddPrefix.",
+      "asil": "ASIL-B"
+    },
+    "REQ-FED-002": {
+      "description": "New must create a Bridge forwarding from a source to a destination mqtt.Client; Pair must create two Bridges with independent per-direction route sets.",
+      "asil": "ASIL-B"
+    },
+    "REQ-FED-003": {
+      "description": "Start must subscribe to every route filter on the source; on a subscribe error it must roll back prior subscriptions and return the error. Start must be idempotent.",
+      "asil": "ASIL-B"
+    },
+    "REQ-FED-004": {
+      "description": "Forwarded messages must be republished to the destination at min(message QoS, route MaxQoS).",
+      "asil": "ASIL-B"
+    },
+    "REQ-FED-005": {
+      "description": "Topic remapping must strip StripPrefix (on a topic-level boundary) and prepend AddPrefix before republishing; a topic that reduces to empty must not be republished.",
+      "asil": "ASIL-B"
+    },
+    "REQ-FED-006": {
+      "description": "Stop must end forwarding and close all source subscriptions without closing the source or destination clients; it must be idempotent. The Bridge must not reconnect automatically (RELAY spec §6.10).",
+      "asil": "ASIL-B"
+    },
+    "REQ-FED-007": {
+      "description": "Stats must report the number of messages forwarded and dropped.",
+      "asil": "ASIL-B"
+    },
+    "REQ-FED-008": {
+      "description": "A republish failure must increment the dropped counter and must not stop the forwarding goroutine.",
+      "asil": "ASIL-B"
     }
   },
   "rules": {
