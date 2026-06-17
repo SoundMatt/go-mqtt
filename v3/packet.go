@@ -29,20 +29,20 @@ import (
 
 // MQTT v3.1.1 packet type constants (fixed-header first nibble).
 const (
-	pktCONNECT    byte = 0x10
-	pktCONNACK    byte = 0x20
-	pktPUBLISH    byte = 0x30
-	pktPUBACK     byte = 0x40
-	pktPUBREC     byte = 0x50 // QoS 2: publish received
-	pktPUBREL     byte = 0x62 // QoS 2: publish release (type 6 + reserved flags 0b0010)
-	pktPUBCOMP    byte = 0x70 // QoS 2: publish complete
-	pktSUBSCRIBE  byte = 0x82 // type 8 + reserved flags 0b0010
-	pktSUBACK     byte = 0x90
+	pktCONNECT     byte = 0x10
+	pktCONNACK     byte = 0x20
+	pktPUBLISH     byte = 0x30
+	pktPUBACK      byte = 0x40
+	pktPUBREC      byte = 0x50 // QoS 2: publish received
+	pktPUBREL      byte = 0x62 // QoS 2: publish release (type 6 + reserved flags 0b0010)
+	pktPUBCOMP     byte = 0x70 // QoS 2: publish complete
+	pktSUBSCRIBE   byte = 0x82 // type 8 + reserved flags 0b0010
+	pktSUBACK      byte = 0x90
 	pktUNSUBSCRIBE byte = 0xA2 // type 10 + reserved flags 0b0010
-	pktUNSUBACK   byte = 0xB0
-	pktPINGREQ    byte = 0xC0
-	pktPINGRESP   byte = 0xD0
-	pktDISCONNECT byte = 0xE0
+	pktUNSUBACK    byte = 0xB0
+	pktPINGREQ     byte = 0xC0
+	pktPINGRESP    byte = 0xD0
+	pktDISCONNECT  byte = 0xE0
 )
 
 //fusa:req REQ-WIRE-001
@@ -129,7 +129,7 @@ func buildCONNECT(clientID string, keepaliveSecs uint16, w *will) []byte {
 
 	body := []byte{
 		0x00, 0x04, 'M', 'Q', 'T', 'T', // protocol name
-		0x04,                             // protocol level = 3.1.1
+		0x04, // protocol level = 3.1.1
 		connectFlags,
 		byte(keepaliveSecs >> 8), byte(keepaliveSecs),
 	}

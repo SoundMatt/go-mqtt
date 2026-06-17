@@ -52,6 +52,25 @@ import "github.com/SoundMatt/go-mqtt/v3"
 client, err := v3.Dial("broker:1883")
 ```
 
+### TLS / mTLS
+
+The v3 client speaks MQTTS (conventionally port 8883). Use `DialTLS` for a
+sensible default config, or `WithTLS` for full control including client
+certificates (mutual TLS):
+
+```go
+// Server-authenticated TLS (system roots, ServerName from the address):
+client, err := v3.DialTLS("broker:8883")
+
+// Mutual TLS with an explicit config:
+cfg := &tls.Config{
+    RootCAs:      caPool,
+    Certificates: []tls.Certificate{clientCert},
+    MinVersion:   tls.VersionTLS12,
+}
+client, err := v3.Dial("broker:8883", v3.WithTLS(cfg))
+```
+
 ## MQTT wildcard subscriptions
 
 Both `mock` and `v3` implement MQTT §4.7 topic matching:
