@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-17T03:24:28.154224104Z",
+  "generated_at": "2026-06-17T13:21:15.239000961Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
@@ -540,6 +540,27 @@
     {
       "component": "v3",
       "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-WS-006"
+      ],
+      "cyber_risks": [
+        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v3",
+      "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
       "failure_modes": [
         "Returns unexpected error"
@@ -604,12 +625,10 @@
       "function": "Dial",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
       "failure_modes": [
-        "Returns unexpected error",
-        "Goroutine not terminated"
+        "Returns unexpected error"
       ],
       "effects": [
-        "Silent failure propagated to caller",
-        "Memory leak or deadlock"
+        "Silent failure propagated to caller"
       ],
       "severity": "high",
       "detection_control": "requirement testing + unit tests",
@@ -670,6 +689,28 @@
     },
     {
       "component": "v3",
+      "function": "DialWS",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-WS-001",
+        "REQ-WS-002"
+      ],
+      "cyber_risks": [
+        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v3",
       "function": "Publish",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
       "failure_modes": [
@@ -705,6 +746,28 @@
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v3",
+      "function": "Read",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-WS-004",
+        "REQ-WS-005"
+      ],
+      "cyber_risks": [
+        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
       ]
     },
@@ -953,6 +1016,29 @@
       ]
     },
     {
+      "component": "v3",
+      "function": "Write",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
+      "failure_modes": [
+        "Returns unexpected error",
+        "Partial write / data corruption"
+      ],
+      "effects": [
+        "Silent failure propagated to caller",
+        "Incorrect system state"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-WS-004"
+      ],
+      "cyber_risks": [
+        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
       "component": "v5",
       "function": "C",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
@@ -983,8 +1069,14 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1004,14 +1096,8 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-006",
-        "REQ-CONN-007",
-        "REQ-CONN-008",
-        "REQ-SAFETY-007"
-      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1358,7 +1444,7 @@
       "severity": "high",
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
-        "REQ-VISSR-010"
+        "REQ-VISSR-008"
       ]
     },
     {
@@ -1374,7 +1460,7 @@
       "severity": "high",
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
-        "REQ-VISSR-008"
+        "REQ-VISSR-010"
       ]
     },
     {
