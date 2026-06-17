@@ -46,11 +46,17 @@ a future milestone.
 | v0.10 | OpenTelemetry adapter (`otel/`) — spans, metrics for publish/subscribe operations |
 | v0.11 | go-FuSa safety case, FMEA table, SBOM, provenance |
 | v1.0 | Stable API, safety certification artefacts |
-| v1.1 | DDS bridge (`bridge/dds/`) — bidirectional MQTT ↔ DDS topic routing via go-DDS |
-| v1.2 | SOME-IP bridge (`bridge/someip/`) — SOME-IP service ↔ MQTT topic translation |
-| v1.3 | gRPC bridge (`bridge/grpc/`) — gRPC bidirectional streaming ↔ MQTT topics |
 | v1.4 | REST bridge (`bridge/rest/`) — HTTP pub/sub gateway over MQTT ✅ |
 | v1.5 | MQTT federation bridge (`bridge/mqtt/`) — broker-to-broker topic forwarding ✅ |
+
+> **Cross-protocol bridges (DDS, SOME-IP, gRPC) are not on the roadmap.** With
+> [RELAY](https://github.com/SoundMatt/RELAY), every protocol implementation
+> exposes `Adapt() → relay.Node`, so MQTT↔DDS / MQTT↔SOME-IP routing is done
+> generically at the relay layer (forwarding `relay.Message` between two
+> adapted nodes) rather than as protocol-specific packages inside go-mqtt.
+> This keeps go-mqtt free of cross-protocol dependencies (go-DDS, go-SOMEIP,
+> gRPC). The remaining `bridge/*` packages (VISSR, REST, federation) are MQTT-
+> or HTTP-native and are not superseded by RELAY.
 
 ---
 
@@ -81,29 +87,14 @@ Specification Reference) implements W3C VISSv2 for vehicle data access.
 
 This package will make go-mqtt a first-class COVESA/VISSR transport.
 
-### v1.1 — DDS bridge (`bridge/dds/`)
+### Cross-protocol integration via RELAY (not a go-mqtt concern)
 
-Bidirectional routing between MQTT topics and DDS topics using
-[go-DDS](https://github.com/SoundMatt/go-DDS). Topic names are mapped
-using a configurable translation table (e.g. `Vehicle/Speed` →
-`Vehicle_Speed` DDS topic). QoS policies are translated: MQTT AtLeastOnce
-→ DDS RELIABLE, AtMostOnce → DDS BEST_EFFORT.
-
-### v1.2 — SOME-IP bridge (`bridge/someip/`)
-
-Bridges SOME-IP service events and methods (AUTOSAR AP / Classic) to MQTT
-topics. Incoming SOME-IP event notifications are published as MQTT messages;
-outgoing MQTT messages trigger SOME-IP method calls or field updates. Intended
-for automotive ECU environments where SOME-IP is the on-vehicle bus and MQTT
-is the cloud or off-board transport.
-
-### v1.3 — gRPC bridge (`bridge/grpc/`)
-
-Exposes MQTT topics as a gRPC bidirectional streaming service. Clients can
-subscribe to topic filters and publish messages over a single gRPC stream,
-enabling gRPC-native applications to interact with an MQTT broker without
-a direct broker connection. Useful for microservice architectures where gRPC
-is the internal RPC layer.
+MQTT↔DDS, MQTT↔SOME-IP, and MQTT↔gRPC routing are handled at the RELAY layer,
+not by packages inside go-mqtt. go-mqtt provides `Adapt(Client) → relay.Node`;
+go-DDS and go-SOMEIP provide their own adapters. A generic relay-level bridge
+forwards `relay.Message` between any two adapted nodes, so no go-mqtt package
+needs to import another protocol's library. This keeps go-mqtt dependency-free
+and avoids duplicating per-protocol topic-mapping logic in every implementation.
 
 ### v1.4 — REST bridge (`bridge/rest/`)
 
