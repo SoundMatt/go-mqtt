@@ -83,3 +83,15 @@ func (a *nodeAdapter) Subscribe(opts ...relay.SubscriberOption) (<-chan relay.Me
 func (a *nodeAdapter) Close() error {
 	return a.c.Close()
 }
+
+// CloseWithDrain implements mqtt.Drainer on the adapter (RELAY spec §9).
+// If the underlying client also implements Drainer, it is forwarded; otherwise
+// Close is called directly since the MQTT protocol layer handles its own drain.
+//
+//fusa:req REQ-RELAY-014
+func (a *nodeAdapter) CloseWithDrain(ctx context.Context) error {
+	if d, ok := a.c.(Drainer); ok {
+		return d.CloseWithDrain(ctx)
+	}
+	return a.c.Close()
+}

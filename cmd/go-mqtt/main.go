@@ -78,7 +78,7 @@ func runCapabilities() {
 		"transports":          []string{"tcp"},
 		"features":            []string{},
 		"interfaces":          []string{"Client", "Subscription"},
-		"optional_interfaces": []string{},
+		"optional_interfaces": []string{"HealthProvider", "MetricsProvider", "Drainer"},
 		"adapt":               true,
 	})
 }
