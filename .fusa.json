@@ -511,6 +511,46 @@
     "REQ-RELAY-014": {
       "description": "Drainer interface must expose CloseWithDrain(ctx context.Context) error that blocks until in-flight messages drain (RELAY spec §9).",
       "asil": "ASIL-B"
+    },
+    "REQ-VISSR-001": {
+      "description": "PathToTopic must convert a VSS dot path to an MQTT topic, mapping a trailing .* subtree to /# and a * segment to +.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-002": {
+      "description": "TopicToPath must convert an MQTT slash topic back to a VSS dot path (inverse of PathToTopic for concrete topics).",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-003": {
+      "description": "Signal must carry Path, Value, and Timestamp with VISSv2-compatible JSON field names.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-004": {
+      "description": "Signal.Float, Signal.Bool, and Signal.String must return the typed value with an ok flag that is false when the underlying value is a different type.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-005": {
+      "description": "vissr.New must wrap an mqtt.Client and vissr.Client must delegate transport to it.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-006": {
+      "description": "Set/SetFloat/SetBool/SetString must JSON-encode a Signal envelope and publish it to the mapped MQTT topic, returning ErrTopicEmpty for an empty path.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-007": {
+      "description": "Subscribe must map the VSS path to an MQTT filter and return a Subscription delivering decoded Signals, returning ErrTopicEmpty for an empty path.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-008": {
+      "description": "Client.Close must close the underlying mqtt.Client.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-009": {
+      "description": "A malformed (non-JSON) payload must be dropped without stalling the Signal stream; a missing path must be backfilled from the topic.",
+      "asil": "ASIL-B"
+    },
+    "REQ-VISSR-010": {
+      "description": "Subscription.Unsubscribe and Subscription.Close must delegate to the underlying mqtt.Subscription.",
+      "asil": "ASIL-B"
     }
   },
   "rules": {
