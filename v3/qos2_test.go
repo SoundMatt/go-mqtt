@@ -256,8 +256,10 @@ func TestQoS2InboundDelivery(t *testing.T) {
 	fb := newFakeBroker(t)
 	defer fb.close()
 
-	// Broker drives an inbound QoS 2 PUBLISH.
+	// Broker drives an inbound QoS 2 PUBLISH. It reports its outcome on
+	// brokerDone so the test can wait for PUBCOMP before tearing down.
 	const id uint16 = 0x0007
+	brokerDone := make(chan error, 1)
 	fb.serve(t, func() {
 		// Discard the SUBSCRIBE packet.
 		fb.readPacket(t)
@@ -266,15 +268,17 @@ func TestQoS2InboundDelivery(t *testing.T) {
 		// Expect PUBREC.
 		hdr, body := fb.readPacket(t)
 		if hdr&0xF0 != pktPUBREC&0xF0 || packetID(body) != id {
-			t.Errorf("expected PUBREC for id %d, got hdr 0x%02x", id, hdr)
+			brokerDone <- errExpected("PUBREC", hdr)
 			return
 		}
 		// Send PUBREL → client should deliver and answer PUBCOMP.
 		_, _ = fb.conn.Write(buildPUBREL(id))
 		hdr2, body2 := fb.readPacket(t)
 		if hdr2&0xF0 != pktPUBCOMP&0xF0 || packetID(body2) != id {
-			t.Errorf("expected PUBCOMP for id %d, got hdr 0x%02x", id, hdr2)
+			brokerDone <- errExpected("PUBCOMP", hdr2)
+			return
 		}
+		brokerDone <- nil
 	})
 
 	c, err := Dial(fb.addr(), WithClientID("qos2-inbound"), WithKeepalive(0))
@@ -300,6 +304,16 @@ func TestQoS2InboundDelivery(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("timeout waiting for QoS 2 inbound delivery")
 	}
+
+	// Wait for the broker to confirm it received PUBCOMP before teardown.
+	select {
+	case err := <-brokerDone:
+		if err != nil {
+			t.Fatalf("broker handshake: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timeout waiting for broker PUBCOMP")
+	}
 }
 
 // TestQoS2InboundDedup verifies that a retransmitted QoS 2 PUBLISH (same packet
@@ -311,7 +325,9 @@ func TestQoS2InboundDedup(t *testing.T) {
 	defer fb.close()
 
 	const id uint16 = 0x0009
+	brokerDone := make(chan struct{})
 	fb.serve(t, func() {
+		defer close(brokerDone)
 		fb.readPacket(t) // discard SUBSCRIBE
 		// Send the same QoS 2 PUBLISH twice before PUBREL (duplicate delivery).
 		_, _ = fb.conn.Write(buildPUBLISH("a/b", []byte("once"), 2, false, id))
@@ -351,6 +367,9 @@ func TestQoS2InboundDedup(t *testing.T) {
 	case <-time.After(200 * time.Millisecond):
 		// Good — no duplicate.
 	}
+
+	// Drain the broker goroutine before teardown.
+	<-brokerDone
 }
 
 func errExpected(want string, got byte) error {
