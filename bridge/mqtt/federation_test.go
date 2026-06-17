@@ -156,7 +156,18 @@ func TestForwardStats(t *testing.T) {
 		recvTimeout(t, sub, time.Second)
 	}
 
-	if got := b.Stats().Forwarded; got != 3 {
+	// The Forwarded counter is incremented just after the downstream Publish
+	// returns, which can lag the consumer's receipt of the message — poll until
+	// it settles rather than reading it racily.
+	deadline := time.Now().Add(time.Second)
+	var got uint64
+	for time.Now().Before(deadline) {
+		if got = b.Stats().Forwarded; got == 3 {
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	if got != 3 {
 		t.Errorf("Forwarded = %d, want 3", got)
 	}
 }
