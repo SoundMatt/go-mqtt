@@ -41,7 +41,7 @@ a future milestone.
 | v0.5 | QoS 2 (ExactlyOnce) in v3 and v5 clients |
 | v0.6 | Retained message support in mock broker |
 | v0.7 | Will message support (`LWT`) |
-| v0.8 | COVESA VISSR bridge (`bridge/vissr/`) — map VSS signal paths to MQTT topics |
+| v0.8 | COVESA VISSR bridge (`bridge/vissr/`) — map VSS signal paths to MQTT topics ✅ |
 | v0.9 | Embedded broker (`broker/`) — minimal in-process MQTT broker for integration tests |
 | v0.10 | OpenTelemetry adapter (`otel/`) — spans, metrics for publish/subscribe operations |
 | v0.11 | go-FuSa safety case, FMEA table, SBOM, provenance |
