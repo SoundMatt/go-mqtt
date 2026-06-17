@@ -202,10 +202,7 @@ func (c *mockClient) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.Subscrib
 	}
 	c.broker.mu.RUnlock()
 	for _, m := range retained {
-		select {
-		case sub.ch <- m:
-		default:
-		}
+		sub.deliver(m)
 	}
 
 	return sub, nil
@@ -226,6 +223,9 @@ type mockSubscription struct {
 	ch     chan mqtt.Message
 	broker *Broker
 	once   sync.Once
+
+	sendMu sync.Mutex // serialises deliver against Close
+	closed bool       // guarded by sendMu
 }
 
 func (s *mockSubscription) C() <-chan mqtt.Message { return s.ch }
@@ -237,8 +237,32 @@ func (s *mockSubscription) Unsubscribe() error {
 
 func (s *mockSubscription) Close() error {
 	_ = s.Unsubscribe()
+	s.sendMu.Lock()
+	s.closed = true
 	s.once.Do(func() { close(s.ch) })
+	s.sendMu.Unlock()
 	return nil
+}
+
+// deliver performs a non-blocking send to the subscription channel. It returns
+// true if the message was delivered, false if dropped (channel full) or if the
+// subscription has been closed. Holding sendMu makes deliver safe against a
+// concurrent Close, preventing a send on a closed channel.
+//
+//fusa:req REQ-CONC-002
+//fusa:req REQ-SAFETY-008
+func (s *mockSubscription) deliver(msg mqtt.Message) bool {
+	s.sendMu.Lock()
+	defer s.sendMu.Unlock()
+	if s.closed {
+		return false
+	}
+	select {
+	case s.ch <- msg:
+		return true
+	default:
+		return false
+	}
 }
 
 // ── Broker routing ────────────────────────────────────────────────────────────
@@ -294,11 +318,10 @@ func (b *Broker) route(msg mqtt.Message) {
 	b.mu.RUnlock()
 
 	for _, sub := range matched {
-		select {
-		case sub.ch <- msg:
+		if sub.deliver(msg) {
 			b.deliverCount.Add(1)
 			b.bytesDelivered.Add(size)
-		default:
+		} else {
 			b.dropCount.Add(1)
 		}
 	}
