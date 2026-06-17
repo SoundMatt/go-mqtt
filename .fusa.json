@@ -648,6 +648,54 @@
       "description": "A republish failure must increment the dropped counter and must not stop the forwarding goroutine.",
       "asil": "ASIL-B"
     },
+    "REQ-BROKER-WIRE-001": {
+      "description": "The broker must read a complete MQTT v3.1.1 packet (fixed header, remaining-length varint, body) and reject a malformed remaining length.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-WIRE-002": {
+      "description": "The broker must build CONNACK, SUBACK, UNSUBACK, PUBACK, PUBREC, PUBCOMP, and PUBLISH packets with correct headers and length-prefixed fields.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-001": {
+      "description": "broker.New must create a Server; the Server must track connected sessions, retained messages, and listeners.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-002": {
+      "description": "ListenAndServe and Serve must accept TCP connections and start a session goroutine per connection until the server is closed.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-003": {
+      "description": "Close must stop all listeners and disconnect all sessions, and must be idempotent.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-004": {
+      "description": "A session must require CONNECT as the first packet and answer CONNACK before processing any other control packet.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-005": {
+      "description": "An inbound QoS 1 PUBLISH must be acknowledged with PUBACK; a QoS 2 PUBLISH must be acknowledged with PUBREC.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-006": {
+      "description": "PUBLISH messages must be routed to every session whose filter matches per MQTT §4.7, at min(publish QoS, granted QoS) capped at QoS 1; QoS 2 inbound must deliver exactly once on PUBREL.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-007": {
+      "description": "SUBSCRIBE must grant the requested QoS, answer SUBACK, and replay matching retained messages; a retained PUBLISH with empty payload must clear the retained topic; UNSUBSCRIBE must remove the filter and answer UNSUBACK.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-008": {
+      "description": "A last-will message provided in CONNECT must be published when the session ends without a DISCONNECT, and must be suppressed on a clean DISCONNECT.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-009": {
+      "description": "WithTLS must cause ListenAndServe to wrap accepted connections in TLS.",
+      "asil": "ASIL-B"
+    },
+    "REQ-BROKER-010": {
+      "description": "The Server must implement mqtt.MetricsProvider and expose SubscriberCount and RetainedCount.",
+      "asil": "ASIL-B"
+    },
     "REQ-REST-001": {
       "description": "rest.New must wrap an mqtt.Client and Handler must serve POST /publish, GET /subscribe, and GET /retain routes with multi-level topic/filter path segments.",
       "asil": "ASIL-B"
