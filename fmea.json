@@ -1,8 +1,24 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-14T00:42:29.887517913Z",
+  "generated_at": "2026-06-17T00:11:47.738626403Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "Adapt",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-RELAY-007"
+      ]
+    },
     {
       "component": "go-mqtt (mqtt)",
       "function": "ApplySubscriberOpts",
@@ -31,6 +47,35 @@
     },
     {
       "component": "go-mqtt (mqtt)",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "medium",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "FromMessage",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-RELAY-009"
+      ]
+    },
+    {
+      "component": "go-mqtt (mqtt)",
       "function": "MatchTopic",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
       "failure_modes": [
@@ -50,6 +95,79 @@
         "REQ-WILD-006",
         "REQ-WILD-007",
         "REQ-WILD-008"
+      ]
+    },
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "Protocol",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "Send",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "medium",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "Subscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
+      "failure_modes": [
+        "Returns unexpected error",
+        "Goroutine not terminated"
+      ],
+      "effects": [
+        "Silent failure propagated to caller",
+        "Memory leak or deadlock"
+      ],
+      "severity": "medium",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "ToMessage",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-RELAY-008"
+      ]
+    },
+    {
+      "component": "go-mqtt (mqtt)",
+      "function": "WithBackPressure",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-RELAY-006"
       ]
     },
     {
@@ -88,11 +206,8 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-008"
-      ]
+      "severity": "medium",
+      "detection_control": "unit tests"
     },
     {
       "component": "mock",
@@ -104,8 +219,11 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-008"
+      ]
     },
     {
       "component": "mock",
@@ -221,14 +339,8 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-006",
-        "REQ-CONN-007",
-        "REQ-CONN-008",
-        "REQ-SAFETY-007"
-      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -248,8 +360,14 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
