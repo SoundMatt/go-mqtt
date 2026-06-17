@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-17T03:17:24.548266946Z",
+  "generated_at": "2026-06-17T03:24:28.154224104Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
@@ -443,6 +443,70 @@
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
         "REQ-FED-006"
+      ]
+    },
+    {
+      "component": "rest",
+      "function": "Handler",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-REST-001"
+      ]
+    },
+    {
+      "component": "rest",
+      "function": "New",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-REST-001"
+      ]
+    },
+    {
+      "component": "rest",
+      "function": "WithMaxBody",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-REST-002"
+      ]
+    },
+    {
+      "component": "rest",
+      "function": "WithRetainTimeout",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-REST-007"
       ]
     },
     {
@@ -919,14 +983,8 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-006",
-        "REQ-CONN-007",
-        "REQ-CONN-008",
-        "REQ-SAFETY-007"
-      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -946,8 +1004,14 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1294,7 +1358,7 @@
       "severity": "high",
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
-        "REQ-VISSR-008"
+        "REQ-VISSR-010"
       ]
     },
     {
@@ -1310,7 +1374,7 @@
       "severity": "high",
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
-        "REQ-VISSR-010"
+        "REQ-VISSR-008"
       ]
     },
     {
