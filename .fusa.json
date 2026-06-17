@@ -196,6 +196,30 @@
       "description": "DialTLS must supply a default tls.Config (TLS 1.2 minimum, ServerName derived from the address) when none is provided, and an explicit WithTLS must take precedence over that default.",
       "asil": "ASIL-B"
     },
+    "REQ-WS-001": {
+      "description": "DialWS must accept ws:// and wss:// URLs and reject any other scheme with an error.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WS-002": {
+      "description": "DialWS over wss:// must complete the TLS handshake (using WithTLS or a default TLS 1.2 config with ServerName from the URL host) before the WebSocket handshake.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WS-003": {
+      "description": "The WebSocket opening handshake must request the mqtt subprotocol and verify the 101 status and the RFC 6455 Sec-WebSocket-Accept value before use.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WS-004": {
+      "description": "Outbound MQTT control packets must be sent as masked WebSocket binary frames (RFC 6455 §5.3), with correct 7/16/64-bit payload length encoding.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WS-005": {
+      "description": "Inbound WebSocket data frames must be unmasked and reassembled into the MQTT byte stream; the 16- and 64-bit extended length forms must be decoded.",
+      "asil": "ASIL-B"
+    },
+    "REQ-WS-006": {
+      "description": "A WebSocket ping must be answered with a pong, and a close frame must terminate the stream; Close must send a close frame before closing the connection.",
+      "asil": "ASIL-B"
+    },
     "REQ-PUB-001": {
       "description": "Publish must return ErrTopicEmpty when topic is an empty string.",
       "asil": "ASIL-B"

@@ -21,6 +21,8 @@
 // The client supports QoS 0 (AtMostOnce), QoS 1 (AtLeastOnce), and QoS 2
 // (ExactlyOnce). QoS 2 performs the full PUBLISH → PUBREC → PUBREL → PUBCOMP
 // handshake; configure the per-step timeout with WithQoS2Timeout.
+//
+// Transports: Dial (TCP), DialTLS (MQTTS), and DialWS (MQTT-over-WebSocket).
 package v3
 
 //fusa:req REQ-CONN-001
@@ -178,6 +180,19 @@ func WithWill(topic string, payload []byte, qos mqtt.QoS, retain bool) Option {
 //fusa:req REQ-CONN-004
 //fusa:req REQ-CONN-005
 func Dial(addr string, opts ...Option) (mqtt.Client, error) {
+	o := newOptions(opts)
+
+	dialCtx, cancel := context.WithTimeout(context.Background(), o.dialTimeout)
+	defer cancel()
+	conn, err := dialTCP(dialCtx, addr, o)
+	if err != nil {
+		return nil, err
+	}
+	return newClient(conn, o)
+}
+
+// newOptions applies defaults then the supplied options.
+func newOptions(opts []Option) *options {
 	o := &options{
 		clientID:    fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
 		keepalive:   30 * time.Second,
@@ -187,25 +202,35 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 	for _, opt := range opts {
 		opt(o)
 	}
+	return o
+}
 
-	dialCtx, cancel := context.WithTimeout(context.Background(), o.dialTimeout)
-	defer cancel()
-	var conn net.Conn
-	conn, err := (&net.Dialer{}).DialContext(dialCtx, "tcp", addr)
+// dialTCP establishes a TCP connection to addr, upgrading to TLS when configured.
+//
+//fusa:req REQ-TLS-001
+func dialTCP(ctx context.Context, addr string, o *options) (net.Conn, error) {
+	conn, err := (&net.Dialer{}).DialContext(ctx, "tcp", addr)
 	if err != nil {
 		return nil, fmt.Errorf("mqtt/v3: dial %s: %w", addr, err)
 	}
-
-	// Upgrade to TLS before the MQTT CONNECT handshake when configured.
 	if o.tlsConfig != nil {
 		tlsConn := tls.Client(conn, o.tlsConfig)
-		if err := tlsConn.HandshakeContext(dialCtx); err != nil {
+		if err := tlsConn.HandshakeContext(ctx); err != nil {
 			_ = conn.Close()
 			return nil, fmt.Errorf("mqtt/v3: TLS handshake with %s: %w", addr, err)
 		}
-		conn = tlsConn
+		return tlsConn, nil
 	}
+	return conn, nil
+}
 
+// newClient performs the MQTT CONNECT/CONNACK handshake over an established
+// connection and starts the read and keepalive loops.
+//
+//fusa:req REQ-CONN-001
+//fusa:req REQ-CONN-002
+//fusa:req REQ-CONN-005
+func newClient(conn net.Conn, o *options) (mqtt.Client, error) {
 	c := &v3Client{
 		conn:    conn,
 		opts:    o,

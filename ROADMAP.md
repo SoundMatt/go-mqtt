@@ -37,7 +37,7 @@ a future milestone.
 | **v0.1** | Foundation: interfaces, mock broker, v3.1.1 client, CI, Docker quickstart ✅ |
 | v0.2 | MQTT v5.0 client (`v5/`) — user properties, response topic, correlation data |
 | v0.3 | TLS / mTLS transport support (`v3.WithTLS`, `v3.DialTLS`) — v3 done ✅ |
-| v0.4 | WebSocket transport — MQTT-over-WS for browser and VISSR compatibility |
+| v0.4 | WebSocket transport — MQTT-over-WS for browser and VISSR compatibility — v3 done ✅ |
 | v0.5 | QoS 2 (ExactlyOnce) in v3 and v5 clients — v3 done ✅ |
 | v0.6 | Retained message support in mock broker |
 | v0.7 | Will message support (`LWT`) |
@@ -72,7 +72,9 @@ and expose these as typed options.
 ### v0.4 — WebSocket transport
 
 W3C VISSv2 defines MQTT-over-WebSocket as the primary browser transport.
-`v3.DialWS` / `v5.DialWS` will accept a `ws://` or `wss://` URL.
+`v3.DialWS` accepts a `ws://` or `wss://` URL and carries MQTT control packets
+in WebSocket binary frames using the `mqtt` subprotocol (RFC 6455, pure stdlib).
+The v5 equivalent is future work.
 
 ### v0.8 — COVESA VISSR bridge
 

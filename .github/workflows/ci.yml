@@ -135,6 +135,7 @@ jobs:
         run: |
           docker run -d --name mosquitto \
             -p 1883:1883 \
+            -p 9001:9001 \
             -v "$PWD/docker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro" \
             eclipse-mosquitto:2
           sleep 2
@@ -144,6 +145,7 @@ jobs:
         run: go test -tags integration -v -timeout 30s ./v3/...
         env:
           MQTT_BROKER: localhost:1883
+          MQTT_WS_BROKER: ws://localhost:9001/
 
       - name: go test v5 (integration)
         if: steps.prereqs.outputs.available == 'true' && hashFiles('v5/*.go') != ''
