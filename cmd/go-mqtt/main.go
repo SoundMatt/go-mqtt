@@ -19,7 +19,7 @@ import (
 
 const (
 	toolName    = "go-mqtt"
-	toolVersion = "0.13.0"
+	toolVersion = "1.0.0"
 )
 
 func main() {

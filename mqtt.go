@@ -61,10 +61,12 @@ import (
 	relay "github.com/SoundMatt/RELAY"
 )
 
-// SpecVersion is the RELAY specification version this package implements.
+// SpecVersion is the RELAY specification version this package implements. It is
+// bound to the RELAY package's own constant so the two can never drift: building
+// against a new RELAY release automatically reports that spec version.
 //
 //fusa:req REQ-RELAY-001
-const SpecVersion = "0.3"
+const SpecVersion = relay.SpecVersion
 
 // ── Sentinel errors ───────────────────────────────────────────────────────────
 
