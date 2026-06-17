@@ -424,6 +424,34 @@
       "description": "TCP connection loss must cause all subscription channels to be closed within the next read attempt.",
       "asil": "ASIL-B"
     },
+    "REQ-FAULT-004": {
+      "description": "Publish on a client after Close() must return ErrClosed (session loss: publish path).",
+      "asil": "ASIL-B"
+    },
+    "REQ-FAULT-005": {
+      "description": "Subscribe on a client after Close() must return ErrClosed (session loss: subscribe path).",
+      "asil": "ASIL-B"
+    },
+    "REQ-FAULT-006": {
+      "description": "Close() must be idempotent: calling it multiple times must not panic or return an error.",
+      "asil": "ASIL-B"
+    },
+    "REQ-FAULT-007": {
+      "description": "Publish and Subscribe with an empty topic must return ErrTopicEmpty before any broker contact.",
+      "asil": "ASIL-B"
+    },
+    "REQ-FAULT-008": {
+      "description": "Publish with a cancelled context must return a non-nil error (context cancellation / packet loss).",
+      "asil": "ASIL-B"
+    },
+    "REQ-FAULT-009": {
+      "description": "When a subscription channel is full, the incoming message must be dropped silently; Publish must not block or error (DropNewest back-pressure).",
+      "asil": "ASIL-B"
+    },
+    "REQ-FAULT-010": {
+      "description": "Concurrent calls to Close() and Publish() must not panic or deadlock.",
+      "asil": "ASIL-B"
+    },
     "REQ-RELAY-001": {
       "description": "SpecVersion constant must equal \"0.2\" (RELAY spec §17.12).",
       "asil": "ASIL-B"
