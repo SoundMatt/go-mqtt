@@ -36,7 +36,7 @@ a future milestone.
 |---|---|
 | **v0.1** | Foundation: interfaces, mock broker, v3.1.1 client, CI, Docker quickstart ✅ |
 | v0.2 | MQTT v5.0 client (`v5/`) — user properties, response topic, correlation data |
-| v0.3 | TLS / mTLS transport support (`v3.WithTLS`, `v5.WithTLS`) |
+| v0.3 | TLS / mTLS transport support (`v3.WithTLS`, `v3.DialTLS`) — v3 done ✅ |
 | v0.4 | WebSocket transport — MQTT-over-WS for browser and VISSR compatibility |
 | v0.5 | QoS 2 (ExactlyOnce) in v3 and v5 clients — v3 done ✅ |
 | v0.6 | Retained message support in mock broker |

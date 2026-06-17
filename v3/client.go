@@ -75,9 +75,13 @@ package v3
 //fusa:req REQ-QOS2-002
 //fusa:req REQ-QOS2-003
 //fusa:req REQ-QOS2-004
+//fusa:req REQ-TLS-001
+//fusa:req REQ-TLS-002
+//fusa:req REQ-TLS-003
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net"
@@ -105,6 +109,7 @@ type options struct {
 	dialTimeout time.Duration
 	will        *will
 	qos2Timeout time.Duration
+	tlsConfig   *tls.Config
 }
 
 // WithClientID sets the MQTT client identifier sent in the CONNECT packet.
@@ -122,6 +127,20 @@ func WithKeepalive(d time.Duration) Option {
 // WithDialTimeout sets the TCP dial timeout. Default: 10s.
 func WithDialTimeout(d time.Duration) Option {
 	return func(o *options) { o.dialTimeout = d }
+}
+
+// WithTLS configures the client to connect over TLS using cfg. The TCP
+// connection is wrapped with tls.Client and the handshake is completed during
+// Dial. Pass a cfg with Certificates set for mutual TLS (mTLS).
+//
+// For convenience, DialTLS supplies a default cfg deriving ServerName from the
+// dial address; use WithTLS when you need explicit control (custom RootCAs,
+// client certificates, ALPN, etc.).
+//
+//fusa:req REQ-TLS-001
+//fusa:req REQ-TLS-002
+func WithTLS(cfg *tls.Config) Option {
+	return func(o *options) { o.tlsConfig = cfg }
 }
 
 // WithQoS2Timeout sets the maximum time to wait for each step of the QoS 2
@@ -171,9 +190,20 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 
 	dialCtx, cancel := context.WithTimeout(context.Background(), o.dialTimeout)
 	defer cancel()
+	var conn net.Conn
 	conn, err := (&net.Dialer{}).DialContext(dialCtx, "tcp", addr)
 	if err != nil {
 		return nil, fmt.Errorf("mqtt/v3: dial %s: %w", addr, err)
+	}
+
+	// Upgrade to TLS before the MQTT CONNECT handshake when configured.
+	if o.tlsConfig != nil {
+		tlsConn := tls.Client(conn, o.tlsConfig)
+		if err := tlsConn.HandshakeContext(dialCtx); err != nil {
+			_ = conn.Close()
+			return nil, fmt.Errorf("mqtt/v3: TLS handshake with %s: %w", addr, err)
+		}
+		conn = tlsConn
 	}
 
 	c := &v3Client{
@@ -199,6 +229,25 @@ func Dial(addr string, opts ...Option) (mqtt.Client, error) {
 		go c.pingLoop()
 	}
 	return c, nil
+}
+
+// DialTLS connects to an MQTT broker over TLS (MQTTS). It is a convenience
+// wrapper around Dial that supplies a default *tls.Config (TLS 1.2 minimum,
+// ServerName derived from addr) when none is provided via WithTLS.
+//
+// The conventional MQTTS port is 8883, e.g. DialTLS("broker:8883", ...). Pass
+// WithTLS to override the default config (custom RootCAs, client certs, etc.);
+// an explicit WithTLS takes precedence over the derived default.
+//
+//fusa:req REQ-TLS-001
+//fusa:req REQ-TLS-003
+func DialTLS(addr string, opts ...Option) (mqtt.Client, error) {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		host = addr
+	}
+	def := WithTLS(&tls.Config{ServerName: host, MinVersion: tls.VersionTLS12})
+	return Dial(addr, append([]Option{def}, opts...)...)
 }
 
 // v3Client implements mqtt.Client over a TCP connection.

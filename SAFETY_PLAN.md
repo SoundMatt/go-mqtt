@@ -134,7 +134,21 @@ verified by the CI `go-FuSa safety check` gate.
 
 ---
 
-## 5. RELAY conformance
+## 5. Security controls
+
+| Control | Requirement | Threat mitigated |
+|---|---|---|
+| TLS transport (`v3.WithTLS`, `v3.DialTLS`) | REQ-TLS-001 | Eavesdropping / tampering on the broker link |
+| Mutual TLS (client certificates) | REQ-TLS-002 | Unauthorised client/broker (man-in-the-middle, impersonation) |
+| TLS 1.2 minimum (DialTLS default) | REQ-TLS-003 | Downgrade to weak protocol versions |
+
+TLS is a mitigating control for transport-level threats in the integrating
+system's threat model. The integrator remains responsible for certificate
+provisioning, rotation, and trust-anchor management.
+
+---
+
+## 6. RELAY conformance
 
 go-mqtt is RELAY-conformant at spec v0.2 (see `mqtt.SpecVersion`).
 Conformance requirements are tracked in the REQ-RELAY family (14 requirements).

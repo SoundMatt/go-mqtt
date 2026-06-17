@@ -184,6 +184,18 @@
       "description": "WithWill must encode the will topic, will message, will QoS, and will retain flag in the CONNECT packet per MQTT §3.1.2.5–3.1.2.7.",
       "asil": "ASIL-B"
     },
+    "REQ-TLS-001": {
+      "description": "When WithTLS is configured, Dial must wrap the TCP connection with tls.Client and complete the TLS handshake before sending CONNECT.",
+      "asil": "ASIL-B"
+    },
+    "REQ-TLS-002": {
+      "description": "A failed TLS handshake (untrusted server certificate, or missing client certificate under mutual TLS) must cause Dial to return a non-nil error and not establish an MQTT session.",
+      "asil": "ASIL-B"
+    },
+    "REQ-TLS-003": {
+      "description": "DialTLS must supply a default tls.Config (TLS 1.2 minimum, ServerName derived from the address) when none is provided, and an explicit WithTLS must take precedence over that default.",
+      "asil": "ASIL-B"
+    },
     "REQ-PUB-001": {
       "description": "Publish must return ErrTopicEmpty when topic is an empty string.",
       "asil": "ASIL-B"
