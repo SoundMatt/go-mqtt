@@ -71,6 +71,16 @@ cfg := &tls.Config{
 client, err := v3.Dial("broker:8883", v3.WithTLS(cfg))
 ```
 
+### WebSocket (MQTT-over-WS)
+
+For browsers and W3C VISSv2, the v3 client speaks MQTT over WebSocket (RFC 6455,
+`mqtt` subprotocol) — pure stdlib, no external dependency:
+
+```go
+client, err := v3.DialWS("ws://broker:9001/")        // plaintext
+client, err := v3.DialWS("wss://broker:9001/mqtt")   // TLS; honours WithTLS
+```
+
 ## MQTT wildcard subscriptions
 
 Both `mock` and `v3` implement MQTT §4.7 topic matching:

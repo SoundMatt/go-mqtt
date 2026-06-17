@@ -26,6 +26,55 @@ func brokerAddr(t *testing.T) string {
 	return addr
 }
 
+func wsBrokerURL(t *testing.T) string {
+	t.Helper()
+	u := os.Getenv("MQTT_WS_BROKER")
+	if u == "" {
+		u = "ws://localhost:9001/"
+	}
+	return u
+}
+
+func TestIntegration_WebSocketPublishSubscribe(t *testing.T) {
+	url := wsBrokerURL(t)
+
+	sub, err := v3.DialWS(url, v3.WithClientID("go-mqtt-v3-integ-ws-sub"))
+	if err != nil {
+		t.Fatalf("DialWS sub: %v", err)
+	}
+	t.Cleanup(func() { _ = sub.Close() })
+
+	pub, err := v3.DialWS(url, v3.WithClientID("go-mqtt-v3-integ-ws-pub"))
+	if err != nil {
+		t.Fatalf("DialWS pub: %v", err)
+	}
+	t.Cleanup(func() { _ = pub.Close() })
+
+	topic := "go-mqtt/v3/integ/ws"
+	subscription, err := sub.Subscribe(topic, mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	t.Cleanup(func() { _ = subscription.Close() })
+
+	time.Sleep(50 * time.Millisecond)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := pub.Publish(ctx, topic, mqtt.AtMostOnce, []byte("over-websocket")); err != nil {
+		t.Fatalf("Publish over WS: %v", err)
+	}
+
+	select {
+	case msg := <-subscription.C():
+		if string(msg.Payload) != "over-websocket" {
+			t.Errorf("payload: got %q, want over-websocket", msg.Payload)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timeout waiting for WS message")
+	}
+}
+
 func TestIntegration_ConnectDisconnect(t *testing.T) {
 	c, err := v3.Dial(brokerAddr(t), v3.WithClientID("go-mqtt-v3-integ-connect"))
 	if err != nil {
