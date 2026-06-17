@@ -1,8 +1,152 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-17T13:31:01.718380907Z",
+  "generated_at": "2026-06-17T13:42:23.711790089Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
+    {
+      "component": "broker",
+      "function": "Addr",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "low",
+      "detection_control": "unit tests"
+    },
+    {
+      "component": "broker",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-003"
+      ]
+    },
+    {
+      "component": "broker",
+      "function": "ListenAndServe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-002",
+        "REQ-BROKER-009"
+      ]
+    },
+    {
+      "component": "broker",
+      "function": "Metrics",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-010"
+      ]
+    },
+    {
+      "component": "broker",
+      "function": "New",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-001"
+      ]
+    },
+    {
+      "component": "broker",
+      "function": "RetainedCount",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-010"
+      ]
+    },
+    {
+      "component": "broker",
+      "function": "Serve",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Returns unexpected error",
+        "Goroutine not terminated"
+      ],
+      "effects": [
+        "Silent failure propagated to caller",
+        "Memory leak or deadlock"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-002"
+      ]
+    },
+    {
+      "component": "broker",
+      "function": "SubscriberCount",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-010"
+      ]
+    },
+    {
+      "component": "broker",
+      "function": "WithTLS",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-BROKER-009"
+      ]
+    },
     {
       "component": "go-mqtt (mqtt)",
       "function": "Adapt",
@@ -540,27 +684,6 @@
     {
       "component": "v3",
       "function": "Close",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-WS-006"
-      ],
-      "cyber_risks": [
-        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
-      ]
-    },
-    {
-      "component": "v3",
-      "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
       "failure_modes": [
         "Returns unexpected error"
@@ -589,6 +712,27 @@
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "component": "v3",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-WS-006"
+      ],
+      "cyber_risks": [
+        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
       ]
     },
