@@ -26,7 +26,10 @@ a future milestone.
 4. Safety as a first-class concern (go-FuSa, ASIL-B / SIL 2)
 5. COVESA VISSR topic conventions by default
 6. Testability by default — mock broker, no network required for unit tests
-7. Observability-ready — metrics and OTel hooks planned
+7. Observability-ready — runtime metrics via the RELAY §9 `MetricsProvider`
+   interface (implemented by the mock and embedded brokers); a standalone
+   OpenTelemetry adapter is intentionally out of scope to keep the core
+   dependency-free (downstream code can bridge `MetricsProvider` to OTel)
 
 ---
 
@@ -43,7 +46,7 @@ a future milestone.
 | v0.7 | Will message support (`LWT`) |
 | v0.8 | COVESA VISSR bridge (`bridge/vissr/`) — map VSS signal paths to MQTT topics ✅ |
 | v0.9 | Embedded broker (`broker/`) — minimal in-process MQTT broker for integration tests ✅ |
-| v0.10 | OpenTelemetry adapter (`otel/`) — spans, metrics for publish/subscribe operations |
+| v0.10 | Observability — metrics via RELAY §9 `MetricsProvider` (mock + broker) ✅ |
 | v0.11 | go-FuSa safety case, FMEA table, SBOM, provenance |
 | v1.0 | Stable API, safety certification artefacts |
 | v1.4 | REST bridge (`bridge/rest/`) — HTTP pub/sub gateway over MQTT ✅ |
