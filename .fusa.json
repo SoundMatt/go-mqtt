@@ -521,7 +521,7 @@
       "asil": "ASIL-B"
     },
     "REQ-RELAY-001": {
-      "description": "SpecVersion constant must equal \"0.2\" (RELAY spec §17.12).",
+      "description": "SpecVersion constant must equal \"0.3\" and match relay.SpecVersion (RELAY spec §17.12).",
       "asil": "ASIL-B"
     },
     "REQ-RELAY-002": {

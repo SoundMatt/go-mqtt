@@ -64,7 +64,7 @@ import (
 // SpecVersion is the RELAY specification version this package implements.
 //
 //fusa:req REQ-RELAY-001
-const SpecVersion = "0.2"
+const SpecVersion = "0.3"
 
 // ── Sentinel errors ───────────────────────────────────────────────────────────
 
