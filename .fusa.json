@@ -152,6 +152,10 @@
       "description": "The keepalive goroutine must exit when Close is called.",
       "asil": "ASIL-B"
     },
+    "REQ-CONN-011": {
+      "description": "WithWill must encode the will topic, will message, will QoS, and will retain flag in the CONNECT packet per MQTT §3.1.2.5–3.1.2.7.",
+      "asil": "ASIL-B"
+    },
     "REQ-PUB-001": {
       "description": "Publish must return ErrTopicEmpty when topic is an empty string.",
       "asil": "ASIL-B"

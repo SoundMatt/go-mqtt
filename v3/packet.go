@@ -85,6 +85,15 @@ func encodeStr(s string) []byte {
 	return b
 }
 
+// encodeBytes encodes a raw byte slice with a 2-byte big-endian length prefix,
+// as used for MQTT binary data fields (will payload, etc.).
+func encodeBytes(b []byte) []byte {
+	out := make([]byte, 2+len(b))
+	binary.BigEndian.PutUint16(out, uint16(len(b)))
+	copy(out[2:], b)
+	return out
+}
+
 // encodeU16 encodes n as a 2-byte big-endian integer.
 func encodeU16(n uint16) []byte {
 	return []byte{byte(n >> 8), byte(n)}
@@ -98,16 +107,32 @@ func packet(header byte, body []byte) []byte {
 
 //fusa:req REQ-WIRE-005
 //fusa:req REQ-WIRE-006
-func buildCONNECT(clientID string, keepaliveSecs uint16) []byte {
-	// Variable header: protocol name "MQTT" + level 4 + flags + keepalive
+//fusa:req REQ-CONN-011
+func buildCONNECT(clientID string, keepaliveSecs uint16, w *will) []byte {
+	// Connect flags: CleanSession=1 (bit 1).
+	// Will flag (bit 2), will QoS (bits 4-3), will retain (bit 5) are set
+	// when a will is provided per MQTT §3.1.2.5–3.1.2.7.
+	connectFlags := byte(0x02) // CleanSession=1
+	if w != nil {
+		connectFlags |= 0x04 // will flag
+		connectFlags |= byte(w.qos) << 3
+		if w.retain {
+			connectFlags |= 0x20
+		}
+	}
+
 	body := []byte{
 		0x00, 0x04, 'M', 'Q', 'T', 'T', // protocol name
 		0x04,                             // protocol level = 3.1.1
-		0x02,                             // connect flags: CleanSession=1
+		connectFlags,
 		byte(keepaliveSecs >> 8), byte(keepaliveSecs),
 	}
-	// Payload: client ID only (no will, username, password)
+	// Payload: client ID, then (if will set) will topic + will message.
 	body = append(body, encodeStr(clientID)...)
+	if w != nil {
+		body = append(body, encodeStr(w.topic)...)
+		body = append(body, encodeBytes(w.payload)...)
+	}
 	return packet(pktCONNECT, body)
 }
 
