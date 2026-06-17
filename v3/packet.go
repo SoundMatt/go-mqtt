@@ -17,6 +17,9 @@ package v3
 //fusa:req REQ-WIRE-010
 //fusa:req REQ-WIRE-011
 //fusa:req REQ-WIRE-012
+//fusa:req REQ-WIRE-013
+//fusa:req REQ-WIRE-014
+//fusa:req REQ-WIRE-015
 
 import (
 	"encoding/binary"
@@ -30,6 +33,9 @@ const (
 	pktCONNACK    byte = 0x20
 	pktPUBLISH    byte = 0x30
 	pktPUBACK     byte = 0x40
+	pktPUBREC     byte = 0x50 // QoS 2: publish received
+	pktPUBREL     byte = 0x62 // QoS 2: publish release (type 6 + reserved flags 0b0010)
+	pktPUBCOMP    byte = 0x70 // QoS 2: publish complete
 	pktSUBSCRIBE  byte = 0x82 // type 8 + reserved flags 0b0010
 	pktSUBACK     byte = 0x90
 	pktUNSUBSCRIBE byte = 0xA2 // type 10 + reserved flags 0b0010
@@ -171,6 +177,28 @@ func buildUNSUBSCRIBE(filter string, packetID uint16) []byte {
 // buildPUBACK builds a PUBACK packet for the given packet ID.
 func buildPUBACK(packetID uint16) []byte {
 	return packet(pktPUBACK, encodeU16(packetID))
+}
+
+// buildPUBREC builds a PUBREC packet (QoS 2, step 2) for the given packet ID.
+//
+//fusa:req REQ-WIRE-013
+func buildPUBREC(packetID uint16) []byte {
+	return packet(pktPUBREC, encodeU16(packetID))
+}
+
+// buildPUBREL builds a PUBREL packet (QoS 2, step 3) for the given packet ID.
+// PUBREL carries reserved flags 0b0010 in its fixed header (pktPUBREL).
+//
+//fusa:req REQ-WIRE-014
+func buildPUBREL(packetID uint16) []byte {
+	return packet(pktPUBREL, encodeU16(packetID))
+}
+
+// buildPUBCOMP builds a PUBCOMP packet (QoS 2, step 4) for the given packet ID.
+//
+//fusa:req REQ-WIRE-015
+func buildPUBCOMP(packetID uint16) []byte {
+	return packet(pktPUBCOMP, encodeU16(packetID))
 }
 
 var pingReq = []byte{pktPINGREQ, 0x00}
