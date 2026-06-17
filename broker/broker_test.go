@@ -229,9 +229,19 @@ func TestMetrics(t *testing.T) {
 	}
 	recv(t, s)
 
-	// The broker implements mqtt.MetricsProvider.
+	// The broker implements mqtt.MetricsProvider. DeliverCount is incremented
+	// just after the broker writes the PUBLISH to the subscriber socket, which
+	// can lag the subscriber's receipt — poll until the counters settle.
 	var mp mqtt.MetricsProvider = srv
-	m := mp.Metrics()
+	deadline := time.Now().Add(time.Second)
+	var m mqtt.Metrics
+	for time.Now().Before(deadline) {
+		m = mp.Metrics()
+		if m.WriteCount >= 1 && m.DeliverCount >= 1 {
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
 	if m.WriteCount < 1 {
 		t.Errorf("WriteCount = %d, want >= 1", m.WriteCount)
 	}
