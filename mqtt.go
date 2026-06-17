@@ -41,29 +41,53 @@ package mqtt
 //fusa:req REQ-WILD-006
 //fusa:req REQ-WILD-007
 //fusa:req REQ-WILD-008
+//fusa:req REQ-RELAY-001
+//fusa:req REQ-RELAY-002
+//fusa:req REQ-RELAY-003
+//fusa:req REQ-RELAY-004
+//fusa:req REQ-RELAY-005
+//fusa:req REQ-RELAY-006
+//fusa:req REQ-RELAY-007
+//fusa:req REQ-RELAY-008
+//fusa:req REQ-RELAY-009
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	"strconv"
 	"strings"
+	"time"
+
+	relay "github.com/SoundMatt/RELAY"
 )
+
+// SpecVersion is the RELAY specification version this package implements.
+//
+//fusa:req REQ-RELAY-001
+const SpecVersion = "0.2"
 
 // ── Sentinel errors ───────────────────────────────────────────────────────────
 
-// ErrClosed is returned when an operation is called on a closed entity.
-var ErrClosed = errors.New("mqtt: entity is closed")
+//fusa:req REQ-RELAY-002
+//fusa:req REQ-RELAY-003
 
-// ErrTopicEmpty is returned when an empty topic string is passed.
-var ErrTopicEmpty = errors.New("mqtt: topic must not be empty")
+// ErrClosed is returned when an operation is called on a closed entity.
+var ErrClosed = fmt.Errorf("mqtt: closed: %w", relay.ErrClosed)
 
 // ErrNotConnected is returned when a network client is not connected to a broker.
-var ErrNotConnected = errors.New("mqtt: client is not connected")
+var ErrNotConnected = fmt.Errorf("mqtt: not connected: %w", relay.ErrNotConnected)
+
+// ErrTimeout is returned when an operation does not complete within the permitted time.
+var ErrTimeout = fmt.Errorf("mqtt: timeout: %w", relay.ErrTimeout)
 
 // ErrPayloadTooLarge is returned when a payload exceeds the broker limit.
-var ErrPayloadTooLarge = errors.New("mqtt: payload exceeds maximum size")
+var ErrPayloadTooLarge = fmt.Errorf("mqtt: payload too large: %w", relay.ErrPayloadTooLarge)
+
+// ErrTopicEmpty is returned when an empty topic string is passed.
+var ErrTopicEmpty = fmt.Errorf("mqtt: topic must not be empty: %w", relay.ErrNotConnected)
 
 // ErrQoSUnsupported is returned when a QoS level is not supported.
-var ErrQoSUnsupported = errors.New("mqtt: QoS level not supported")
+var ErrQoSUnsupported = fmt.Errorf("mqtt: QoS level not supported: %w", relay.ErrNotConnected)
 
 // ── QoS ──────────────────────────────────────────────────────────────────────
 
@@ -73,7 +97,7 @@ var ErrQoSUnsupported = errors.New("mqtt: QoS level not supported")
 //fusa:req REQ-QOS-004
 
 // QoS is the MQTT Quality of Service delivery guarantee.
-type QoS byte
+type QoS int
 
 const (
 	// AtMostOnce (QoS 0) — fire-and-forget. No acknowledgement. Messages may
@@ -106,41 +130,96 @@ const (
 //
 //fusa:req REQ-V5-MSG-003
 type UserProperty struct {
-	Key   string
-	Value string
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // Message is a single MQTT publish message delivered to a Subscription.
 type Message struct {
 	// Topic is the MQTT topic the message was published on.
-	Topic string
+	Topic string `json:"topic"`
 	// Payload is the raw message bytes.
-	Payload []byte
+	Payload []byte `json:"payload"`
 	// QoS is the quality of service level of this message.
-	QoS QoS
+	QoS QoS `json:"qos"`
 	// Retained indicates the broker sent this as a retained message.
-	Retained bool
+	Retained bool `json:"retained,omitempty"`
 	// PacketID is non-zero for QoS 1 and QoS 2 messages.
-	PacketID uint16
+	PacketID uint16 `json:"packet_id,omitempty"`
 
 	// MQTT v5 properties — zero values mean "not set".
-	ResponseTopic   string        // REQ-V5-PUB-002
-	CorrelationData []byte        // REQ-V5-PUB-002
-	UserProperties  []UserProperty // REQ-V5-PUB-001
-	ContentType     string
-	ExpiryInterval  uint32 // seconds; 0 = no expiry
+	ResponseTopic   string         `json:"response_topic,omitempty"`   // REQ-V5-PUB-002
+	CorrelationData []byte         `json:"correlation_data,omitempty"` // REQ-V5-PUB-002
+	UserProperties  []UserProperty `json:"user_properties,omitempty"`  // REQ-V5-PUB-001
+	ContentType     string         `json:"content_type,omitempty"`
+	ExpiryInterval  uint32         `json:"expiry_interval,omitempty"` // seconds; 0 = no expiry
 }
+
+// ToMessage converts this MQTT message to a relay.Message envelope.
+//
+//fusa:req REQ-RELAY-008
+func (m Message) ToMessage() relay.Message {
+	return relay.Message{
+		Protocol:  relay.MQTT,
+		ID:        m.Topic,
+		Payload:   m.Payload,
+		Timestamp: time.Now(),
+		Meta: map[string]string{
+			"mqtt.qos":      strconv.Itoa(int(m.QoS)),
+			"mqtt.retained": strconv.FormatBool(m.Retained),
+		},
+	}
+}
+
+// FromMessage converts a relay.Message envelope to an MQTT Message.
+//
+//fusa:req REQ-RELAY-009
+func FromMessage(msg relay.Message) (Message, error) {
+	m := Message{
+		Topic:   msg.ID,
+		Payload: msg.Payload,
+	}
+	if v, ok := msg.Meta["mqtt.qos"]; ok {
+		switch v {
+		case "1":
+			m.QoS = AtLeastOnce
+		case "2":
+			m.QoS = ExactlyOnce
+		}
+	}
+	if msg.Meta["mqtt.retained"] == "true" {
+		m.Retained = true
+	}
+	return m, nil
+}
+
+// ── Back-pressure ─────────────────────────────────────────────────────────────
+
+//fusa:req REQ-RELAY-004
+
+// BackPressurePolicy controls what happens when a subscription channel is full.
+type BackPressurePolicy int
+
+const (
+	DropNewest BackPressurePolicy = iota // drop the arriving message (default)
+	DropOldest                           // drop the oldest buffered message
+	Block                                // block until space is available
+)
 
 // ── Subscription options ──────────────────────────────────────────────────────
 
 //fusa:req REQ-SUB-004
 //fusa:req REQ-SUB-005
+//fusa:req REQ-RELAY-005
 
 // SubscriberConfig holds per-subscription options applied at creation time.
 type SubscriberConfig struct {
 	// ChannelDepth is the capacity of the subscription's internal channel.
 	// 0 means the implementation default (64).
 	ChannelDepth int
+	// BackPressure controls what happens when the channel is full.
+	// Default is DropNewest.
+	BackPressure BackPressurePolicy
 }
 
 // SubscriberOption configures a subscription at creation time.
@@ -150,6 +229,13 @@ type SubscriberOption func(*SubscriberConfig)
 // A depth of 0 uses the implementation default (64).
 func WithChannelDepth(n int) SubscriberOption {
 	return func(c *SubscriberConfig) { c.ChannelDepth = n }
+}
+
+// WithBackPressure sets the back-pressure policy applied when the channel is full.
+//
+//fusa:req REQ-RELAY-006
+func WithBackPressure(p BackPressurePolicy) SubscriberOption {
+	return func(c *SubscriberConfig) { c.BackPressure = p }
 }
 
 // ApplySubscriberOpts merges a slice of SubscriberOption into a SubscriberConfig.

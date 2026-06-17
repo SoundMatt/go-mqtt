@@ -423,6 +423,42 @@
     "REQ-FAULT-003": {
       "description": "TCP connection loss must cause all subscription channels to be closed within the next read attempt.",
       "asil": "ASIL-B"
+    },
+    "REQ-RELAY-001": {
+      "description": "SpecVersion constant must equal \"0.2\" (RELAY spec §17.12).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-002": {
+      "description": "ErrClosed, ErrNotConnected, ErrPayloadTooLarge must each wrap the corresponding relay sentinel so errors.Is reaches relay.ErrClosed etc. (RELAY spec §5.2).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-003": {
+      "description": "ErrTimeout must be defined and must wrap relay.ErrTimeout (RELAY spec §5.1).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-004": {
+      "description": "BackPressurePolicy must define DropNewest=0, DropOldest=1, Block=2 (RELAY spec §14.1).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-005": {
+      "description": "SubscriberConfig must include a BackPressure field of type BackPressurePolicy defaulting to DropNewest (RELAY spec §14.1).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-006": {
+      "description": "WithBackPressure must return a SubscriberOption that sets BackPressure on SubscriberConfig (RELAY spec §14.1).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-007": {
+      "description": "Adapt must wrap a Client as relay.Node returning relay.MQTT as the Protocol (RELAY spec §10.3).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-008": {
+      "description": "Message.ToMessage must return a relay.Message with Protocol=relay.MQTT, ID=Topic, and mqtt.qos/mqtt.retained in Meta (RELAY spec §15.7.4).",
+      "asil": "ASIL-B"
+    },
+    "REQ-RELAY-009": {
+      "description": "FromMessage must set Message.Topic from relay.Message.ID and parse mqtt.qos/mqtt.retained from Meta (RELAY spec §15.7.4).",
+      "asil": "ASIL-B"
     }
   },
   "rules": {
