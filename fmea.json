@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-17T03:01:16.228095191Z",
+  "generated_at": "2026-06-17T03:10:16.040214426Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
@@ -364,6 +364,88 @@
       "detection_control": "unit tests"
     },
     {
+      "component": "mqtt (mqttbridge)",
+      "function": "New",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-FED-002"
+      ]
+    },
+    {
+      "component": "mqtt (mqttbridge)",
+      "function": "Pair",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-FED-002"
+      ]
+    },
+    {
+      "component": "mqtt (mqttbridge)",
+      "function": "Start",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
+      "failure_modes": [
+        "Returns unexpected error",
+        "Goroutine not terminated"
+      ],
+      "effects": [
+        "Silent failure propagated to caller",
+        "Memory leak or deadlock"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-FED-003"
+      ]
+    },
+    {
+      "component": "mqtt (mqttbridge)",
+      "function": "Stats",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
+      "failure_modes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-FED-007"
+      ]
+    },
+    {
+      "component": "mqtt (mqttbridge)",
+      "function": "Stop",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
+      "failure_modes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-FED-006"
+      ]
+    },
+    {
       "component": "v3",
       "function": "C",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
@@ -401,14 +483,8 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-006",
-        "REQ-CONN-007",
-        "REQ-CONN-008",
-        "REQ-SAFETY-007"
-      ],
+      "severity": "medium",
+      "detection_control": "unit tests",
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -435,8 +511,14 @@
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
+      "severity": "high",
+      "detection_control": "requirement testing + unit tests",
+      "requirement_ids": [
+        "REQ-CONN-006",
+        "REQ-CONN-007",
+        "REQ-CONN-008",
+        "REQ-SAFETY-007"
+      ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
