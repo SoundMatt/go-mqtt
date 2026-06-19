@@ -32,7 +32,14 @@ sbom-spdx-3.0.1.json
 provenance.json
 artifact-manifest.json
 audit-pack.zip
+gofusa-audit-pack.zip
 vuln.json
+cyber-report.json
+trace-matrix.json
+boundary.mermaid
+coupling-report.json
+tara.json
+tara.md
 
 # Editor
 .idea/

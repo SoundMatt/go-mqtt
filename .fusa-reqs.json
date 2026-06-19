@@ -1,0 +1,1444 @@
+{
+  "requirements": [
+    {
+      "id": "REQ-MSG-001",
+      "title": "Message.Topic must be a non-empty UTF-8 string identifying the publish destin...",
+      "text": "Message.Topic must be a non-empty UTF-8 string identifying the publish destination.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MSG-002",
+      "title": "Message.Payload must be a byte slice carrying the message body; nil or empty...",
+      "text": "Message.Payload must be a byte slice carrying the message body; nil or empty is valid.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MSG-003",
+      "title": "Message.QoS must reflect the quality-of-service level negotiated for this del...",
+      "text": "Message.QoS must reflect the quality-of-service level negotiated for this delivery.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MSG-004",
+      "title": "Message.Retained must be true when the broker is delivering a stored retained...",
+      "text": "Message.Retained must be true when the broker is delivering a stored retained copy.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MSG-005",
+      "title": "Message.PacketID must be non-zero for QoS >= 1 messages and zero for QoS 0",
+      "text": "Message.PacketID must be non-zero for QoS >= 1 messages and zero for QoS 0.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-MSG-001",
+      "title": "Message.ResponseTopic must carry the MQTT v5 Response Topic property (propert...",
+      "text": "Message.ResponseTopic must carry the MQTT v5 Response Topic property (property ID 0x08).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-MSG-002",
+      "title": "Message.CorrelationData must carry the MQTT v5 Correlation Data property (pro...",
+      "text": "Message.CorrelationData must carry the MQTT v5 Correlation Data property (property ID 0x09).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-MSG-003",
+      "title": "Message.UserProperties must carry MQTT v5 User Property key/value pairs (prop...",
+      "text": "Message.UserProperties must carry MQTT v5 User Property key/value pairs (property ID 0x26).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-MSG-004",
+      "title": "Message.ContentType must carry the MQTT v5 Content Type property (property ID...",
+      "text": "Message.ContentType must carry the MQTT v5 Content Type property (property ID 0x03).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-MSG-005",
+      "title": "Message.ExpiryInterval must carry the MQTT v5 Message Expiry Interval in seco...",
+      "text": "Message.ExpiryInterval must carry the MQTT v5 Message Expiry Interval in seconds (property ID 0x02); 0 means no expiry.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS-001",
+      "title": "AtMostOnce (QoS 0) must have integer value 0",
+      "text": "AtMostOnce (QoS 0) must have integer value 0.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS-002",
+      "title": "AtLeastOnce (QoS 1) must have integer value 1",
+      "text": "AtLeastOnce (QoS 1) must have integer value 1.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS-003",
+      "title": "ExactlyOnce (QoS 2) must have integer value 2",
+      "text": "ExactlyOnce (QoS 2) must have integer value 2.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS-004",
+      "title": "The three QoS constant values must be mutually distinct",
+      "text": "The three QoS constant values must be mutually distinct.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS2-001",
+      "title": "An outbound QoS 2 Publish must send PUBLISH then complete only after the PUBL...",
+      "text": "An outbound QoS 2 Publish must send PUBLISH then complete only after the PUBLISH \u2192 PUBREC \u2192 PUBREL \u2192 PUBCOMP handshake succeeds.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS2-002",
+      "title": "On receiving PUBREC for an in-flight outbound publish the client must send PU...",
+      "text": "On receiving PUBREC for an in-flight outbound publish the client must send PUBREL; on PUBCOMP it must resolve the publish as complete.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS2-003",
+      "title": "An inbound QoS 2 PUBLISH must be acknowledged with PUBREC and delivered to su...",
+      "text": "An inbound QoS 2 PUBLISH must be acknowledged with PUBREC and delivered to subscribers exactly once, on receipt of PUBREL, deduplicated by packet identifier.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-QOS2-004",
+      "title": "Each QoS 2 handshake step must fail with ErrTimeout if unanswered within the...",
+      "text": "Each QoS 2 handshake step must fail with ErrTimeout if unanswered within the configured per-step timeout, and must honour context cancellation and client close.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-001",
+      "title": "VarLen encoding must use 7-bit LSB groups with MSB=1 as the continuation mark...",
+      "text": "VarLen encoding must use 7-bit LSB groups with MSB=1 as the continuation marker (MQTT \u00a72.2.3).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-002",
+      "title": "VarLen encoding must represent values 0 to 268,435,455 in at most 4 bytes",
+      "text": "VarLen encoding must represent values 0 to 268,435,455 in at most 4 bytes.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-003",
+      "title": "VarLen decoding must return an error when a 5th byte with MSB=1 is encountered",
+      "text": "VarLen decoding must return an error when a 5th byte with MSB=1 is encountered.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-004",
+      "title": "String encoding must prefix UTF-8 bytes with a 2-byte big-endian byte count (...",
+      "text": "String encoding must prefix UTF-8 bytes with a 2-byte big-endian byte count (MQTT \u00a71.5.4).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-005",
+      "title": "CONNECT must encode the protocol name as the 6-byte sequence 0x00 0x04 'M' 'Q...",
+      "text": "CONNECT must encode the protocol name as the 6-byte sequence 0x00 0x04 'M' 'Q' 'T' 'T'.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-006",
+      "title": "CONNECT v3.1.1 must set the protocol level byte to 0x04",
+      "text": "CONNECT v3.1.1 must set the protocol level byte to 0x04.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-007",
+      "title": "PUBLISH fixed header bit 0 must encode the RETAIN flag (MQTT \u00a73.3.1.3)",
+      "text": "PUBLISH fixed header bit 0 must encode the RETAIN flag (MQTT \u00a73.3.1.3).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-008",
+      "title": "PUBLISH fixed header bits [2:1] must encode the QoS level (MQTT \u00a73.3.1.2)",
+      "text": "PUBLISH fixed header bits [2:1] must encode the QoS level (MQTT \u00a73.3.1.2).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-009",
+      "title": "PUBLISH fixed header bit 3 must encode the DUP flag (MQTT \u00a73.3.1.1)",
+      "text": "PUBLISH fixed header bit 3 must encode the DUP flag (MQTT \u00a73.3.1.1).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-010",
+      "title": "QoS >= 1 PUBLISH packets must include a non-zero 2-byte big-endian packet ide...",
+      "text": "QoS >= 1 PUBLISH packets must include a non-zero 2-byte big-endian packet identifier.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-011",
+      "title": "SUBSCRIBE packets must include a non-zero 2-byte big-endian packet identifier",
+      "text": "SUBSCRIBE packets must include a non-zero 2-byte big-endian packet identifier.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-012",
+      "title": "UNSUBSCRIBE packets must include a non-zero 2-byte big-endian packet identifier",
+      "text": "UNSUBSCRIBE packets must include a non-zero 2-byte big-endian packet identifier.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-013",
+      "title": "PUBREC packets must carry the 2-byte big-endian packet identifier of the PUBL...",
+      "text": "PUBREC packets must carry the 2-byte big-endian packet identifier of the PUBLISH being acknowledged.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-014",
+      "title": "PUBREL packets must use fixed-header flags 0b0010 and carry the 2-byte big-en...",
+      "text": "PUBREL packets must use fixed-header flags 0b0010 and carry the 2-byte big-endian packet identifier.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WIRE-015",
+      "title": "PUBCOMP packets must carry the 2-byte big-endian packet identifier completing...",
+      "text": "PUBCOMP packets must carry the 2-byte big-endian packet identifier completing the QoS 2 handshake.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-001",
+      "title": "Dial must send CONNECT to the broker before waiting for CONNACK",
+      "text": "Dial must send CONNECT to the broker before waiting for CONNACK.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-002",
+      "title": "Dial must not return the Client until a CONNACK packet is received",
+      "text": "Dial must not return the Client until a CONNACK packet is received.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-003",
+      "title": "Dial must return an error if the TCP connection cannot be established",
+      "text": "Dial must return an error if the TCP connection cannot be established.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-004",
+      "title": "Dial must close the TCP connection if any part of the CONNECT/CONNACK handsha...",
+      "text": "Dial must close the TCP connection if any part of the CONNECT/CONNACK handshake fails.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-005",
+      "title": "Dial (v3.1.1) must return an error when the CONNACK return code byte is non-zero",
+      "text": "Dial (v3.1.1) must return an error when the CONNACK return code byte is non-zero.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-006",
+      "title": "Close must send a DISCONNECT packet before closing the TCP connection",
+      "text": "Close must send a DISCONNECT packet before closing the TCP connection.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-007",
+      "title": "Close must close the TCP connection after sending DISCONNECT",
+      "text": "Close must close the TCP connection after sending DISCONNECT.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-008",
+      "title": "Close must be idempotent: subsequent calls after the first must not panic or...",
+      "text": "Close must be idempotent: subsequent calls after the first must not panic or produce side effects.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-009",
+      "title": "The client must send PINGREQ at the negotiated keepalive interval",
+      "text": "The client must send PINGREQ at the negotiated keepalive interval.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-010",
+      "title": "The keepalive goroutine must exit when Close is called",
+      "text": "The keepalive goroutine must exit when Close is called.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONN-011",
+      "title": "WithWill must encode the will topic, will message, will QoS, and will retain...",
+      "text": "WithWill must encode the will topic, will message, will QoS, and will retain flag in the CONNECT packet per MQTT \u00a73.1.2.5\u20133.1.2.7.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-TLS-001",
+      "title": "When WithTLS is configured, Dial must wrap the TCP connection with tls.Client...",
+      "text": "When WithTLS is configured, Dial must wrap the TCP connection with tls.Client and complete the TLS handshake before sending CONNECT.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-TLS-002",
+      "title": "A failed TLS handshake (untrusted server certificate, or missing client certi...",
+      "text": "A failed TLS handshake (untrusted server certificate, or missing client certificate under mutual TLS) must cause Dial to return a non-nil error and not establish an MQTT session.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-TLS-003",
+      "title": "DialTLS must supply a default tls.Config (TLS 1.2 minimum, ServerName derived...",
+      "text": "DialTLS must supply a default tls.Config (TLS 1.2 minimum, ServerName derived from the address) when none is provided, and an explicit WithTLS must take precedence over that default.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WS-001",
+      "title": "DialWS must accept ws:// and wss:// URLs and reject any other scheme with an...",
+      "text": "DialWS must accept ws:// and wss:// URLs and reject any other scheme with an error.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WS-002",
+      "title": "DialWS over wss:// must complete the TLS handshake (using WithTLS or a defaul...",
+      "text": "DialWS over wss:// must complete the TLS handshake (using WithTLS or a default TLS 1.2 config with ServerName from the URL host) before the WebSocket handshake.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WS-003",
+      "title": "The WebSocket opening handshake must request the mqtt subprotocol and verify...",
+      "text": "The WebSocket opening handshake must request the mqtt subprotocol and verify the 101 status and the RFC 6455 Sec-WebSocket-Accept value before use.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WS-004",
+      "title": "Outbound MQTT control packets must be sent as masked WebSocket binary frames...",
+      "text": "Outbound MQTT control packets must be sent as masked WebSocket binary frames (RFC 6455 \u00a75.3), with correct 7/16/64-bit payload length encoding.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WS-005",
+      "title": "Inbound WebSocket data frames must be unmasked and reassembled into the MQTT...",
+      "text": "Inbound WebSocket data frames must be unmasked and reassembled into the MQTT byte stream; the 16- and 64-bit extended length forms must be decoded.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WS-006",
+      "title": "A WebSocket ping must be answered with a pong, and a close frame must termina...",
+      "text": "A WebSocket ping must be answered with a pong, and a close frame must terminate the stream; Close must send a close frame before closing the connection.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-PUB-001",
+      "title": "Publish must return ErrTopicEmpty when topic is an empty string",
+      "text": "Publish must return ErrTopicEmpty when topic is an empty string.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-PUB-002",
+      "title": "Publish must return ErrQoSUnsupported when QoS is ExactlyOnce (QoS 2)",
+      "text": "Publish must return ErrQoSUnsupported when QoS is ExactlyOnce (QoS 2).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-PUB-003",
+      "title": "Publish must return ErrClosed when called on a closed client",
+      "text": "Publish must return ErrClosed when called on a closed client.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-PUB-004",
+      "title": "Publish must return ctx.Err() when the context is cancelled before the send c...",
+      "text": "Publish must return ctx.Err() when the context is cancelled before the send completes.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-PUB-005",
+      "title": "Publish at QoS 0 must not include a packet identifier in the PUBLISH packet",
+      "text": "Publish at QoS 0 must not include a packet identifier in the PUBLISH packet.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-PUB-006",
+      "title": "Publish at QoS 1 must include a non-zero packet identifier in the PUBLISH packet",
+      "text": "Publish at QoS 1 must include a non-zero packet identifier in the PUBLISH packet.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-001",
+      "title": "Subscribe must return ErrTopicEmpty when the topic filter is an empty string",
+      "text": "Subscribe must return ErrTopicEmpty when the topic filter is an empty string.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-002",
+      "title": "Subscribe must return ErrClosed when called on a closed client",
+      "text": "Subscribe must return ErrClosed when called on a closed client.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-003",
+      "title": "Subscribe must return a Subscription backed by a buffered message channel",
+      "text": "Subscribe must return a Subscription backed by a buffered message channel.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-004",
+      "title": "The default subscription channel depth must be at least 64 when not configure...",
+      "text": "The default subscription channel depth must be at least 64 when not configured by the caller.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-005",
+      "title": "Subscription channel depth must be configurable by the caller via SubscriberO...",
+      "text": "Subscription channel depth must be configurable by the caller via SubscriberOption.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-006",
+      "title": "Subscribe must send a SUBSCRIBE packet to the broker carrying the given filte...",
+      "text": "Subscribe must send a SUBSCRIBE packet to the broker carrying the given filter and QoS.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-007",
+      "title": "Incoming PUBLISH messages must be delivered to all subscriptions where MatchT...",
+      "text": "Incoming PUBLISH messages must be delivered to all subscriptions where MatchTopic returns true.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SUB-008",
+      "title": "A PUBLISH matching multiple active subscriptions must be delivered independen...",
+      "text": "A PUBLISH matching multiple active subscriptions must be delivered independently to each one.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-001",
+      "title": "MatchTopic(\"#\") must return true for any topic that does not start with '$'",
+      "text": "MatchTopic(\"#\") must return true for any topic that does not start with '$'.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-002",
+      "title": "MatchTopic(\"#\") must return false for any topic that starts with '$'",
+      "text": "MatchTopic(\"#\") must return false for any topic that starts with '$'.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-003",
+      "title": "MatchTopic(\"prefix/#\") must return true when topic equals \"prefix\" exactly",
+      "text": "MatchTopic(\"prefix/#\") must return true when topic equals \"prefix\" exactly.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-004",
+      "title": "MatchTopic(\"prefix/#\") must return true when topic starts with \"prefix/\"",
+      "text": "MatchTopic(\"prefix/#\") must return true when topic starts with \"prefix/\".",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-005",
+      "title": "MatchTopic(\"prefix/#\") must return false for '$'-prefixed topics when prefix...",
+      "text": "MatchTopic(\"prefix/#\") must return false for '$'-prefixed topics when prefix has no '$'.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-006",
+      "title": "MatchTopic with '+' at any position must match exactly one topic level",
+      "text": "MatchTopic with '+' at any position must match exactly one topic level.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-007",
+      "title": "MatchTopic with '+' at level 0 must return false for topics that start with '$'",
+      "text": "MatchTopic with '+' at level 0 must return false for topics that start with '$'.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-WILD-008",
+      "title": "MatchTopic must return true when filter equals topic and neither contains a w...",
+      "text": "MatchTopic must return true when filter equals topic and neither contains a wildcard character.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-001",
+      "title": "Client.Publish on a closed client must return ErrClosed",
+      "text": "Client.Publish on a closed client must return ErrClosed.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-002",
+      "title": "Client.Subscribe on a closed client must return ErrClosed",
+      "text": "Client.Subscribe on a closed client must return ErrClosed.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-003",
+      "title": "Client.Publish and Client.Subscribe must not panic on any valid or invalid input",
+      "text": "Client.Publish and Client.Subscribe must not panic on any valid or invalid input.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-004",
+      "title": "Client.Publish with an empty topic must return ErrTopicEmpty",
+      "text": "Client.Publish with an empty topic must return ErrTopicEmpty.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-005",
+      "title": "Client.Subscribe with an empty topic must return ErrTopicEmpty",
+      "text": "Client.Subscribe with an empty topic must return ErrTopicEmpty.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-006",
+      "title": "All active subscription channels must be closed when the TCP connection is lost",
+      "text": "All active subscription channels must be closed when the TCP connection is lost.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-007",
+      "title": "All active subscription channels must be closed when Client.Close is called",
+      "text": "All active subscription channels must be closed when Client.Close is called.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SAFETY-008",
+      "title": "Message delivery must never block: a full subscription channel must silently...",
+      "text": "Message delivery must never block: a full subscription channel must silently drop the message.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MOCK-001",
+      "title": "Broker.Subscribe must deliver all retained messages matching the filter at su...",
+      "text": "Broker.Subscribe must deliver all retained messages matching the filter at subscribe time.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MOCK-002",
+      "title": "Broker.route must store a retained message (non-empty payload) before fan-out...",
+      "text": "Broker.route must store a retained message (non-empty payload) before fan-out to current subscribers.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MOCK-003",
+      "title": "Broker.route must delete a stored retained message when the published payload...",
+      "text": "Broker.route must delete a stored retained message when the published payload is empty.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MOCK-004",
+      "title": "Broker.route must deliver to all subscriptions where MatchTopic returns true...",
+      "text": "Broker.route must deliver to all subscriptions where MatchTopic returns true for the message topic.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-MOCK-005",
+      "title": "Broker.Dial must return a new client that is connected to the same in-process...",
+      "text": "Broker.Dial must return a new client that is connected to the same in-process broker.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-CONN-001",
+      "title": "v5.Dial must send an MQTT 5.0 CONNECT packet (protocol level byte 0x05)",
+      "text": "v5.Dial must send an MQTT 5.0 CONNECT packet (protocol level byte 0x05).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-CONN-002",
+      "title": "v5.Dial must not return the Client until a CONNACK is received",
+      "text": "v5.Dial must not return the Client until a CONNACK is received.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-CONN-003",
+      "title": "v5.Dial must return an error when the CONNACK reason code byte is non-zero",
+      "text": "v5.Dial must return an error when the CONNACK reason code byte is non-zero.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-CONN-004",
+      "title": "v5 Client must parse and apply TopicAliasMax from CONNACK properties",
+      "text": "v5 Client must parse and apply TopicAliasMax from CONNACK properties.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-WIRE-001",
+      "title": "Each MQTT v5 property must be preceded by its 1-byte property identifier",
+      "text": "Each MQTT v5 property must be preceded by its 1-byte property identifier.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-WIRE-002",
+      "title": "The v5 property section must be preceded by a VarLen total byte count of all...",
+      "text": "The v5 property section must be preceded by a VarLen total byte count of all property bytes.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-WIRE-003",
+      "title": "v5 property decoding must skip unknown property identifiers without returning...",
+      "text": "v5 property decoding must skip unknown property identifiers without returning an error.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-WIRE-004",
+      "title": "CONNECT v5.0 must set the protocol level byte to 0x05",
+      "text": "CONNECT v5.0 must set the protocol level byte to 0x05.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-PUB-001",
+      "title": "PublishV5 must encode each UserProperty pair with property identifier 0x26",
+      "text": "PublishV5 must encode each UserProperty pair with property identifier 0x26.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-PUB-002",
+      "title": "PublishV5 must encode ResponseTopic with property identifier 0x08 when non-empty",
+      "text": "PublishV5 must encode ResponseTopic with property identifier 0x08 when non-empty.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-PUB-003",
+      "title": "PublishV5 must encode CorrelationData with property identifier 0x09 when non-...",
+      "text": "PublishV5 must encode CorrelationData with property identifier 0x09 when non-nil and non-empty.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-PUB-004",
+      "title": "PublishV5 must encode MessageExpiryInterval with property identifier 0x02 whe...",
+      "text": "PublishV5 must encode MessageExpiryInterval with property identifier 0x02 when non-zero.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-PUB-005",
+      "title": "PublishV5 must encode ContentType with property identifier 0x03 when non-empty",
+      "text": "PublishV5 must encode ContentType with property identifier 0x03 when non-empty.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-PUB-006",
+      "title": "PublishV5 must encode TopicAlias with property identifier 0x23 when non-zero",
+      "text": "PublishV5 must encode TopicAlias with property identifier 0x23 when non-zero.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-SUB-001",
+      "title": "SubscribeV5 must encode QoS in bits [1:0] of the subscription options byte",
+      "text": "SubscribeV5 must encode QoS in bits [1:0] of the subscription options byte.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-SUB-002",
+      "title": "SubscribeV5 must set bit 2 of the subscription options byte when NoLocal is true",
+      "text": "SubscribeV5 must set bit 2 of the subscription options byte when NoLocal is true.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-SUB-003",
+      "title": "SubscribeV5 must set bit 3 of the subscription options byte when RetainAsPubl...",
+      "text": "SubscribeV5 must set bit 3 of the subscription options byte when RetainAsPublished is true.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-SUB-004",
+      "title": "SubscribeV5 must encode RetainHandling in bits [5:4] of the subscription opti...",
+      "text": "SubscribeV5 must encode RetainHandling in bits [5:4] of the subscription options byte.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-ALIAS-001",
+      "title": "v5 Client must register a topic alias when PUBLISH arrives with both a non-em...",
+      "text": "v5 Client must register a topic alias when PUBLISH arrives with both a non-empty topic and a non-zero alias.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-ALIAS-002",
+      "title": "v5 Client must resolve a topic alias when PUBLISH arrives with empty topic an...",
+      "text": "v5 Client must resolve a topic alias when PUBLISH arrives with empty topic and a non-zero alias.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-ALIAS-003",
+      "title": "v5 Client must drop a PUBLISH when topic is empty and the alias is not regist...",
+      "text": "v5 Client must drop a PUBLISH when topic is empty and the alias is not registered.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-V5-SESSION-001",
+      "title": "WithSessionExpiry must encode SessionExpiryInterval with property identifier...",
+      "text": "WithSessionExpiry must encode SessionExpiryInterval with property identifier 0x11 in CONNECT properties.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONC-001",
+      "title": "All exported Client methods must be safe for concurrent use from multiple gor...",
+      "text": "All exported Client methods must be safe for concurrent use from multiple goroutines (go test -race must pass).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONC-002",
+      "title": "Concurrent calls to Publish and Subscribe on the same Client must not cause a...",
+      "text": "Concurrent calls to Publish and Subscribe on the same Client must not cause a data race.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-CONC-003",
+      "title": "Concurrent calls to Close and any other Client method must not panic",
+      "text": "Concurrent calls to Close and any other Client method must not panic.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-LEAK-001",
+      "title": "All goroutines started by Dial must exit after Close is called; no goroutine...",
+      "text": "All goroutines started by Dial must exit after Close is called; no goroutine leak.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-LEAK-002",
+      "title": "Subscription state (channel, filter) must be released when a Subscription is...",
+      "text": "Subscription state (channel, filter) must be released when a Subscription is closed.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-LEAK-003",
+      "title": "Message payload bytes delivered to a Subscription channel must be a copy owne...",
+      "text": "Message payload bytes delivered to a Subscription channel must be a copy owned by the receiver; internal buffers must not be aliased.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-ORDER-001",
+      "title": "Messages on a single Subscription channel must arrive in the order they were...",
+      "text": "Messages on a single Subscription channel must arrive in the order they were received from the network.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-ORDER-002",
+      "title": "QoS 0 PUBLISH packets sent from a single goroutine must be written to the net...",
+      "text": "QoS 0 PUBLISH packets sent from a single goroutine must be written to the network in the order Publish was called.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-001",
+      "title": "A broker sending a malformed variable-length integer must cause the client to...",
+      "text": "A broker sending a malformed variable-length integer must cause the client to close without panicking.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-002",
+      "title": "A broker sending an unexpected or unknown packet type must be silently ignore...",
+      "text": "A broker sending an unexpected or unknown packet type must be silently ignored without corrupting client state.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-003",
+      "title": "TCP connection loss must cause all subscription channels to be closed within...",
+      "text": "TCP connection loss must cause all subscription channels to be closed within the next read attempt.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-004",
+      "title": "Publish on a client after Close() must return ErrClosed (session loss: publis...",
+      "text": "Publish on a client after Close() must return ErrClosed (session loss: publish path).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-005",
+      "title": "Subscribe on a client after Close() must return ErrClosed (session loss: subs...",
+      "text": "Subscribe on a client after Close() must return ErrClosed (session loss: subscribe path).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-006",
+      "title": "Close() must be idempotent: calling it multiple times must not panic or retur...",
+      "text": "Close() must be idempotent: calling it multiple times must not panic or return an error.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-007",
+      "title": "Publish and Subscribe with an empty topic must return ErrTopicEmpty before an...",
+      "text": "Publish and Subscribe with an empty topic must return ErrTopicEmpty before any broker contact.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-008",
+      "title": "Publish with a cancelled context must return a non-nil error (context cancell...",
+      "text": "Publish with a cancelled context must return a non-nil error (context cancellation / packet loss).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-009",
+      "title": "When a subscription channel is full, the incoming message must be dropped sil...",
+      "text": "When a subscription channel is full, the incoming message must be dropped silently; Publish must not block or error (DropNewest back-pressure).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FAULT-010",
+      "title": "Concurrent calls to Close() and Publish() must not panic or deadlock",
+      "text": "Concurrent calls to Close() and Publish() must not panic or deadlock.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-001",
+      "title": "SpecVersion must be bound to relay.SpecVersion (currently \"1.0\") so it tracks...",
+      "text": "SpecVersion must be bound to relay.SpecVersion (currently \"1.0\") so it tracks the RELAY package and cannot drift (RELAY spec \u00a717.12).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-002",
+      "title": "ErrClosed, ErrNotConnected, ErrPayloadTooLarge must each wrap the correspondi...",
+      "text": "ErrClosed, ErrNotConnected, ErrPayloadTooLarge must each wrap the corresponding relay sentinel so errors.Is reaches relay.ErrClosed etc. (RELAY spec \u00a75.2).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-003",
+      "title": "ErrTimeout must be defined and must wrap relay.ErrTimeout (RELAY spec \u00a75.1)",
+      "text": "ErrTimeout must be defined and must wrap relay.ErrTimeout (RELAY spec \u00a75.1).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-004",
+      "title": "BackPressurePolicy must define DropNewest=0, DropOldest=1, Block=2 (RELAY spe...",
+      "text": "BackPressurePolicy must define DropNewest=0, DropOldest=1, Block=2 (RELAY spec \u00a714.1).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-005",
+      "title": "SubscriberConfig must include a BackPressure field of type BackPressurePolicy...",
+      "text": "SubscriberConfig must include a BackPressure field of type BackPressurePolicy defaulting to DropNewest (RELAY spec \u00a714.1).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-006",
+      "title": "WithBackPressure must return a SubscriberOption that sets BackPressure on Sub...",
+      "text": "WithBackPressure must return a SubscriberOption that sets BackPressure on SubscriberConfig (RELAY spec \u00a714.1).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-007",
+      "title": "Adapt must wrap a Client as relay.Node returning relay.MQTT as the Protocol (...",
+      "text": "Adapt must wrap a Client as relay.Node returning relay.MQTT as the Protocol (RELAY spec \u00a710.3).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-008",
+      "title": "Message.ToMessage must return a relay.Message with Protocol=relay.MQTT, ID=To...",
+      "text": "Message.ToMessage must return a relay.Message with Protocol=relay.MQTT, ID=Topic, and mqtt.qos/mqtt.retained in Meta (RELAY spec \u00a715.7.4).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-009",
+      "title": "FromMessage must set Message.Topic from relay.Message.ID and parse mqtt.qos/m...",
+      "text": "FromMessage must set Message.Topic from relay.Message.ID and parse mqtt.qos/mqtt.retained from Meta (RELAY spec \u00a715.7.4).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-010",
+      "title": "HealthStatus must define HealthOK=0, HealthDegraded=1, HealthDown=2 matching...",
+      "text": "HealthStatus must define HealthOK=0, HealthDegraded=1, HealthDown=2 matching RELAY spec \u00a79.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-011",
+      "title": "HealthProvider interface must expose Health() returning a Health struct with...",
+      "text": "HealthProvider interface must expose Health() returning a Health struct with Status and Details (RELAY spec \u00a79).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-012",
+      "title": "Metrics struct must carry WriteCount, DeliverCount, DropCount, BytesWritten,...",
+      "text": "Metrics struct must carry WriteCount, DeliverCount, DropCount, BytesWritten, BytesDelivered, ErrorCount (RELAY spec \u00a79).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-013",
+      "title": "MetricsProvider interface must expose Metrics() returning a Metrics struct (R...",
+      "text": "MetricsProvider interface must expose Metrics() returning a Metrics struct (RELAY spec \u00a79).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-RELAY-014",
+      "title": "Drainer interface must expose CloseWithDrain(ctx context.Context) error that...",
+      "text": "Drainer interface must expose CloseWithDrain(ctx context.Context) error that blocks until in-flight messages drain (RELAY spec \u00a79).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-001",
+      "title": "PathToTopic must convert a VSS dot path to an MQTT topic, mapping a trailing...",
+      "text": "PathToTopic must convert a VSS dot path to an MQTT topic, mapping a trailing .* subtree to /# and a * segment to +.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-002",
+      "title": "TopicToPath must convert an MQTT slash topic back to a VSS dot path (inverse...",
+      "text": "TopicToPath must convert an MQTT slash topic back to a VSS dot path (inverse of PathToTopic for concrete topics).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-003",
+      "title": "Signal must carry Path, Value, and Timestamp with VISSv2-compatible JSON fiel...",
+      "text": "Signal must carry Path, Value, and Timestamp with VISSv2-compatible JSON field names.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-004",
+      "title": "Signal.Float, Signal.Bool, and Signal.String must return the typed value with...",
+      "text": "Signal.Float, Signal.Bool, and Signal.String must return the typed value with an ok flag that is false when the underlying value is a different type.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-005",
+      "title": "vissr.New must wrap an mqtt.Client and vissr.Client must delegate transport t...",
+      "text": "vissr.New must wrap an mqtt.Client and vissr.Client must delegate transport to it.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-006",
+      "title": "Set/SetFloat/SetBool/SetString must JSON-encode a Signal envelope and publish...",
+      "text": "Set/SetFloat/SetBool/SetString must JSON-encode a Signal envelope and publish it to the mapped MQTT topic, returning ErrTopicEmpty for an empty path.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-007",
+      "title": "Subscribe must map the VSS path to an MQTT filter and return a Subscription d...",
+      "text": "Subscribe must map the VSS path to an MQTT filter and return a Subscription delivering decoded Signals, returning ErrTopicEmpty for an empty path.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-008",
+      "title": "Client.Close must close the underlying mqtt.Client",
+      "text": "Client.Close must close the underlying mqtt.Client.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-009",
+      "title": "A malformed (non-JSON) payload must be dropped without stalling the Signal st...",
+      "text": "A malformed (non-JSON) payload must be dropped without stalling the Signal stream; a missing path must be backfilled from the topic.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-VISSR-010",
+      "title": "Subscription.Unsubscribe and Subscription.Close must delegate to the underlyi...",
+      "text": "Subscription.Unsubscribe and Subscription.Close must delegate to the underlying mqtt.Subscription.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-001",
+      "title": "A federation Route must declare source topic Filters and an optional MaxQoS c...",
+      "text": "A federation Route must declare source topic Filters and an optional MaxQoS cap, StripPrefix, and AddPrefix.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-002",
+      "title": "New must create a Bridge forwarding from a source to a destination mqtt.Clien...",
+      "text": "New must create a Bridge forwarding from a source to a destination mqtt.Client; Pair must create two Bridges with independent per-direction route sets.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-003",
+      "title": "Start must subscribe to every route filter on the source; on a subscribe erro...",
+      "text": "Start must subscribe to every route filter on the source; on a subscribe error it must roll back prior subscriptions and return the error. Start must be idempotent.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-004",
+      "title": "Forwarded messages must be republished to the destination at min(message QoS,...",
+      "text": "Forwarded messages must be republished to the destination at min(message QoS, route MaxQoS).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-005",
+      "title": "Topic remapping must strip StripPrefix (on a topic-level boundary) and prepen...",
+      "text": "Topic remapping must strip StripPrefix (on a topic-level boundary) and prepend AddPrefix before republishing; a topic that reduces to empty must not be republished.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-006",
+      "title": "Stop must end forwarding and close all source subscriptions without closing t...",
+      "text": "Stop must end forwarding and close all source subscriptions without closing the source or destination clients; it must be idempotent. The Bridge must not reconnect automatically (RELAY spec \u00a76.10).",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-007",
+      "title": "Stats must report the number of messages forwarded and dropped",
+      "text": "Stats must report the number of messages forwarded and dropped.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-FED-008",
+      "title": "A republish failure must increment the dropped counter and must not stop the...",
+      "text": "A republish failure must increment the dropped counter and must not stop the forwarding goroutine.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-WIRE-001",
+      "title": "The broker must read a complete MQTT v3.1.1 packet (fixed header, remaining-l...",
+      "text": "The broker must read a complete MQTT v3.1.1 packet (fixed header, remaining-length varint, body) and reject a malformed remaining length.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-WIRE-002",
+      "title": "The broker must build CONNACK, SUBACK, UNSUBACK, PUBACK, PUBREC, PUBCOMP, and...",
+      "text": "The broker must build CONNACK, SUBACK, UNSUBACK, PUBACK, PUBREC, PUBCOMP, and PUBLISH packets with correct headers and length-prefixed fields.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-001",
+      "title": "broker.New must create a Server; the Server must track connected sessions, re...",
+      "text": "broker.New must create a Server; the Server must track connected sessions, retained messages, and listeners.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-002",
+      "title": "ListenAndServe and Serve must accept TCP connections and start a session goro...",
+      "text": "ListenAndServe and Serve must accept TCP connections and start a session goroutine per connection until the server is closed.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-003",
+      "title": "Close must stop all listeners and disconnect all sessions, and must be idempo...",
+      "text": "Close must stop all listeners and disconnect all sessions, and must be idempotent.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-004",
+      "title": "A session must require CONNECT as the first packet and answer CONNACK before...",
+      "text": "A session must require CONNECT as the first packet and answer CONNACK before processing any other control packet.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-005",
+      "title": "An inbound QoS 1 PUBLISH must be acknowledged with PUBACK; a QoS 2 PUBLISH mu...",
+      "text": "An inbound QoS 1 PUBLISH must be acknowledged with PUBACK; a QoS 2 PUBLISH must be acknowledged with PUBREC.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-006",
+      "title": "PUBLISH messages must be routed to every session whose filter matches per MQT...",
+      "text": "PUBLISH messages must be routed to every session whose filter matches per MQTT \u00a74.7, at min(publish QoS, granted QoS) capped at QoS 1; QoS 2 inbound must deliver exactly once on PUBREL.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-007",
+      "title": "SUBSCRIBE must grant the requested QoS, answer SUBACK, and replay matching re...",
+      "text": "SUBSCRIBE must grant the requested QoS, answer SUBACK, and replay matching retained messages; a retained PUBLISH with empty payload must clear the retained topic; UNSUBSCRIBE must remove the filter and answer UNSUBACK.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-008",
+      "title": "A last-will message provided in CONNECT must be published when the session en...",
+      "text": "A last-will message provided in CONNECT must be published when the session ends without a DISCONNECT, and must be suppressed on a clean DISCONNECT.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-009",
+      "title": "WithTLS must cause ListenAndServe to wrap accepted connections in TLS",
+      "text": "WithTLS must cause ListenAndServe to wrap accepted connections in TLS.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-010",
+      "title": "The Server must implement mqtt.MetricsProvider and expose SubscriberCount and...",
+      "text": "The Server must implement mqtt.MetricsProvider and expose SubscriberCount and RetainedCount.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-001",
+      "title": "rest.New must wrap an mqtt.Client and Handler must serve POST /publish, GET /...",
+      "text": "rest.New must wrap an mqtt.Client and Handler must serve POST /publish, GET /subscribe, and GET /retain routes with multi-level topic/filter path segments.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-002",
+      "title": "POST /publish/{topic} must publish the request body to the topic and return 2...",
+      "text": "POST /publish/{topic} must publish the request body to the topic and return 202 Accepted; a body exceeding the configured maximum must return 413.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-003",
+      "title": "The optional ?qos query parameter must select the publish QoS (0, 1, or 2); a...",
+      "text": "The optional ?qos query parameter must select the publish QoS (0, 1, or 2); an out-of-range or non-numeric value must return 400.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-004",
+      "title": "GET /subscribe/{filter} must subscribe to the filter and stream matching mess...",
+      "text": "GET /subscribe/{filter} must subscribe to the filter and stream matching messages as Server-Sent Events with Content-Type text/event-stream.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-005",
+      "title": "Each forwarded SSE event must be a JSON-encoded mqtt.Message prefixed with 'd...",
+      "text": "Each forwarded SSE event must be a JSON-encoded mqtt.Message prefixed with 'data: ' and flushed immediately.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-006",
+      "title": "The SSE stream must terminate and unsubscribe when the request context is can...",
+      "text": "The SSE stream must terminate and unsubscribe when the request context is cancelled or the subscription channel closes.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-007",
+      "title": "GET /retain/{topic} must return the retained message for the topic within the...",
+      "text": "GET /retain/{topic} must return the retained message for the topic within the configured timeout, or 404 if none arrives.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-REST-008",
+      "title": "GET /retain/{topic} must ignore live (non-retained) traffic and only return a...",
+      "text": "GET /retain/{topic} must ignore live (non-retained) traffic and only return a message whose Retained flag is set.",
+      "standard": "ISO 26262",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    }
+  ]
+}
