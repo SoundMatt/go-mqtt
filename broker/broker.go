@@ -63,9 +63,12 @@ type Server struct {
 // Option configures a Server.
 type Option func(*Server)
 
-// WithTLS makes ListenAndServe wrap accepted connections in TLS using cfg.
+// WithTLS makes ListenAndServe wrap accepted connections in TLS using cfg. When
+// cfg requires client certificates (mutual TLS), the handshake rejects a client
+// that presents no valid certificate.
 //
 //fusa:req REQ-BROKER-009
+//fusa:req REQ-SEC-003
 func WithTLS(cfg *tls.Config) Option {
 	return func(s *Server) { s.tlsConfig = cfg }
 }

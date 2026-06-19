@@ -55,6 +55,20 @@ func recv(t *testing.T, sub mqtt.Subscription) mqtt.Message {
 	}
 }
 
+// Requirements verified by this broker test suite (in-process MQTT v3.1.1
+// server): Server construction + session tracking, accept loop, idempotent
+// Close, CONNECT/CONNACK, QoS 0/1/2 routing, wildcard delivery, retained
+// replay, unsubscribe, and the MetricsProvider counters. WithTLS is covered in
+// tls_test.go; the will and wire framing in raw_test.go.
+//
+//fusa:test REQ-BROKER-001
+//fusa:test REQ-BROKER-002
+//fusa:test REQ-BROKER-003
+//fusa:test REQ-BROKER-004
+//fusa:test REQ-BROKER-005
+//fusa:test REQ-BROKER-006
+//fusa:test REQ-BROKER-007
+//fusa:test REQ-BROKER-010
 func TestPubSubQoS0(t *testing.T) {
 	_, addr := startBroker(t)
 	sub := dial(t, addr, "sub")

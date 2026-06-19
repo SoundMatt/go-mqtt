@@ -1439,6 +1439,78 @@
       "standard": "ISO 26262",
       "level": "LLR",
       "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-001",
+      "title": "TLS server-certificate verification",
+      "text": "A TLS client connection must verify the server certificate chain against the configured roots; an untrusted certificate must fail the handshake.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-002",
+      "title": "TLS minimum protocol version",
+      "text": "The DialTLS convenience default must set MinVersion to TLS 1.2 or higher.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-003",
+      "title": "Mutual-TLS client authentication",
+      "text": "When the broker requires client certificates, a client presenting no valid certificate must be rejected at the TLS handshake.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-004",
+      "title": "Untrusted remaining-length bounds",
+      "text": "A malformed MQTT Remaining Length with a 5th continuation byte must be rejected, preventing integer overflow on untrusted wire input.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-005",
+      "title": "Unknown packet tolerance",
+      "text": "An unexpected or unknown MQTT control-packet type received from the peer must be ignored without crashing the client.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-006",
+      "title": "Publish payload size limit",
+      "text": "A REST publish body exceeding the configured maximum must be rejected with 413 rather than buffered without bound.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-007",
+      "title": "WebSocket accept-key verification",
+      "text": "The RFC 6455 Sec-WebSocket-Accept value must be computed from the client key and GUID and verified before the connection is used.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-008",
+      "title": "Malformed payload isolation",
+      "text": "A non-JSON or malformed signal payload must be dropped without stalling or terminating the subscription stream.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-009",
+      "title": "Topic-alias injection guard",
+      "text": "An MQTT v5 PUBLISH with an empty topic and an unregistered topic alias must be dropped, never delivered with an attacker-chosen topic.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
     }
   ]
 }

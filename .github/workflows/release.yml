@@ -38,6 +38,9 @@ jobs:
       - name: Regenerate dFMEA table
         run: gofusa fmea -cyber
 
+      - name: Regenerate component boundary diagram
+        run: gofusa boundary
+
       - name: Regenerate safety case
         run: gofusa safety-case
 
@@ -52,7 +55,7 @@ jobs:
       - name: Commit regenerated artifacts
         run: |
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          git add -f fmea.csv fmea.json \
+          git add -f fmea.csv fmea.json boundary.mermaid \
                      safety-case.json safety-case.md safety-case.mermaid \
                      sbom.json provenance.json artifact-manifest.json
           if git diff --cached --quiet; then

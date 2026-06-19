@@ -13,6 +13,30 @@ import (
 	mqtt "github.com/SoundMatt/go-mqtt"
 )
 
+// Requirements verified by this MQTT v5.0 wire test suite: VarLen, the property
+// framing (ID-prefixed, VarLen-counted, unknown-ID skip), CONNECT level 0x05 +
+// SessionExpiry, PUBLISH v5 properties (response topic, correlation data, user
+// properties, expiry, content type, topic alias) and their identifiers, and the
+// SUBSCRIBE options byte (QoS / NoLocal / RetainAsPublished / RetainHandling).
+//
+//fusa:test REQ-V5-WIRE-001
+//fusa:test REQ-V5-WIRE-002
+//fusa:test REQ-V5-WIRE-003
+//fusa:test REQ-V5-WIRE-004
+//fusa:test REQ-V5-CONN-001
+//fusa:test REQ-V5-MSG-001
+//fusa:test REQ-V5-MSG-002
+//fusa:test REQ-V5-MSG-003
+//fusa:test REQ-V5-MSG-005
+//fusa:test REQ-V5-PUB-001
+//fusa:test REQ-V5-PUB-002
+//fusa:test REQ-V5-PUB-003
+//fusa:test REQ-V5-PUB-004
+//fusa:test REQ-V5-SUB-001
+//fusa:test REQ-V5-SUB-002
+//fusa:test REQ-V5-SUB-003
+//fusa:test REQ-V5-SESSION-001
+
 // ── encodeVarLen / decodeVarLen ────────────────────────────────────────────
 
 func TestEncodeVarLen(t *testing.T) {
@@ -451,6 +475,49 @@ func TestBuildPUBLISH_ExpiryInterval(t *testing.T) {
 	}
 }
 
+// TestBuildPUBLISH_ContentType verifies the Content Type property (ID 0x03) is
+// encoded and round-trips (REQ-V5-MSG-004, REQ-V5-PUB-005).
+//
+//fusa:test REQ-V5-MSG-004
+//fusa:test REQ-V5-PUB-005
+func TestBuildPUBLISH_ContentType(t *testing.T) {
+	props := PublishProps{ContentType: "application/json"}
+	p := buildPUBLISH("t", []byte("{}"), 0, false, 0, props)
+	_, n, _ := decodeVarLen(p[1:])
+	body := p[1+n:]
+	topicLen := int(binary.BigEndian.Uint16(body[:2]))
+	pp, _, err := readPropSet(body[2+topicLen:])
+	if err != nil {
+		t.Fatalf("readPropSet: %v", err)
+	}
+	if pp.contentType != "application/json" {
+		t.Errorf("content type: got %q, want application/json", pp.contentType)
+	}
+	// The 0x03 property identifier must appear in the encoded property section.
+	if !bytes.Contains(body[2+topicLen:], []byte{0x03}) {
+		t.Error("content-type property identifier 0x03 not encoded")
+	}
+}
+
+// TestBuildPUBLISH_TopicAlias verifies the Topic Alias property (ID 0x23) is
+// encoded when non-zero (REQ-V5-PUB-006).
+//
+//fusa:test REQ-V5-PUB-006
+func TestBuildPUBLISH_TopicAlias(t *testing.T) {
+	props := PublishProps{TopicAlias: 7}
+	p := buildPUBLISH("Vehicle/Speed", []byte("60"), 0, false, 0, props)
+	_, n, _ := decodeVarLen(p[1:])
+	body := p[1+n:]
+	topicLen := int(binary.BigEndian.Uint16(body[:2]))
+	pp, _, err := readPropSet(body[2+topicLen:])
+	if err != nil {
+		t.Fatalf("readPropSet: %v", err)
+	}
+	if pp.topicAlias == nil || *pp.topicAlias != 7 {
+		t.Errorf("topic alias: got %v, want 7", pp.topicAlias)
+	}
+}
+
 // ── buildSUBSCRIBE ─────────────────────────────────────────────────────────
 
 func TestBuildSUBSCRIBE_Basic(t *testing.T) {
@@ -490,6 +557,25 @@ func TestBuildSUBSCRIBE_RetainAsPublished(t *testing.T) {
 	subOpts := body[topicStart+2+topicLen]
 	if subOpts&0x08 == 0 {
 		t.Error("RetainAsPublished flag not set in subscription options byte")
+	}
+}
+
+// TestBuildSUBSCRIBE_RetainHandling verifies RetainHandling is encoded in bits
+// [5:4] of the subscription options byte (REQ-V5-SUB-004).
+//
+//fusa:test REQ-V5-SUB-004
+func TestBuildSUBSCRIBE_RetainHandling(t *testing.T) {
+	for _, rh := range []byte{0, 1, 2} {
+		p := buildSUBSCRIBE("t", 0, 1, SubscribeOpts{RetainHandling: rh})
+		_, n, _ := decodeVarLen(p[1:])
+		body := p[1+n:]
+		propsLen := int(body[2])
+		topicStart := 3 + propsLen
+		topicLen := int(binary.BigEndian.Uint16(body[topicStart:]))
+		subOpts := body[topicStart+2+topicLen]
+		if got := (subOpts >> 4) & 0x03; got != rh {
+			t.Errorf("RetainHandling=%d: options bits [5:4] = %d, want %d", rh, got, rh)
+		}
 	}
 }
 

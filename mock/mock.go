@@ -144,6 +144,9 @@ type mockClient struct {
 //fusa:req REQ-SAFETY-001
 //fusa:req REQ-SAFETY-003
 //fusa:req REQ-SAFETY-004
+//fusa:req REQ-FAULT-004
+//fusa:req REQ-FAULT-007
+//fusa:req REQ-FAULT-008
 func (c *mockClient) Publish(ctx context.Context, topic string, qos mqtt.QoS, payload []byte) error {
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
@@ -173,6 +176,8 @@ func (c *mockClient) Publish(ctx context.Context, topic string, qos mqtt.QoS, pa
 //fusa:req REQ-SAFETY-002
 //fusa:req REQ-SAFETY-003
 //fusa:req REQ-SAFETY-005
+//fusa:req REQ-FAULT-005
+//fusa:req REQ-FAULT-007
 func (c *mockClient) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.SubscriberOption) (mqtt.Subscription, error) {
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
@@ -209,6 +214,7 @@ func (c *mockClient) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.Subscrib
 }
 
 //fusa:req REQ-CONN-008
+//fusa:req REQ-FAULT-006
 func (c *mockClient) Close() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -251,6 +257,8 @@ func (s *mockSubscription) Close() error {
 //
 //fusa:req REQ-CONC-002
 //fusa:req REQ-SAFETY-008
+//fusa:req REQ-FAULT-009
+//fusa:req REQ-FAULT-010
 func (s *mockSubscription) deliver(msg mqtt.Message) bool {
 	s.sendMu.Lock()
 	defer s.sendMu.Unlock()

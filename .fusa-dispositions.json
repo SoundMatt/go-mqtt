@@ -1,0 +1,13 @@
+{
+  "project": "",
+  "entries": [
+    {
+      "ruleID": "CYBER001",
+      "rationale": "SHA-1 in v3/websocket.go is the RFC 6455 Sec-WebSocket-Accept handshake computation (SHA-1 of the client key + fixed GUID), which is mandated verbatim by the WebSocket standard. It is not used for security-sensitive hashing of secrets, passwords, signatures, or message integrity — it is a fixed, non-cryptographic handshake echo. No alternative is permitted by RFC 6455. Verified by REQ-SEC-007 / TestWSAcceptKey.",
+      "reviewer": "Matt Jones",
+      "date": "2026-06-19T20:38:19.670678Z",
+      "action": "accept",
+      "reference": "REQ-SEC-007"
+    }
+  ]
+}

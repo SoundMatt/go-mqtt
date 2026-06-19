@@ -7,13 +7,29 @@
 // Each test verifies a specific failure mode enumerated in the FMEA and SAFETY_PLAN.
 package mock_test
 
-//fusa:req REQ-FAULT-004
-//fusa:req REQ-FAULT-005
-//fusa:req REQ-FAULT-006
-//fusa:req REQ-FAULT-007
-//fusa:req REQ-FAULT-008
-//fusa:req REQ-FAULT-009
-//fusa:req REQ-FAULT-010
+//fusa:test REQ-FAULT-004
+//fusa:test REQ-FAULT-005
+//fusa:test REQ-FAULT-006
+//fusa:test REQ-FAULT-007
+//fusa:test REQ-FAULT-008
+//fusa:test REQ-FAULT-009
+//fusa:test REQ-FAULT-010
+//
+// These fault tests also verify the generic Client safety contract: ErrClosed
+// on publish/subscribe after close, ErrTopicEmpty on empty topics, no-panic on
+// invalid input, context cancellation, and non-blocking delivery.
+//
+//fusa:test REQ-PUB-001
+//fusa:test REQ-PUB-003
+//fusa:test REQ-PUB-004
+//fusa:test REQ-SUB-001
+//fusa:test REQ-SUB-002
+//fusa:test REQ-SAFETY-001
+//fusa:test REQ-SAFETY-002
+//fusa:test REQ-SAFETY-003
+//fusa:test REQ-SAFETY-004
+//fusa:test REQ-SAFETY-005
+//fusa:test REQ-SAFETY-008
 
 import (
 	"context"
@@ -29,7 +45,7 @@ import (
 // TestFaultPublishAfterClose verifies that Publish on a closed client returns
 // ErrClosed (FMEA: session loss → all operations must return ErrClosed).
 //
-//fusa:req REQ-FAULT-004
+//fusa:test REQ-FAULT-004
 func TestFaultPublishAfterClose(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -45,7 +61,7 @@ func TestFaultPublishAfterClose(t *testing.T) {
 // TestFaultSubscribeAfterClose verifies that Subscribe on a closed client
 // returns ErrClosed (FMEA: session loss).
 //
-//fusa:req REQ-FAULT-005
+//fusa:test REQ-FAULT-005
 func TestFaultSubscribeAfterClose(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -61,7 +77,7 @@ func TestFaultSubscribeAfterClose(t *testing.T) {
 // TestFaultIdempotentClose verifies Close is safe to call multiple times
 // (FMEA: double-close must not panic or return an error).
 //
-//fusa:req REQ-FAULT-006
+//fusa:test REQ-FAULT-006
 func TestFaultIdempotentClose(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -76,7 +92,7 @@ func TestFaultIdempotentClose(t *testing.T) {
 // TestFaultEmptyTopic verifies that an empty topic is rejected at the API
 // boundary before any network operation (FMEA: invalid input).
 //
-//fusa:req REQ-FAULT-007
+//fusa:test REQ-FAULT-007
 func TestFaultEmptyTopicPublish(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -91,7 +107,7 @@ func TestFaultEmptyTopicPublish(t *testing.T) {
 // TestFaultEmptyTopicSubscribe verifies that an empty topic filter is rejected
 // (FMEA: invalid input — structural violation before subscription is created).
 //
-//fusa:req REQ-FAULT-007
+//fusa:test REQ-FAULT-007
 func TestFaultEmptyTopicSubscribe(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -106,7 +122,7 @@ func TestFaultEmptyTopicSubscribe(t *testing.T) {
 // TestFaultContextCancelled verifies that Publish on a cancelled context returns
 // a context error (FMEA: packet loss / timeout).
 //
-//fusa:req REQ-FAULT-008
+//fusa:test REQ-FAULT-008
 func TestFaultContextCancelled(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -125,7 +141,7 @@ func TestFaultContextCancelled(t *testing.T) {
 // causes messages to be dropped rather than blocking the publisher
 // (FMEA: packet loss — channel back-pressure with DropNewest policy).
 //
-//fusa:req REQ-FAULT-009
+//fusa:test REQ-FAULT-009
 func TestFaultSubscriptionChannelDrop(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -158,7 +174,7 @@ func TestFaultSubscriptionChannelDrop(t *testing.T) {
 // TestFaultConcurrentClosePublish verifies that concurrent Close and Publish
 // do not panic or deadlock (FMEA: session loss under concurrent access).
 //
-//fusa:req REQ-FAULT-010
+//fusa:test REQ-FAULT-010
 func TestFaultConcurrentClosePublish(t *testing.T) {
 	const n = 50
 	b := mock.New()

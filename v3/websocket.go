@@ -171,6 +171,7 @@ func wsHandshake(conn net.Conn, u *url.URL, host string) (*bufio.Reader, error) 
 // wsAcceptKey computes the RFC 6455 Sec-WebSocket-Accept value for a client key.
 //
 //fusa:req REQ-WS-003
+//fusa:req REQ-SEC-007
 func wsAcceptKey(key string) string {
 	h := sha1.New() //nolint:gosec // SHA-1 is mandated by RFC 6455 for this handshake
 	_, _ = io.WriteString(h, key+wsGUID)

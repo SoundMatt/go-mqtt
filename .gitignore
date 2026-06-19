@@ -35,11 +35,20 @@ audit-pack.zip
 gofusa-audit-pack.zip
 vuln.json
 cyber-report.json
+cyber-plan.json
 trace-matrix.json
 boundary.mermaid
+boundary.dot
 coupling-report.json
+coverage-report.json
+coverage.out
+sci.json
+sas.json
+sas.md
 tara.json
 tara.md
+.fusa-evidence.json
+.fusa-metrics.json
 
 # Editor
 .idea/

@@ -1,0 +1,30 @@
+%{init: {"theme": "default"}}%
+flowchart LR
+    % Module: github.com/SoundMatt/go-mqtt
+    % Generated: 2026-06-19T20:39:01Z
+
+    github_com_SoundMatt_go_mqtt["mqtt"]
+    github_com_SoundMatt_go_mqtt_bridge_mqtt["mqttbridge"]
+    github_com_SoundMatt_go_mqtt_bridge_rest["rest"]
+    github_com_SoundMatt_go_mqtt_bridge_vissr["vissr"]
+    github_com_SoundMatt_go_mqtt_broker["broker"]
+    github_com_SoundMatt_go_mqtt_cmd_go_mqtt["github.com/SoundMatt/go-mqtt/cmd/go-mqtt"]
+    github_com_SoundMatt_go_mqtt_examples_quickstart_pub["github.com/SoundMatt/go-mqtt/examples/quickstart/pub"]
+    github_com_SoundMatt_go_mqtt_examples_quickstart_sub["github.com/SoundMatt/go-mqtt/examples/quickstart/sub"]
+    github_com_SoundMatt_go_mqtt_mock["mock"]
+    github_com_SoundMatt_go_mqtt_v3["v3"]
+    github_com_SoundMatt_go_mqtt_v5["v5"]
+
+    github_com_SoundMatt_go_mqtt_bridge_mqtt --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_bridge_rest --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_bridge_vissr --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_broker --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_cmd_go_mqtt --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_cmd_go_mqtt --> github_com_SoundMatt_go_mqtt_v3
+    github_com_SoundMatt_go_mqtt_examples_quickstart_pub --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_examples_quickstart_pub --> github_com_SoundMatt_go_mqtt_v3
+    github_com_SoundMatt_go_mqtt_examples_quickstart_sub --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_examples_quickstart_sub --> github_com_SoundMatt_go_mqtt_v3
+    github_com_SoundMatt_go_mqtt_mock --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_v3 --> github_com_SoundMatt_go_mqtt
+    github_com_SoundMatt_go_mqtt_v5 --> github_com_SoundMatt_go_mqtt

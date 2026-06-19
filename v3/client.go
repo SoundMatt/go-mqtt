@@ -206,8 +206,12 @@ func newOptions(opts []Option) *options {
 }
 
 // dialTCP establishes a TCP connection to addr, upgrading to TLS when configured.
+// The TLS handshake verifies the server certificate against the configured roots
+// (the library never sets InsecureSkipVerify), and a failed handshake closes the
+// connection.
 //
 //fusa:req REQ-TLS-001
+//fusa:req REQ-SEC-001
 func dialTCP(ctx context.Context, addr string, o *options) (net.Conn, error) {
 	conn, err := (&net.Dialer{}).DialContext(ctx, "tcp", addr)
 	if err != nil {
@@ -266,6 +270,7 @@ func newClient(conn net.Conn, o *options) (mqtt.Client, error) {
 //
 //fusa:req REQ-TLS-001
 //fusa:req REQ-TLS-003
+//fusa:req REQ-SEC-002
 func DialTLS(addr string, opts ...Option) (mqtt.Client, error) {
 	host, _, err := net.SplitHostPort(addr)
 	if err != nil {
@@ -492,6 +497,7 @@ func (c *v3Client) removeSubscription(sub *v3Subscription) {
 //fusa:req REQ-FAULT-002
 //fusa:req REQ-FAULT-003
 //fusa:req REQ-LEAK-001
+//fusa:req REQ-SEC-005
 func (c *v3Client) readLoop() {
 	defer func() {
 		c.mu.RLock()

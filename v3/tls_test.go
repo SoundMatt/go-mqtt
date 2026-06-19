@@ -5,9 +5,9 @@
 
 package v3
 
-//fusa:req REQ-TLS-001
-//fusa:req REQ-TLS-002
-//fusa:req REQ-TLS-003
+//fusa:test REQ-TLS-001
+//fusa:test REQ-TLS-002
+//fusa:test REQ-TLS-003
 
 import (
 	"context"
@@ -99,7 +99,7 @@ func (fb *fakeBroker) serveTLS(t *testing.T, cfg *tls.Config, handler func()) {
 // TestDialTLS verifies that a client can connect over TLS to a broker presenting
 // a server certificate the client trusts.
 //
-//fusa:req REQ-TLS-001
+//fusa:test REQ-TLS-001
 func TestDialTLS(t *testing.T) {
 	server := genCert(t, false)
 
@@ -120,7 +120,8 @@ func TestDialTLS(t *testing.T) {
 // TestDialTLSUntrustedFails verifies that the handshake fails when the client
 // does not trust the server certificate.
 //
-//fusa:req REQ-TLS-002
+//fusa:test REQ-TLS-002
+//fusa:sec-test REQ-SEC-001
 func TestDialTLSUntrustedFails(t *testing.T) {
 	server := genCert(t, false)
 
@@ -141,7 +142,7 @@ func TestDialTLSUntrustedFails(t *testing.T) {
 // TestMutualTLS verifies that mTLS succeeds when the client presents a
 // certificate the server requires and trusts.
 //
-//fusa:req REQ-TLS-002
+//fusa:test REQ-TLS-002
 func TestMutualTLS(t *testing.T) {
 	server := genCert(t, false)
 	client := genCert(t, true)
@@ -172,7 +173,8 @@ func TestMutualTLS(t *testing.T) {
 // TestMutualTLSNoClientCertFails verifies that a server requiring a client
 // certificate rejects a client that presents none.
 //
-//fusa:req REQ-TLS-002
+//fusa:test REQ-TLS-002
+//fusa:sec-test REQ-SEC-003
 func TestMutualTLSNoClientCertFails(t *testing.T) {
 	server := genCert(t, false)
 	client := genCert(t, true)
@@ -198,7 +200,7 @@ func TestMutualTLSNoClientCertFails(t *testing.T) {
 // TestDialTLSPublishSubscribe verifies normal pub/sub works over a TLS
 // connection (the TLS layer is transparent to the MQTT protocol).
 //
-//fusa:req REQ-TLS-001
+//fusa:test REQ-TLS-001
 func TestDialTLSPublishSubscribe(t *testing.T) {
 	server := genCert(t, false)
 
@@ -238,7 +240,7 @@ func TestDialTLSPublishSubscribe(t *testing.T) {
 // TestDialTLSConvenience verifies DialTLS supplies a default TLS config and that
 // an explicit WithTLS overrides it (here, to trust the test cert).
 //
-//fusa:req REQ-TLS-003
+//fusa:test REQ-TLS-003
 func TestDialTLSConvenience(t *testing.T) {
 	server := genCert(t, false)
 
@@ -256,4 +258,28 @@ func TestDialTLSConvenience(t *testing.T) {
 		t.Fatalf("DialTLS: %v", err)
 	}
 	defer func() { _ = c.Close() }()
+}
+
+// TestTLSMinVersionEnforced verifies that a client requiring TLS 1.2 rejects a
+// server that offers only TLS 1.1 — the security floor DialTLS sets by default.
+//
+//fusa:sec-test REQ-SEC-002
+func TestTLSMinVersionEnforced(t *testing.T) {
+	server := genCert(t, false)
+
+	fb := newFakeBroker(t)
+	defer fb.close()
+
+	// Server capped at TLS 1.1.
+	serverCfg := &tls.Config{
+		Certificates: []tls.Certificate{server.tlsCert},
+		MaxVersion:   tls.VersionTLS11,
+	}
+	fb.serveTLS(t, serverCfg, nil)
+
+	// Client requires TLS 1.2 (the DialTLS default floor) — handshake must fail.
+	clientCfg := &tls.Config{RootCAs: server.pool, ServerName: "localhost", MinVersion: tls.VersionTLS12}
+	if _, err := Dial(fb.addr(), WithClientID("minver"), WithKeepalive(0), WithTLS(clientCfg)); err == nil {
+		t.Fatal("Dial succeeded against a TLS 1.1 server with MinVersion 1.2, want error")
+	}
 }

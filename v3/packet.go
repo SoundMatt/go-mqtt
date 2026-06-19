@@ -66,6 +66,7 @@ func encodeVarLen(n int) []byte {
 //fusa:req REQ-WIRE-001
 //fusa:req REQ-WIRE-003
 //fusa:req REQ-FAULT-001
+//fusa:req REQ-SEC-004
 func readVarLen(r io.Reader) (int, error) {
 	multiplier := 1
 	n := 0

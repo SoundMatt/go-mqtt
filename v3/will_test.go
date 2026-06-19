@@ -5,7 +5,7 @@
 
 package v3
 
-//fusa:req REQ-CONN-011
+//fusa:test REQ-CONN-011
 
 import (
 	"bytes"
@@ -61,7 +61,7 @@ func stripFixedHeader(t *testing.T, pkt []byte) []byte {
 // TestBuildConnectNoWill verifies that buildCONNECT without a will sets
 // CleanSession and no will flag.
 //
-//fusa:req REQ-CONN-011
+//fusa:test REQ-CONN-011
 func TestBuildConnectNoWill(t *testing.T) {
 	pkt := buildCONNECT("test-id", 30, nil)
 	body := stripFixedHeader(t, pkt)
@@ -84,7 +84,7 @@ func TestBuildConnectNoWill(t *testing.T) {
 // TestBuildConnectWithWillQoS0 verifies that a QoS-0 non-retained will is
 // encoded with the will flag set and QoS bits = 0.
 //
-//fusa:req REQ-CONN-011
+//fusa:test REQ-CONN-011
 func TestBuildConnectWithWillQoS0(t *testing.T) {
 	w := &will{topic: "status/dead", payload: []byte("offline"), qos: mqtt.AtMostOnce, retain: false}
 	pkt := buildCONNECT("sensor-1", 60, w)
@@ -110,7 +110,7 @@ func TestBuildConnectWithWillQoS0(t *testing.T) {
 
 // TestBuildConnectWithWillQoS1Retain verifies QoS-1 retained will encoding.
 //
-//fusa:req REQ-CONN-011
+//fusa:test REQ-CONN-011
 func TestBuildConnectWithWillQoS1Retain(t *testing.T) {
 	w := &will{topic: "lwt/sensor", payload: []byte("dead"), qos: mqtt.AtLeastOnce, retain: true}
 	pkt := buildCONNECT("sensor-2", 30, w)
@@ -136,7 +136,7 @@ func TestBuildConnectWithWillQoS1Retain(t *testing.T) {
 
 // TestBuildConnectWithWillQoS2 verifies QoS-2 will encoding.
 //
-//fusa:req REQ-CONN-011
+//fusa:test REQ-CONN-011
 func TestBuildConnectWithWillQoS2(t *testing.T) {
 	w := &will{topic: "lwt/ctrl", payload: []byte("gone"), qos: mqtt.ExactlyOnce, retain: false}
 	pkt := buildCONNECT("ctrl-1", 30, w)
@@ -151,7 +151,7 @@ func TestBuildConnectWithWillQoS2(t *testing.T) {
 // TestWithWillOption verifies that the WithWill option correctly populates
 // the will struct in options.
 //
-//fusa:req REQ-CONN-011
+//fusa:test REQ-CONN-011
 func TestWithWillOption(t *testing.T) {
 	o := &options{}
 	WithWill("topic", []byte("msg"), mqtt.AtLeastOnce, true)(o)

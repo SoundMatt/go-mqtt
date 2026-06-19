@@ -107,6 +107,7 @@ func parseQoS(r *http.Request) (mqtt.QoS, bool) {
 //
 //fusa:req REQ-REST-002
 //fusa:req REQ-REST-003
+//fusa:req REQ-SEC-006
 func (g *Gateway) handlePublish(w http.ResponseWriter, r *http.Request) {
 	topic := r.PathValue("topic")
 	if topic == "" {

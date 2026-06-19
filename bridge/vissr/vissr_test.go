@@ -16,6 +16,21 @@ import (
 	"github.com/SoundMatt/go-mqtt/mock"
 )
 
+// Requirements verified by this VISSR bridge test suite (VSS dot ↔ MQTT slash):
+// path/topic mapping, Signal envelope + typed accessors, Set*/Subscribe
+// transport delegation, malformed-payload drop, and Unsubscribe/Close.
+//
+//fusa:test REQ-VISSR-001
+//fusa:test REQ-VISSR-002
+//fusa:test REQ-VISSR-003
+//fusa:test REQ-VISSR-004
+//fusa:test REQ-VISSR-005
+//fusa:test REQ-VISSR-006
+//fusa:test REQ-VISSR-007
+//fusa:test REQ-VISSR-008
+//fusa:test REQ-VISSR-009
+//fusa:test REQ-VISSR-010
+
 // ── Path / topic mapping ──────────────────────────────────────────────────────
 
 func TestPathToTopic(t *testing.T) {
@@ -200,6 +215,7 @@ func TestSubscribeEmptyPath(t *testing.T) {
 	}
 }
 
+//fusa:sec-test REQ-SEC-008
 func TestMalformedPayloadDropped(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()

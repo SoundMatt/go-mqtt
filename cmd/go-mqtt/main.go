@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"runtime"
@@ -32,11 +33,11 @@ func main() {
 
 	switch os.Args[1] {
 	case "version":
-		runVersion(os.Args[2:])
+		runVersion(os.Stdout, os.Args[2:])
 	case "capabilities":
-		runCapabilities()
+		runCapabilities(os.Stdout)
 	case "status":
-		runStatus(os.Args[2:])
+		runStatus(os.Stdout, os.Args[2:])
 	case "convert":
 		os.Exit(runConvert(os.Stdin, os.Stdout, os.Stderr, os.Args[2:]))
 	case "send":
@@ -51,13 +52,13 @@ func main() {
 	}
 }
 
-func runVersion(args []string) {
+func runVersion(w io.Writer, args []string) {
 	fs := flag.NewFlagSet("version", flag.ExitOnError)
 	format := fs.String("format", "text", "output format: text|json")
 	_ = fs.Parse(args)
 
 	if *format == "json" {
-		enc := json.NewEncoder(os.Stdout)
+		enc := json.NewEncoder(w)
 		enc.SetIndent("", "    ")
 		_ = enc.Encode(map[string]any{
 			"tool":         toolName,
@@ -70,12 +71,12 @@ func runVersion(args []string) {
 		})
 		return
 	}
-	fmt.Printf("tool:         %s\nprotocol:     MQTT\nversion:      %s\nspec_version: %s\n",
+	fmt.Fprintf(w, "tool:         %s\nprotocol:     MQTT\nversion:      %s\nspec_version: %s\n",
 		toolName, toolVersion, mqtt.SpecVersion)
 }
 
-func runCapabilities() {
-	enc := json.NewEncoder(os.Stdout)
+func runCapabilities(w io.Writer) {
+	enc := json.NewEncoder(w)
 	enc.SetIndent("", "    ")
 	_ = enc.Encode(map[string]any{
 		"kind":                "capabilities",
@@ -93,13 +94,13 @@ func runCapabilities() {
 	})
 }
 
-func runStatus(args []string) {
+func runStatus(w io.Writer, args []string) {
 	fs := flag.NewFlagSet("status", flag.ExitOnError)
 	format := fs.String("format", "text", "output format: text|json")
 	_ = fs.Parse(args)
 
 	if *format == "json" {
-		enc := json.NewEncoder(os.Stdout)
+		enc := json.NewEncoder(w)
 		enc.SetIndent("", "    ")
 		_ = enc.Encode(map[string]any{
 			"protocol":  "MQTT",
@@ -112,6 +113,6 @@ func runStatus(args []string) {
 		})
 		return
 	}
-	fmt.Printf("tool:      %s\nprotocol:  MQTT\nversion:   %s\nhealthy:   true\nconnected: false\n",
+	fmt.Fprintf(w, "tool:      %s\nprotocol:  MQTT\nversion:   %s\nhealthy:   true\nconnected: false\n",
 		toolName, toolVersion)
 }

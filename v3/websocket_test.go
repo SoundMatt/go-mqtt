@@ -5,12 +5,12 @@
 
 package v3
 
-//fusa:req REQ-WS-001
-//fusa:req REQ-WS-002
-//fusa:req REQ-WS-003
-//fusa:req REQ-WS-004
-//fusa:req REQ-WS-005
-//fusa:req REQ-WS-006
+//fusa:test REQ-WS-001
+//fusa:test REQ-WS-002
+//fusa:test REQ-WS-003
+//fusa:test REQ-WS-004
+//fusa:test REQ-WS-005
+//fusa:test REQ-WS-006
 
 import (
 	"bufio"
@@ -112,8 +112,8 @@ func wsURL(httpURL string) string {
 
 // TestDialWSConnect verifies the WebSocket handshake and MQTT CONNECT over WS.
 //
-//fusa:req REQ-WS-001
-//fusa:req REQ-WS-003
+//fusa:test REQ-WS-001
+//fusa:test REQ-WS-003
 func TestDialWSConnect(t *testing.T) {
 	srv := newWSBroker(t, nil)
 	defer srv.Close()
@@ -127,7 +127,7 @@ func TestDialWSConnect(t *testing.T) {
 
 // TestDialWSBadScheme verifies non-ws schemes are rejected.
 //
-//fusa:req REQ-WS-001
+//fusa:test REQ-WS-001
 func TestDialWSBadScheme(t *testing.T) {
 	if _, err := DialWS("http://example/mqtt"); err == nil {
 		t.Error("DialWS with http scheme: expected error, got nil")
@@ -137,7 +137,7 @@ func TestDialWSBadScheme(t *testing.T) {
 // TestDialWSPublish verifies an MQTT PUBLISH is carried in a WS binary frame and
 // reaches the broker intact.
 //
-//fusa:req REQ-WS-004
+//fusa:test REQ-WS-004
 func TestDialWSPublish(t *testing.T) {
 	got := make(chan mqtt.Message, 1)
 	srv := newWSBroker(t, func(fb *fakeBroker) {
@@ -178,7 +178,7 @@ func TestDialWSPublish(t *testing.T) {
 // TestDialWSSubscribeDeliver verifies a broker PUBLISH (server → client WS
 // frame) is delivered to a subscription.
 //
-//fusa:req REQ-WS-005
+//fusa:test REQ-WS-005
 func TestDialWSSubscribeDeliver(t *testing.T) {
 	srv := newWSBroker(t, func(fb *fakeBroker) {
 		fb.readPacket(t) // SUBSCRIBE
@@ -214,8 +214,8 @@ func TestDialWSSubscribeDeliver(t *testing.T) {
 // TestDialWSLargeFrame exercises the 16-bit extended length path with a payload
 // larger than 125 bytes, split across the WS framing.
 //
-//fusa:req REQ-WS-004
-//fusa:req REQ-WS-005
+//fusa:test REQ-WS-004
+//fusa:test REQ-WS-005
 func TestDialWSLargeFrame(t *testing.T) {
 	big := strings.Repeat("x", 1000)
 	got := make(chan string, 1)
@@ -252,7 +252,8 @@ func TestDialWSLargeFrame(t *testing.T) {
 
 // TestWSAcceptKey verifies the RFC 6455 example accept-key computation.
 //
-//fusa:req REQ-WS-003
+//fusa:test REQ-WS-003
+//fusa:sec-test REQ-SEC-007
 func TestWSAcceptKey(t *testing.T) {
 	// From RFC 6455 §1.3.
 	if got := wsAcceptKey("dGhlIHNhbXBsZSBub25jZQ=="); got != "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=" {
