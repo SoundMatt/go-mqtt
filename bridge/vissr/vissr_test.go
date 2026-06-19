@@ -215,6 +215,7 @@ func TestSubscribeEmptyPath(t *testing.T) {
 	}
 }
 
+//fusa:sec-test REQ-SEC-008
 func TestMalformedPayloadDropped(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()

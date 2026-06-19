@@ -299,6 +299,7 @@ func TestSubChannelsClosedOnTCPLoss(t *testing.T) {
 // broker is ignored rather than crashing the client.
 //
 //fusa:test REQ-FAULT-002
+//fusa:sec-test REQ-SEC-005
 func TestUnknownPacketIgnored(t *testing.T) {
 	fb := newFakeBroker(t)
 	defer fb.close()

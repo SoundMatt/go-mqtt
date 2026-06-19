@@ -193,6 +193,7 @@ func TestV5TopicAliasRegisterResolve(t *testing.T) {
 // unregistered alias is dropped rather than delivered with an empty topic.
 //
 //fusa:test REQ-V5-ALIAS-003
+//fusa:sec-test REQ-SEC-009
 func TestV5TopicAliasUnknownDropped(t *testing.T) {
 	fb := newFakeBrokerV5(t)
 	go fb.accept(t, connack(0x00, nil))

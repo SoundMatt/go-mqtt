@@ -253,6 +253,7 @@ func TestDialWSLargeFrame(t *testing.T) {
 // TestWSAcceptKey verifies the RFC 6455 example accept-key computation.
 //
 //fusa:test REQ-WS-003
+//fusa:sec-test REQ-SEC-007
 func TestWSAcceptKey(t *testing.T) {
 	// From RFC 6455 §1.3.
 	if got := wsAcceptKey("dGhlIHNhbXBsZSBub25jZQ=="); got != "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=" {

@@ -132,6 +132,7 @@ func TestPublishInvalidQoS(t *testing.T) {
 	}
 }
 
+//fusa:sec-test REQ-SEC-006
 func TestPublishBodyTooLarge(t *testing.T) {
 	broker := mock.New()
 	gw := rest.New(broker.Dial(), rest.WithMaxBody(4))

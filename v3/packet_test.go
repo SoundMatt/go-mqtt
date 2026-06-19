@@ -82,6 +82,7 @@ func TestVarLenRoundtrip(t *testing.T) {
 //
 //fusa:test REQ-WIRE-003
 //fusa:test REQ-FAULT-001
+//fusa:sec-test REQ-SEC-004
 func TestReadVarLenOverflow(t *testing.T) {
 	// Five bytes all with the continuation bit set — exceeds the 4-byte maximum.
 	overlong := []byte{0xFF, 0xFF, 0xFF, 0xFF, 0x7F}

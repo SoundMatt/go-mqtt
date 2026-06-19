@@ -246,6 +246,7 @@ func (s *Subscription) Close() error { return s.inner.Close() }
 // are dropped silently so a single malformed payload cannot stall the stream.
 //
 //fusa:req REQ-VISSR-009
+//fusa:req REQ-SEC-008
 func (s *Subscription) pump() {
 	defer close(s.ch)
 	for msg := range s.inner.C() {

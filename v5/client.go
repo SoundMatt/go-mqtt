@@ -479,6 +479,7 @@ func (c *Client) readLoop() {
 //fusa:req REQ-V5-ALIAS-003
 //fusa:req REQ-LEAK-003
 //fusa:req REQ-ORDER-001
+//fusa:req REQ-SEC-009
 func (c *Client) handlePUBLISH(hdr byte, body []byte) {
 	qos := mqtt.QoS((hdr >> 1) & 0x03)
 	retain := hdr&0x01 != 0
