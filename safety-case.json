@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa Safety Case v1",
-  "generatedAt": "2026-06-17T14:30:23.871269561Z",
+  "generatedAt": "2026-06-19T19:15:43.238703815Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "standard": "generic",
   "evidence": [
@@ -15,8 +15,8 @@
       "id": "trace",
       "description": "Requirements traceability matrix",
       "file": ".fusa-reqs.json",
-      "status": "absent",
-      "detail": "run 'gofusa trace' and add requirements to .fusa-reqs.json"
+      "status": "present",
+      "detail": "180 requirements"
     },
     {
       "id": "verify",
@@ -90,7 +90,6 @@
   ],
   "gaps": [
     "check",
-    "trace",
     "verify",
     "qualify"
   ]
