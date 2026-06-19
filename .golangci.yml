@@ -20,6 +20,12 @@ linters:
         - (io.Closer).Close
         - (*net.Conn).Close
         - os.Remove
+        # Diagnostic writes to an io.Writer param (CLI stdout/stderr): errcheck
+        # already ignores fmt.Fprint* to os.Stdout/os.Stderr literals, but the
+        # CLI commands take writers for testability, so exclude them explicitly.
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
     govet:
       enable-all: true
       disable:
