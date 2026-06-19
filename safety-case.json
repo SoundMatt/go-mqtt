@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa Safety Case v1",
-  "generatedAt": "2026-06-19T19:15:43.238703815Z",
+  "generatedAt": "2026-06-19T19:32:05.739703363Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "standard": "generic",
   "evidence": [

@@ -4,7 +4,7 @@
   "tool": "go-FuSa",
   "toolVersion": "0.30.0",
   "language": "go",
-  "generatedAt": "2026-06-19T19:15:43.252283627Z",
+  "generatedAt": "2026-06-19T19:32:05.760595254Z",
   "format": "x-FuSa SBOM v1",
   "module": "github.com/SoundMatt/go-mqtt",
   "goVersion": "1.25.0",
