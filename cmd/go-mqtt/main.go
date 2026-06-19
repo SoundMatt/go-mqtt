@@ -8,10 +8,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"runtime"
 
 	mqtt "github.com/SoundMatt/go-mqtt"
@@ -24,7 +26,7 @@ const (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "usage: %s <command>\ncommands: version, capabilities, status\n", toolName)
+		fmt.Fprintf(os.Stderr, "usage: %s <command>\ncommands: version, capabilities, status, convert, send, subscribe\n", toolName)
 		os.Exit(2)
 	}
 
@@ -35,6 +37,14 @@ func main() {
 		runCapabilities()
 	case "status":
 		runStatus(os.Args[2:])
+	case "convert":
+		os.Exit(runConvert(os.Stdin, os.Stdout, os.Stderr, os.Args[2:]))
+	case "send":
+		os.Exit(runSend(os.Stdin, os.Stdout, os.Stderr, os.Args[2:]))
+	case "subscribe":
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+		defer stop()
+		os.Exit(runSubscribe(ctx, os.Stdout, os.Stderr, os.Args[2:]))
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n", os.Args[1])
 		os.Exit(2)
@@ -74,7 +84,7 @@ func runCapabilities() {
 		"protocol_int":        4,
 		"version":             toolVersion,
 		"spec_version":        mqtt.SpecVersion,
-		"commands":            []string{"version", "capabilities", "status"},
+		"commands":            []string{"version", "capabilities", "status", "convert", "send", "subscribe"},
 		"transports":          []string{"tcp"},
 		"features":            []string{},
 		"interfaces":          []string{"Client", "Subscription"},
