@@ -1,6 +1,6 @@
 {
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-06-19T19:32:05.454020601Z",
+  "generated_at": "2026-06-19T20:50:12.740346875Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
@@ -144,7 +144,8 @@
       "severity": "high",
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
-        "REQ-BROKER-009"
+        "REQ-BROKER-009",
+        "REQ-SEC-003"
       ]
     },
     {
@@ -369,7 +370,8 @@
       "severity": "high",
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
-        "REQ-CONN-008"
+        "REQ-CONN-008",
+        "REQ-FAULT-006"
       ]
     },
     {
@@ -468,7 +470,10 @@
         "REQ-PUB-004",
         "REQ-SAFETY-001",
         "REQ-SAFETY-003",
-        "REQ-SAFETY-004"
+        "REQ-SAFETY-004",
+        "REQ-FAULT-004",
+        "REQ-FAULT-007",
+        "REQ-FAULT-008"
       ]
     },
     {
@@ -491,7 +496,9 @@
         "REQ-MOCK-001",
         "REQ-SAFETY-002",
         "REQ-SAFETY-003",
-        "REQ-SAFETY-005"
+        "REQ-SAFETY-005",
+        "REQ-FAULT-005",
+        "REQ-FAULT-007"
       ]
     },
     {
@@ -813,7 +820,8 @@
       "detection_control": "requirement testing + unit tests",
       "requirement_ids": [
         "REQ-TLS-001",
-        "REQ-TLS-003"
+        "REQ-TLS-003",
+        "REQ-SEC-002"
       ],
       "cyber_risks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",

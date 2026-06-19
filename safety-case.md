@@ -1,6 +1,6 @@
 # Safety Case: github.com/SoundMatt/go-mqtt
 
-Generated: 2026-06-19T19:32:05Z  
+Generated: 2026-06-19T20:50:13Z  
 Standard: generic
 
 ## Top Claim
@@ -13,7 +13,7 @@ argued by demonstrating compliance with the safety development lifecycle.
 | ID | Description | Status | Detail |
 |---|---|---|---|
 | Sn1 | Coding standard and static analysis checks | ⚠ absent | run 'gofusa check --output check-report.json' to generate |
-| Sn2 | Requirements traceability matrix | ✅ present | 180 requirements |
+| Sn2 | Requirements traceability matrix | ✅ present | 189 requirements |
 | Sn3 | Test evidence bundle | ⚠ absent | run 'gofusa verify' to generate |
 | Sn4 | Tool qualification report | ⚠ absent | run 'gofusa qualify' to generate |
 | Sn5 | SBOM (SPDX 3.0.1) | ✅ present |  |

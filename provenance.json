@@ -4,12 +4,12 @@
   "tool": "go-FuSa",
   "toolVersion": "0.30.0",
   "language": "go",
-  "generatedAt": "2026-06-19T19:32:05.767170902Z",
+  "generatedAt": "2026-06-19T20:50:13.112283773Z",
   "format": "x-FuSa provenance v1",
   "module": "github.com/SoundMatt/go-mqtt",
   "goVersion": "go1.25.11",
   "goos": "linux",
   "goarch": "amd64",
-  "vcsRevision": "efca32dd37f1cac2267d7c81ed8e5a752fc6b7a2",
+  "vcsRevision": "f162585dd52d2eceedb6e87d3edf7f10dc64c206",
   "vcsModified": true
 }
