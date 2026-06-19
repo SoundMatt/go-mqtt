@@ -5,10 +5,10 @@
 
 package v3
 
-//fusa:req REQ-QOS2-001
-//fusa:req REQ-QOS2-002
-//fusa:req REQ-QOS2-003
-//fusa:req REQ-QOS2-004
+//fusa:test REQ-QOS2-001
+//fusa:test REQ-QOS2-002
+//fusa:test REQ-QOS2-003
+//fusa:test REQ-QOS2-004
 
 import (
 	"bytes"
@@ -24,6 +24,7 @@ import (
 
 // ── Packet builder unit tests ─────────────────────────────────────────────────
 
+//fusa:test REQ-WIRE-013
 func TestBuildPUBREC(t *testing.T) {
 	pkt := buildPUBREC(0x1234)
 	want := []byte{pktPUBREC, 0x02, 0x12, 0x34}
@@ -32,6 +33,7 @@ func TestBuildPUBREC(t *testing.T) {
 	}
 }
 
+//fusa:test REQ-WIRE-014
 func TestBuildPUBREL(t *testing.T) {
 	pkt := buildPUBREL(0x1234)
 	// PUBREL fixed header MUST carry reserved flags 0b0010 → 0x62.
@@ -44,6 +46,7 @@ func TestBuildPUBREL(t *testing.T) {
 	}
 }
 
+//fusa:test REQ-WIRE-015
 func TestBuildPUBCOMP(t *testing.T) {
 	pkt := buildPUBCOMP(0x1234)
 	want := []byte{pktPUBCOMP, 0x02, 0x12, 0x34}
@@ -145,8 +148,8 @@ func publishPacketID(body []byte) uint16 {
 // TestQoS2PublishHandshake verifies the outbound QoS 2 flow:
 // PUBLISH → PUBREC → PUBREL → PUBCOMP, with Publish returning nil on success.
 //
-//fusa:req REQ-QOS2-001
-//fusa:req REQ-QOS2-002
+//fusa:test REQ-QOS2-001
+//fusa:test REQ-QOS2-002
 func TestQoS2PublishHandshake(t *testing.T) {
 	fb := newFakeBroker(t)
 	defer fb.close()
@@ -199,7 +202,7 @@ func TestQoS2PublishHandshake(t *testing.T) {
 // TestQoS2PublishTimeout verifies that Publish returns ErrTimeout if the broker
 // never sends PUBREC.
 //
-//fusa:req REQ-QOS2-004
+//fusa:test REQ-QOS2-004
 func TestQoS2PublishTimeout(t *testing.T) {
 	fb := newFakeBroker(t)
 	defer fb.close()
@@ -223,7 +226,7 @@ func TestQoS2PublishTimeout(t *testing.T) {
 // TestQoS2PublishContextCancel verifies that a cancelled context aborts the
 // QoS 2 handshake.
 //
-//fusa:req REQ-QOS2-004
+//fusa:test REQ-QOS2-004
 func TestQoS2PublishContextCancel(t *testing.T) {
 	fb := newFakeBroker(t)
 	defer fb.close()
@@ -251,7 +254,7 @@ func TestQoS2PublishContextCancel(t *testing.T) {
 // TestQoS2InboundDelivery verifies the inbound QoS 2 flow: the client receives a
 // QoS 2 PUBLISH, answers PUBREC, and delivers the message exactly once on PUBREL.
 //
-//fusa:req REQ-QOS2-003
+//fusa:test REQ-QOS2-003
 func TestQoS2InboundDelivery(t *testing.T) {
 	fb := newFakeBroker(t)
 	defer fb.close()
@@ -319,7 +322,7 @@ func TestQoS2InboundDelivery(t *testing.T) {
 // TestQoS2InboundDedup verifies that a retransmitted QoS 2 PUBLISH (same packet
 // ID) is delivered only once.
 //
-//fusa:req REQ-QOS2-003
+//fusa:test REQ-QOS2-003
 func TestQoS2InboundDedup(t *testing.T) {
 	fb := newFakeBroker(t)
 	defer fb.close()

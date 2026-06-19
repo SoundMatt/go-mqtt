@@ -27,6 +27,18 @@ func recvTimeout(t *testing.T, sub mqtt.Subscription, d time.Duration) mqtt.Mess
 	}
 }
 
+// Requirements verified by this federation test suite (§6.10 broker-to-broker
+// forwarding): Route/Bridge construction, Start subscribe + error handling,
+// QoS capping, prefix remap, Stop, stats, and drop-on-republish-failure.
+//
+//fusa:test REQ-FED-001
+//fusa:test REQ-FED-002
+//fusa:test REQ-FED-003
+//fusa:test REQ-FED-004
+//fusa:test REQ-FED-005
+//fusa:test REQ-FED-006
+//fusa:test REQ-FED-007
+//fusa:test REQ-FED-008
 func TestForwardBasic(t *testing.T) {
 	srcBroker := mock.New()
 	dstBroker := mock.New()

@@ -15,8 +15,24 @@ import (
 	"github.com/SoundMatt/go-mqtt/mock"
 )
 
+// Requirements verified by this RELAY conformance test suite: SpecVersion
+// binding, §5 error-sentinel wrapping, §6 BackPressurePolicy/SubscriberConfig,
+// §10 Adapt, §15 ToMessage/FromMessage, and the §9 optional interfaces
+// (Health/Metrics/Drainer).
+//
+//fusa:test REQ-RELAY-002
+//fusa:test REQ-RELAY-003
+//fusa:test REQ-RELAY-004
+//fusa:test REQ-RELAY-005
+//fusa:test REQ-RELAY-006
+//fusa:test REQ-RELAY-007
+//fusa:test REQ-RELAY-010
+//fusa:test REQ-RELAY-012
+//fusa:test REQ-RELAY-014
+
 // ── SpecVersion ───────────────────────────────────────────────────────────────
 
+//fusa:test REQ-RELAY-001
 func TestSpecVersion(t *testing.T) {
 	if mqtt.SpecVersion != "1.10" {
 		t.Errorf("SpecVersion = %q, want %q", mqtt.SpecVersion, "1.10")

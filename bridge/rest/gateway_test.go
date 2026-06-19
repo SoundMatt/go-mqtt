@@ -49,6 +49,18 @@ func getURL(t *testing.T, url string) *http.Response {
 	return resp
 }
 
+// Requirements verified by this REST gateway test suite: Handler routing,
+// POST /publish (+ ?qos), GET /subscribe SSE streaming (JSON events, context
+// cancellation), GET /retain (retained-only), and method/limit guards.
+//
+//fusa:test REQ-REST-001
+//fusa:test REQ-REST-002
+//fusa:test REQ-REST-003
+//fusa:test REQ-REST-004
+//fusa:test REQ-REST-005
+//fusa:test REQ-REST-006
+//fusa:test REQ-REST-007
+//fusa:test REQ-REST-008
 func TestPublishEndpoint(t *testing.T) {
 	broker := mock.New()
 	gw := rest.New(broker.Dial())

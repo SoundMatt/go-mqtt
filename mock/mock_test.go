@@ -15,6 +15,21 @@ import (
 	"github.com/SoundMatt/go-mqtt/mock"
 )
 
+// Requirements verified by this mock-broker test suite: retained store/replace/
+// delete + replay, MatchTopic fan-out, Dial connectivity, and concurrent-use
+// safety of the exported Client methods. Payload-copy isolation (REQ-LEAK-003)
+// and single-channel ordering (REQ-ORDER-001) are covered by the dedicated
+// tests below; subscription release (REQ-LEAK-002) by TestUnsubscribe.
+//
+//fusa:test REQ-MOCK-001
+//fusa:test REQ-MOCK-002
+//fusa:test REQ-MOCK-003
+//fusa:test REQ-MOCK-004
+//fusa:test REQ-MOCK-005
+//fusa:test REQ-CONC-001
+//fusa:test REQ-CONC-002
+//fusa:test REQ-CONC-003
+//fusa:test REQ-LEAK-002
 func TestPublishSubscribe(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -146,6 +161,8 @@ func TestNoMatchNoDelivery(t *testing.T) {
 	}
 }
 
+//fusa:test REQ-SUB-007
+//fusa:test REQ-SUB-008
 func TestMultipleSubscribers(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
@@ -302,16 +319,33 @@ func TestConcurrentPublish(t *testing.T) {
 	wg.Wait()
 }
 
+//fusa:test REQ-SUB-003
+//fusa:test REQ-SUB-004
+//fusa:test REQ-SUB-005
 func TestChannelDepthOption(t *testing.T) {
 	b := mock.New()
 	c := b.Dial()
 	t.Cleanup(func() { _ = c.Close() })
 
+	// REQ-SUB-004: the default channel depth is at least 64.
+	defSub, err := c.Subscribe("depth/default", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = defSub.Close() })
+	if c := cap(defSub.C()); c < 64 {
+		t.Errorf("default channel depth = %d, want >= 64", c)
+	}
+
+	// REQ-SUB-005: depth is configurable; REQ-SUB-003: the channel is buffered.
 	sub, err := c.Subscribe("depth/test", mqtt.AtMostOnce, mqtt.WithChannelDepth(2))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = sub.Close() })
+	if cap(sub.C()) != 2 {
+		t.Errorf("configured channel depth = %d, want 2", cap(sub.C()))
+	}
 
 	ctx := context.Background()
 	// Publish 3 messages — 3rd should be dropped (channel depth=2).
@@ -329,6 +363,75 @@ func TestChannelDepthOption(t *testing.T) {
 				t.Errorf("received %d messages, want ≤2 (depth=2)", count)
 			}
 			return
+		}
+	}
+}
+
+// TestPayloadCopyIsolation verifies that the bytes delivered to a subscriber are
+// a copy of the publisher's slice, so a caller mutating its buffer after Publish
+// cannot corrupt an already-delivered message (REQ-LEAK-003).
+//
+//fusa:test REQ-LEAK-003
+func TestPayloadCopyIsolation(t *testing.T) {
+	b := mock.New()
+	c := b.Dial()
+	t.Cleanup(func() { _ = c.Close() })
+
+	sub, err := c.Subscribe("iso/#", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = sub.Close() })
+
+	payload := []byte("original")
+	if err := c.Publish(context.Background(), "iso/x", mqtt.AtMostOnce, payload); err != nil {
+		t.Fatal(err)
+	}
+	// Mutate the caller's buffer immediately after Publish returns.
+	for i := range payload {
+		payload[i] = 'X'
+	}
+
+	select {
+	case msg := <-sub.C():
+		if string(msg.Payload) != "original" {
+			t.Errorf("delivered payload = %q, want %q (publisher mutation leaked)", msg.Payload, "original")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timeout waiting for message")
+	}
+}
+
+// TestSingleChannelOrdering verifies that messages published from one goroutine
+// arrive on a single subscription channel in publication order (REQ-ORDER-001).
+//
+//fusa:test REQ-ORDER-001
+func TestSingleChannelOrdering(t *testing.T) {
+	b := mock.New()
+	c := b.Dial()
+	t.Cleanup(func() { _ = c.Close() })
+
+	sub, err := c.Subscribe("ord/#", mqtt.AtMostOnce, mqtt.WithChannelDepth(128))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = sub.Close() })
+
+	const n = 100
+	ctx := context.Background()
+	for i := range n {
+		if err := c.Publish(ctx, "ord/x", mqtt.AtMostOnce, []byte{byte(i)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for i := range n {
+		select {
+		case msg := <-sub.C():
+			if msg.Payload[0] != byte(i) {
+				t.Fatalf("message %d out of order: got %d", i, msg.Payload[0])
+			}
+		case <-time.After(time.Second):
+			t.Fatalf("timeout waiting for message %d", i)
 		}
 	}
 }

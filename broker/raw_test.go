@@ -68,6 +68,13 @@ func rawConnect(t *testing.T, addr, clientID string, w *willMsg) net.Conn {
 	return conn
 }
 
+// Requirements verified by the raw-wire broker tests: last-will publication on
+// abrupt disconnect (and suppression on clean disconnect), plus the broker's
+// packet reader/builder framing exercised by every raw CONNECT/PUBLISH here.
+//
+//fusa:test REQ-BROKER-008
+//fusa:test REQ-BROKER-WIRE-001
+//fusa:test REQ-BROKER-WIRE-002
 func TestRetainedReplayedOnSubscribe(t *testing.T) {
 	_, addr := rawStartBroker(t)
 

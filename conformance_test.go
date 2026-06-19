@@ -42,7 +42,7 @@ func loadVector(t *testing.T) mqttMessageVector {
 // TestVectorMessageDecodes verifies the canonical "value" JSON decodes into the
 // expected mqtt.Message (field tags and types match the spec §15.4 schema).
 //
-//fusa:req REQ-RELAY-001
+//fusa:test REQ-RELAY-001
 func TestVectorMessageDecodes(t *testing.T) {
 	v := loadVector(t)
 	if v.Value.Topic != "sensors/temp" {
@@ -62,7 +62,7 @@ func TestVectorMessageDecodes(t *testing.T) {
 // TestVectorToMessage verifies Message.ToMessage produces the canonical
 // relay.Message envelope (timestamp is implementation-set and excluded).
 //
-//fusa:req REQ-RELAY-008
+//fusa:test REQ-RELAY-008
 func TestVectorToMessage(t *testing.T) {
 	v := loadVector(t)
 	got := v.Value.ToMessage()
@@ -86,7 +86,7 @@ func TestVectorToMessage(t *testing.T) {
 // TestVectorFromMessage verifies FromMessage reconstructs the canonical Message
 // from the relay.Message envelope.
 //
-//fusa:req REQ-RELAY-009
+//fusa:test REQ-RELAY-009
 func TestVectorFromMessage(t *testing.T) {
 	v := loadVector(t)
 	got, err := mqtt.FromMessage(v.Message)
@@ -111,8 +111,8 @@ func TestVectorFromMessage(t *testing.T) {
 // RELAY's, an mqtt optional-interface implementer also satisfies the RELAY
 // interface directly.
 //
-//fusa:req REQ-RELAY-011
-//fusa:req REQ-RELAY-013
+//fusa:test REQ-RELAY-011
+//fusa:test REQ-RELAY-013
 func TestMockSatisfiesRelayOptional(t *testing.T) {
 	// mqtt.Health is identical to relay.Health, etc. A compile-time assertion:
 	var _ relay.HealthProvider = healthOnly{}
