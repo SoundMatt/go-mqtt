@@ -242,8 +242,28 @@ jobs:
         run: gofusa boundary || true
       - name: gofusa coupling (data/control coupling)
         run: gofusa coupling || true
+      # ── Structural coverage + machine-readable analysis reports ─────────────
+      - name: Structural coverage report
+        run: |
+          go test -coverprofile=coverage.out ./... || true
+          gofusa coverage -format json -output coverage-report.json coverage.out || true
+      - name: Analysis reports (check/cyber-plan/sci/sas)
+        run: |
+          gofusa check --format json --output check-report.json || true
+          gofusa check --output cyber-plan.json || true
+          gofusa cyber || true
+          gofusa sci -output sci.json || true
+          gofusa sas || true
       - name: gofusa release (SBOM + build provenance, SLSA)
         run: gofusa release || true
+      # ── Standards compliance gap reports (non-gating; for the record) ───────
+      - name: ISO 26262 / IEC 61508 / DO-178C / ISO 21434 gap reports
+        run: |
+          gofusa iso26262 || true
+          gofusa iec61508 || true
+          gofusa do178 || true
+          gofusa iso21434 || true
+          gofusa slsa || true
       - name: gofusa audit-pack (bundle all evidence)
         run: gofusa audit-pack --output gofusa-audit-pack.zip || true
       - name: Upload evidence bundle
