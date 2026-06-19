@@ -1,6 +1,6 @@
 # Safety Case: github.com/SoundMatt/go-mqtt
 
-Generated: 2026-06-19T20:50:13Z  
+Generated: 2026-06-19T23:05:58Z  
 Standard: generic
 
 ## Top Claim
