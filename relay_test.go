@@ -34,8 +34,8 @@ import (
 
 //fusa:test REQ-RELAY-001
 func TestSpecVersion(t *testing.T) {
-	if mqtt.SpecVersion != "1.10" {
-		t.Errorf("SpecVersion = %q, want %q", mqtt.SpecVersion, "1.10")
+	if mqtt.SpecVersion != "1.11" {
+		t.Errorf("SpecVersion = %q, want %q", mqtt.SpecVersion, "1.11")
 	}
 	// go-mqtt binds SpecVersion to the RELAY package constant so they can't drift.
 	if mqtt.SpecVersion != relay.SpecVersion {

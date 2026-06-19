@@ -190,7 +190,7 @@ jobs:
   # runs `relay interop --strict` (behavioural golden-vector conformance: the
   # CLI's `convert` output MUST be EQUIVALENT to the reference for every vector).
   relay-conform:
-    name: RELAY conform + interop --strict (v1.10.0)
+    name: RELAY conform + interop --strict (v1.11.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -200,9 +200,9 @@ jobs:
       - name: Build go-mqtt CLI
         run: go build -o go-mqtt ./cmd/go-mqtt
       - name: relay conform --strict
-        run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.10.0 conform --strict ./go-mqtt
+        run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.11.0 conform --strict ./go-mqtt
       - name: relay interop --strict (§20.1.3 behavioural conformance)
-        run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.10.0 interop --protocol MQTT --strict ./go-mqtt
+        run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.11.0 interop --protocol MQTT --strict ./go-mqtt
 
   # ── go-FuSa full lifecycle (spec §20.1.2) ─────────────────────────────────
   # Pinned to v0.30.0. The gating steps (check/trace/cyber/vuln/qualify) fail the
