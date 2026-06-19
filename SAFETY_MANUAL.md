@@ -46,7 +46,7 @@ allocated system-level requirements, in particular:
 ## 4. Assumptions of use (the integrator MUST ensure)
 
 1. **Trusted toolchain.** Built with Go 1.25+ and the pinned go-FuSa `v0.30.0`
-   and RELAY `v1.10.0`; no `InsecureSkipVerify` is introduced downstream.
+   and RELAY `v1.11.0`; no `InsecureSkipVerify` is introduced downstream.
 2. **TLS for untrusted networks.** When the broker link crosses a trust
    boundary, TLS (≥1.2) is used; certificate verification is **not** disabled,
    and client authentication (mTLS) is configured where the threat model
