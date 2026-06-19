@@ -1,0 +1,174 @@
+{
+  "project": "go-mqtt",
+  "standard": "ISO 26262",
+  "createdAt": "2026-06-19T00:00:00Z",
+  "operationalSituations": [
+    {
+      "id": "OS-001",
+      "description": "An in-vehicle application uses the go-mqtt client (v3/v5) to publish and subscribe vehicle signals over MQTT in a production vehicle gateway — payloads carry signal values acted on by downstream control or display functions"
+    },
+    {
+      "id": "OS-002",
+      "description": "The go-mqtt embedded broker brokers vehicle-signal traffic between in-vehicle ECUs and edge clients — every routing, retain, and QoS decision affects which subscriber receives which signal"
+    },
+    {
+      "id": "OS-003",
+      "description": "The COVESA VISSR bridge maps VSS signal paths (dot notation) to MQTT topics (slash notation) and back — a mapping error misroutes a vehicle signal to the wrong topic space"
+    },
+    {
+      "id": "OS-004",
+      "description": "CI runs relay conform --strict and the full go-FuSa lifecycle as a release gate before a go-mqtt version is tagged and consumed by covesa/vissr"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "H-001",
+      "description": "Topic mismatch — MatchTopic (§4.7) routes a message to a subscriber whose filter should not match (or fails to deliver to one that should), so a signal reaches an unintended consumer or is silently lost",
+      "source": "Incorrect single-level (+) or multi-level (#) wildcard handling, or off-by-one in topic-level segmentation, in MatchTopic",
+      "situations": ["OS-001", "OS-002"],
+      "risk": {
+        "severity": "S3",
+        "exposure": "E3",
+        "controllability": "C2",
+        "asil": "ASIL-B"
+      },
+      "safetyGoals": ["SG-001"]
+    },
+    {
+      "id": "H-002",
+      "description": "Envelope field loss — ToMessage / FromMessage drops or corrupts a mandatory field (topic, QoS, retained, payload), so a relay.Node routes a message that misrepresents the original vehicle signal",
+      "source": "Missing field copy, incorrect Meta-map key, or faulty strconv conversion in ToMessage/FromMessage",
+      "situations": ["OS-001", "OS-003"],
+      "risk": {
+        "severity": "S3",
+        "exposure": "E2",
+        "controllability": "C2",
+        "asil": "ASIL-B"
+      },
+      "safetyGoals": ["SG-002"]
+    },
+    {
+      "id": "H-003",
+      "description": "QoS guarantee violated — a QoS 1 or QoS 2 publish is silently dropped, or a QoS 2 message is delivered more than once without deduplication, so a downstream function acts on a missing or duplicated signal",
+      "source": "Incomplete PUBACK/PUBREC/PUBREL/PUBCOMP handshake, lost packet-identifier state, or back-pressure policy discarding an acknowledged message",
+      "situations": ["OS-001", "OS-002"],
+      "risk": {
+        "severity": "S3",
+        "exposure": "E3",
+        "controllability": "C2",
+        "asil": "ASIL-B"
+      },
+      "safetyGoals": ["SG-003"]
+    },
+    {
+      "id": "H-004",
+      "description": "Malformed wire packet — a CONNECT/PUBLISH/SUBSCRIBE control packet is encoded or decoded incorrectly, corrupting the byte stream so the peer mis-parses subsequent packets and acts on garbage signal data",
+      "source": "Remaining-length encoding error, incorrect UTF-8 string length prefix, or fixed-header flag bug in v3/v5 packet encode/decode",
+      "situations": ["OS-001", "OS-002"],
+      "risk": {
+        "severity": "S3",
+        "exposure": "E2",
+        "controllability": "C2",
+        "asil": "ASIL-B"
+      },
+      "safetyGoals": ["SG-004"]
+    },
+    {
+      "id": "H-005",
+      "description": "Last-will not delivered — on an ungraceful client disconnect the broker fails to publish the registered will message, so downstream consumers never learn that a signal source has dropped offline",
+      "source": "Will state not retained across the session, or will publish skipped on connection teardown",
+      "situations": ["OS-002"],
+      "risk": {
+        "severity": "S2",
+        "exposure": "E3",
+        "controllability": "C2",
+        "asil": "ASIL-A"
+      },
+      "safetyGoals": ["SG-005"]
+    },
+    {
+      "id": "H-006",
+      "description": "Resource exhaustion under fault — goroutine, connection, or subscription leakage under repeated connect/disconnect or fault injection grows unbounded, leading to eventual denial of signal transport",
+      "source": "Subscription not closed on client Close, send-on-closed-channel guard missing, or context not cancelled on teardown",
+      "situations": ["OS-001", "OS-002"],
+      "risk": {
+        "severity": "S2",
+        "exposure": "E4",
+        "controllability": "C2",
+        "asil": "ASIL-B"
+      },
+      "safetyGoals": ["SG-006"]
+    },
+    {
+      "id": "H-007",
+      "description": "Concurrent-use corruption — simultaneous publishes or subscribe/close from multiple goroutines race on shared state and corrupt a payload or deliver a torn message",
+      "source": "Unsynchronised access to subscription maps or buffers; a data race between deliver and close",
+      "situations": ["OS-001", "OS-002"],
+      "risk": {
+        "severity": "S3",
+        "exposure": "E2",
+        "controllability": "C2",
+        "asil": "ASIL-B"
+      },
+      "safetyGoals": ["SG-007"]
+    }
+  ],
+  "safetyGoals": [
+    {
+      "id": "SG-001",
+      "description": "go-mqtt shall implement MatchTopic exactly per §4.7 such that a message is delivered to a subscription if and only if the topic matches the filter, for all single-level and multi-level wildcard cases",
+      "hazards": ["H-001"],
+      "asil": "ASIL-B",
+      "safeState": "Message delivered only to matching subscriptions; non-matching subscriptions receive nothing",
+      "fssrRef": "REQ-WILD REQ-SUB"
+    },
+    {
+      "id": "SG-002",
+      "description": "go-mqtt shall preserve every mandatory envelope field losslessly across ToMessage and FromMessage so the round-tripped relay.Message equals the canonical golden vector",
+      "hazards": ["H-002"],
+      "asil": "ASIL-B",
+      "safeState": "FromMessage(ToMessage(m)) reproduces topic, QoS, retained and payload exactly",
+      "fssrRef": "REQ-MSG"
+    },
+    {
+      "id": "SG-003",
+      "description": "go-mqtt shall honour the requested QoS: a QoS 1 message is delivered at least once and a QoS 2 message exactly once, completing the full acknowledgement handshake before reporting success",
+      "hazards": ["H-003"],
+      "asil": "ASIL-B",
+      "safeState": "Publish returns success only after the QoS handshake completes; no acknowledged message is dropped or duplicated",
+      "fssrRef": "REQ-QOS"
+    },
+    {
+      "id": "SG-004",
+      "description": "go-mqtt shall encode and decode every MQTT control packet strictly per the v3.1.1 / v5.0 wire format, rejecting malformed input with a sentinel error rather than producing or accepting a corrupt stream",
+      "hazards": ["H-004"],
+      "asil": "ASIL-B",
+      "safeState": "Malformed packets rejected with a sentinel error; the connection is not left in an ambiguous state",
+      "fssrRef": "REQ-WIRE"
+    },
+    {
+      "id": "SG-005",
+      "description": "The go-mqtt broker shall retain each client's registered last-will message and publish it on any ungraceful disconnect",
+      "hazards": ["H-005"],
+      "asil": "ASIL-A",
+      "safeState": "Will message published to subscribers on ungraceful disconnect",
+      "fssrRef": "REQ-SAFETY"
+    },
+    {
+      "id": "SG-006",
+      "description": "go-mqtt shall release every goroutine, connection and subscription it owns when the owning client or broker is closed, so resource use stays bounded under repeated connect/disconnect and fault injection",
+      "hazards": ["H-006"],
+      "asil": "ASIL-B",
+      "safeState": "All owned resources released on Close; no leak across repeated lifecycles",
+      "fssrRef": "REQ-LEAK REQ-FAULT"
+    },
+    {
+      "id": "SG-007",
+      "description": "go-mqtt shall be safe for concurrent use by multiple goroutines such that concurrent publish, subscribe and close operations never race on shared state or corrupt a delivered message",
+      "hazards": ["H-007"],
+      "asil": "ASIL-B",
+      "safeState": "Concurrent operations are correctly synchronised; -race is clean and no message is torn",
+      "fssrRef": "REQ-CONC REQ-ORDER"
+    }
+  ]
+}

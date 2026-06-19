@@ -18,8 +18,8 @@ import (
 // ── SpecVersion ───────────────────────────────────────────────────────────────
 
 func TestSpecVersion(t *testing.T) {
-	if mqtt.SpecVersion != "1.0" {
-		t.Errorf("SpecVersion = %q, want %q", mqtt.SpecVersion, "1.0")
+	if mqtt.SpecVersion != "1.10" {
+		t.Errorf("SpecVersion = %q, want %q", mqtt.SpecVersion, "1.10")
 	}
 	// go-mqtt binds SpecVersion to the RELAY package constant so they can't drift.
 	if mqtt.SpecVersion != relay.SpecVersion {

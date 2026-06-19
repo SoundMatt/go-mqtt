@@ -185,10 +185,27 @@ jobs:
           version: v2.12.2
           args: --timeout=5m
 
-  # ── go-FuSa safety gate ────────────────────────────────────────────────────
-  # Pinned to v0.30.0; exits 1 on any ERROR-level finding.
+  # ── RELAY conformance gate (spec §20.1.1) ─────────────────────────────────
+  # Builds the CLI and runs `relay conform --strict`; fails on any FAIL or WARN.
+  relay-conform:
+    name: RELAY conform --strict (v1.10.0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
+      - name: Build go-mqtt CLI
+        run: go build -o go-mqtt ./cmd/go-mqtt
+      - name: relay conform --strict
+        run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.10.0 conform --strict ./go-mqtt
+
+  # ── go-FuSa full lifecycle (spec §20.1.2) ─────────────────────────────────
+  # Pinned to v0.30.0. The gating steps (check/trace/cyber/vuln/qualify) fail the
+  # job on any ERROR finding, untraced requirement, or failed qualification case.
+  # The remaining steps regenerate the §20.4/§20.5 evidence bundle.
   gofusa:
-    name: go-FuSa safety check (v0.30.0)
+    name: go-FuSa full lifecycle (v0.30.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -197,5 +214,38 @@ jobs:
           go-version: "1.25"
       - name: Install go-FuSa
         run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.30.0
-      - name: gofusa check
+      # ── Gating: ERROR findings, traceability, security, vulns, qualification ──
+      - name: gofusa check (gate on ERROR findings)
         run: gofusa check ./...
+      - name: gofusa trace (gate on 100% requirement traceability)
+        run: gofusa trace -req-coverage 100
+      - name: gofusa cyber (cybersecurity analysis)
+        run: gofusa cyber
+      - name: gofusa vuln (dependency vulnerability scan)
+        run: gofusa vuln
+      - name: gofusa qualify (tool qualification suite)
+        run: gofusa qualify
+      # ── Evidence (§20.4 / §20.5): non-gating, regenerated on every run ──────
+      - name: gofusa verify (test evidence bundle)
+        run: gofusa verify || true
+      - name: gofusa hara (validate hazard analysis loads)
+        run: gofusa hara show >/dev/null
+      - name: gofusa tara (ISO 21434 threat analysis)
+        run: gofusa tara || true
+      - name: gofusa fmea (dFMEA)
+        run: gofusa fmea -cyber || true
+      - name: gofusa boundary (architecture diagram)
+        run: gofusa boundary || true
+      - name: gofusa coupling (data/control coupling)
+        run: gofusa coupling || true
+      - name: gofusa release (SBOM + build provenance, SLSA)
+        run: gofusa release || true
+      - name: gofusa audit-pack (bundle all evidence)
+        run: gofusa audit-pack --output gofusa-audit-pack.zip || true
+      - name: Upload evidence bundle
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: gofusa-audit-pack
+          path: gofusa-audit-pack.zip
+          if-no-files-found: ignore
