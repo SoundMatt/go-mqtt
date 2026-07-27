@@ -53,6 +53,12 @@ with Matt Jones.
 | `.` | `mqtt` package — interfaces, QoS, Message, MatchTopic |
 | `mock/` | In-process broker for testing |
 | `v3/` | MQTT v3.1.1 pure-Go TCP client |
+| `v5/` | MQTT v5.0 pure-Go TCP client |
+| `broker/` | Minimal in-process MQTT v3.1.1 broker |
+| `bridge/rest/` | HTTP gateway — REST/SSE pub/sub over MQTT |
+| `bridge/mqtt/` | Broker-to-broker federation bridge |
+| `bridge/vissr/` | COVESA VISSR bridge — VSS dot-paths ↔ MQTT topics |
+| `cmd/go-mqtt/` | RELAY-conformant CLI |
 | `examples/quickstart/` | Docker quickstart publisher and subscriber |
 | `docker/` | Dockerfile and docker-compose.yml |
 | `.github/workflows/` | CI, DCO, Docker publish, release workflows |

@@ -22,10 +22,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [pub, sub]
+        target: [pub, sub, cli]
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Compute tool version
+        id: version
+        run: echo "value=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU (multi-arch)
         uses: docker/setup-qemu-action@v3
@@ -40,11 +46,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # The CLI image (RELAY spec §13.2/§13.5) is published unsuffixed at
+      # ghcr.io/soundmatt/go-mqtt; the pub/sub quickstart demo images keep
+      # their existing -pub/-sub suffixes.
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_BASE }}-${{ matrix.target }}
+          images: ${{ matrix.target == 'cli' && env.IMAGE_BASE || format('{0}-{1}', env.IMAGE_BASE, matrix.target) }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -58,6 +67,8 @@ jobs:
           file: docker/Dockerfile
           target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            TOOL_VERSION=${{ steps.version.outputs.value }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

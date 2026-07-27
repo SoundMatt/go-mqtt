@@ -91,7 +91,7 @@ const (
 type propKind int
 
 const (
-	propKindByte    propKind = iota
+	propKindByte propKind = iota
 	propKindU16
 	propKindU32
 	propKindVarInt
@@ -475,12 +475,12 @@ func skipPropValue(id byte, data []byte) ([]byte, error) {
 //fusa:req REQ-V5-PUB-002
 //fusa:req REQ-V5-PUB-003
 type PublishProps struct {
-	ResponseTopic   string             // for request/response correlation
-	CorrelationData []byte             // opaque identifier echoed in the response
+	ResponseTopic   string              // for request/response correlation
+	CorrelationData []byte              // opaque identifier echoed in the response
 	UserProperties  []mqtt.UserProperty // arbitrary key/value metadata
-	ContentType     string             // MIME type of the payload
-	ExpiryInterval  uint32             // seconds; 0 = no expiry
-	TopicAlias      uint16             // 0 = no alias; must be ≤ server TopicAliasMax
+	ContentType     string              // MIME type of the payload
+	ExpiryInterval  uint32              // seconds; 0 = no expiry
+	TopicAlias      uint16              // 0 = no alias; must be ≤ server TopicAliasMax
 }
 
 // SubscribeOpts holds MQTT v5 subscription options for SubscribeV5.
@@ -510,8 +510,8 @@ func buildCONNECT(clientID string, keepaliveSecs uint16, sessionExpiry uint32, r
 
 	body := []byte{
 		0x00, 0x04, 'M', 'Q', 'T', 'T', // protocol name
-		0x05,                             // protocol level = 5
-		0x02,                             // connect flags: CleanStart=1
+		0x05, // protocol level = 5
+		0x02, // connect flags: CleanStart=1
 		byte(keepaliveSecs >> 8), byte(keepaliveSecs),
 	}
 	body = append(body, encodeProps(connProps...)...)

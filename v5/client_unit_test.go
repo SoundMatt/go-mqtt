@@ -117,6 +117,37 @@ func TestV5DialCONNACK(t *testing.T) {
 	_ = c.Close()
 }
 
+// TestV5New verifies New (the RELAY spec §7 Constructor Contract entry point)
+// performs the same handshake as Dial and returns an mqtt.Client.
+//
+//fusa:test REQ-V5-CONN-002
+func TestV5New(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := New(context.Background(), fb.addr(), WithClientID("n"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+}
+
+// TestV5NewRespectsContext verifies New aborts connection establishment
+// promptly when the supplied ctx is already canceled, per RELAY spec §7 rule
+// 3 (New MUST NOT block indefinitely).
+//
+//fusa:test REQ-V5-CONN-002
+func TestV5NewRespectsContext(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if _, err := New(ctx, fb.addr(), WithClientID("n2"), WithKeepalive(0)); err == nil {
+		t.Fatal("New with an already-canceled ctx succeeded, want error")
+	}
+}
+
 // TestV5DialBadReason verifies Dial returns an error when the CONNACK reason
 // code is non-zero.
 //

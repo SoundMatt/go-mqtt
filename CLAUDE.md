@@ -12,7 +12,13 @@ Designed for vehicle-signal transport and COVESA VISSR compatibility.
 |---|---|
 | `.` | `mqtt` — interfaces, QoS, Message, MatchTopic, sentinel errors |
 | `mock/` | In-process broker, zero deps, use for unit tests |
-| `v3/` | Pure-Go MQTT v3.1.1 TCP client |
+| `v3/` | Pure-Go MQTT v3.1.1 TCP client (TLS, WebSocket) |
+| `v5/` | Pure-Go MQTT v5.0 TCP client (properties, topic aliases) |
+| `broker/` | Minimal in-process MQTT v3.1.1 broker (edge/test harnesses) |
+| `bridge/rest/` | HTTP gateway — REST/SSE pub/sub over MQTT |
+| `bridge/mqtt/` | Broker-to-broker federation bridge |
+| `bridge/vissr/` | COVESA VISSR bridge — VSS dot-paths ↔ MQTT topics |
+| `cmd/go-mqtt/` | RELAY-conformant CLI (`version`, `capabilities`, `status`, `convert`, `send`, `subscribe`) |
 | `examples/quickstart/` | Docker quickstart pub/sub binaries |
 
 ## Per-PR checklist
@@ -52,9 +58,9 @@ history expansion on `%`, `!`, and `(`.
 
 ## COVESA/VISSR context
 
-go-mqtt will be used as a transport by covesa/vissr. VSS signal paths use
+go-mqtt is used as a transport by covesa/vissr. VSS signal paths use
 dot notation (`Vehicle.Speed`) but MQTT topics use slash notation (`Vehicle/Speed`).
-The planned `bridge/vissr/` package handles this mapping. When designing new
+The `bridge/vissr/` package handles this mapping. When designing new
 API, prefer slash-separated topic paths to stay idiomatic to MQTT.
 
 ## Version history
