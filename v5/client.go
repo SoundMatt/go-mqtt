@@ -182,12 +182,37 @@ type Client struct {
 //fusa:req REQ-CONN-004
 //fusa:req REQ-V5-SESSION-001
 func Dial(addr string, opts ...Option) (*Client, error) {
+	return dial(context.Background(), addr, opts...)
+}
+
+// New connects to the MQTT v5.0 broker at addr and returns a Client as the
+// RELAY spec §8.4 mqtt.Client interface, per RELAY spec §7 (Constructor
+// Contract, Form 1: endpoint-addressed). It is a context-aware alias for
+// Dial: ctx bounds connection establishment (TCP dial and the
+// CONNECT/CONNACK handshake). Callers needing v5-specific extensions
+// (PublishV5, SubscribeV5, …) should call Dial directly for the concrete
+// *Client type.
+//
+//fusa:req REQ-V5-CONN-001
+//fusa:req REQ-V5-CONN-002
+//fusa:req REQ-V5-CONN-003
+//fusa:req REQ-V5-CONN-004
+func New(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error) {
+	c, err := dial(ctx, addr, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+// dial is the shared implementation behind Dial and New.
+func dial(ctx context.Context, addr string, opts ...Option) (*Client, error) {
 	o := defaultOptions()
 	for _, opt := range opts {
 		opt(o)
 	}
 
-	dialCtx, cancel := context.WithTimeout(context.Background(), o.dialTimeout)
+	dialCtx, cancel := context.WithTimeout(ctx, o.dialTimeout)
 	defer cancel()
 	conn, err := (&net.Dialer{}).DialContext(dialCtx, "tcp", addr)
 	if err != nil {

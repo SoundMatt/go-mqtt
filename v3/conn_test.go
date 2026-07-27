@@ -50,6 +50,40 @@ func TestDialHandshake(t *testing.T) {
 	_ = c.Close()
 }
 
+// TestNew verifies New (the RELAY spec §7 Constructor Contract entry point)
+// performs the same handshake as Dial and honours a caller-supplied ctx.
+//
+//fusa:test REQ-CONN-001
+//fusa:test REQ-CONN-002
+func TestNew(t *testing.T) {
+	fb := newFakeBroker(t)
+	defer fb.close()
+	fb.serve(t, func() {})
+
+	c, err := New(context.Background(), fb.addr(), WithClientID("n"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+}
+
+// TestNewRespectsContext verifies New aborts connection establishment
+// promptly when the supplied ctx is already canceled, per RELAY spec §7 rule
+// 3 (New MUST NOT block indefinitely).
+//
+//fusa:test REQ-CONN-003
+func TestNewRespectsContext(t *testing.T) {
+	fb := newFakeBroker(t)
+	defer fb.close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if _, err := New(ctx, fb.addr(), WithClientID("n2"), WithKeepalive(0)); err == nil {
+		t.Fatal("New with an already-canceled ctx succeeded, want error")
+	}
+}
+
 // TestDialConnectionRefused verifies Dial returns an error when no broker is
 // listening at the address.
 //

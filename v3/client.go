@@ -23,6 +23,8 @@
 // handshake; configure the per-step timeout with WithQoS2Timeout.
 //
 // Transports: Dial (TCP), DialTLS (MQTTS), and DialWS (MQTT-over-WebSocket).
+// New is a context-aware alias for Dial, satisfying RELAY spec §7's
+// Constructor Contract.
 package v3
 
 //fusa:req REQ-CONN-001
@@ -180,9 +182,30 @@ func WithWill(topic string, payload []byte, qos mqtt.QoS, retain bool) Option {
 //fusa:req REQ-CONN-004
 //fusa:req REQ-CONN-005
 func Dial(addr string, opts ...Option) (mqtt.Client, error) {
+	return dial(context.Background(), addr, opts...)
+}
+
+// New connects to the MQTT broker at addr and returns a Client, per RELAY
+// spec §7 (Constructor Contract, Form 1: endpoint-addressed). It is a
+// context-aware alias for Dial: ctx bounds connection establishment (TCP
+// dial, optional TLS handshake, and the CONNECT/CONNACK handshake). Dial
+// remains the idiomatic Go-facing entry point for callers that don't need
+// an explicit ctx.
+//
+//fusa:req REQ-CONN-001
+//fusa:req REQ-CONN-002
+//fusa:req REQ-CONN-003
+//fusa:req REQ-CONN-004
+//fusa:req REQ-CONN-005
+func New(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error) {
+	return dial(ctx, addr, opts...)
+}
+
+// dial is the shared implementation behind Dial and New.
+func dial(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error) {
 	o := newOptions(opts)
 
-	dialCtx, cancel := context.WithTimeout(context.Background(), o.dialTimeout)
+	dialCtx, cancel := context.WithTimeout(ctx, o.dialTimeout)
 	defer cancel()
 	conn, err := dialTCP(dialCtx, addr, o)
 	if err != nil {

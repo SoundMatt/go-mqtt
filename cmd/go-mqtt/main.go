@@ -20,10 +20,18 @@ import (
 	mqtt "github.com/SoundMatt/go-mqtt"
 )
 
-const (
-	toolName    = "go-mqtt"
-	toolVersion = "1.0.0"
-)
+const toolName = "go-mqtt"
+
+// toolVersion is the CLI's own release version, reported by version,
+// capabilities, and status (RELAY spec §§12.1-12.3). It is overridden at
+// build time via -ldflags "-X main.toolVersion=$(git describe --tags)" (see
+// .github/workflows/ci.yml and docker/Dockerfile's cli stage), so official
+// builds always report the exact tag they were built from. The literal below
+// is only a fallback for a bare `go build`/`go install` without that flag —
+// keep it in sync with the latest release tag as part of the release
+// process, the same way SpecVersion is kept in sync via the RELAY module
+// dependency.
+var toolVersion = "1.5.0"
 
 func main() {
 	if len(os.Args) < 2 {

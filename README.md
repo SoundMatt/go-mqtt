@@ -11,7 +11,13 @@ A pure-Go MQTT client library — safety-oriented, broker-agnostic, and ready fo
 |---|---|---|
 | `.` | `mqtt` — core interfaces, QoS, Message, MatchTopic | Nothing |
 | `mock` | In-process broker. Zero dependencies. Default for testing. | Nothing |
-| `v3` | Pure-Go MQTT v3.1.1 TCP client. Connects to any broker. | Nothing |
+| `v3` | Pure-Go MQTT v3.1.1 TCP client. Connects to any broker. TLS/mTLS and WebSocket transports. | Nothing |
+| `v5` | Pure-Go MQTT v5.0 TCP client. User properties, response topic, correlation data, topic aliases. | Nothing |
+| `broker` | Minimal in-process MQTT v3.1.1 broker for edge devices and test harnesses. | Nothing |
+| `bridge/rest` | HTTP gateway — REST/SSE pub/sub over MQTT for clients that can't speak MQTT directly. | Nothing |
+| `bridge/mqtt` | Broker-to-broker federation bridge — topic forwarding, QoS downgrade, prefix remap. | Nothing |
+| `bridge/vissr` | COVESA VISSR bridge — maps VSS dot-separated signal paths to MQTT topics. | Nothing |
+| `cmd/go-mqtt` | RELAY-conformant CLI: `version`, `capabilities`, `status`, `convert`, `send`, `subscribe`. | Nothing |
 
 ## Install
 
@@ -116,7 +122,34 @@ Spins up an Eclipse Mosquitto broker, a publisher sending `Vehicle/Speed` readin
 
 ## COVESA VISSR
 
-go-mqtt uses VSS-style topic paths by default (`Vehicle/Speed`, `Vehicle/Cabin/HVAC/Temperature`). The roadmap includes a `bridge/vissr` package that maps COVESA VISSR WebSocket/MQTT signals to go-mqtt subscriptions. See `ROADMAP.md`.
+go-mqtt uses VSS-style topic paths by default (`Vehicle/Speed`, `Vehicle/Cabin/HVAC/Temperature`). The `bridge/vissr` package maps COVESA VISSR VSS dot-separated signal paths (`Vehicle.Speed`) onto MQTT topics and provides a signal-oriented client on top of any `mqtt.Client`. See `ROADMAP.md` for details.
+
+## RELAY CLI
+
+`cmd/go-mqtt` is a RELAY-conformant CLI (spec §11) exposing `version`, `capabilities`, and `status` (mandatory), plus `convert`, `send`, and `subscribe`:
+
+```bash
+go run ./cmd/go-mqtt version --format json
+go run ./cmd/go-mqtt capabilities
+```
+
+It also ships as a Docker image: `ghcr.io/soundmatt/go-mqtt`.
+
+## Bridges
+
+- `bridge/rest` — HTTP gateway exposing MQTT publish/subscribe over REST + Server-Sent Events, for clients that can't speak MQTT directly.
+- `bridge/mqtt` — broker-to-broker federation: forwards matching topics between two MQTT brokers with QoS downgrade and topic-prefix remapping.
+- `bridge/vissr` — COVESA VISSR signal-path bridge (see above).
+
+## Embedded broker
+
+The `broker` package is a minimal in-process MQTT v3.1.1 broker, suitable for edge devices, integration tests, and environments where running Mosquitto isn't feasible:
+
+```go
+srv := broker.New()
+go func() { _ = srv.ListenAndServe(":1883") }()
+defer srv.Close()
+```
 
 ## Safety
 
