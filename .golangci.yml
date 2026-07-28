@@ -32,6 +32,9 @@ linters:
         - fieldalignment
   exclusions:
     rules:
-      # Eclipse Mosquitto is the correct product spelling (not "Mosquito").
+      # Eclipse Mosquitto — and its bundled mosquitto_pub/mosquitto_sub CLI
+      # tools — are the correct product/binary spelling (not "Mosquito").
+      # Case-insensitive so it also covers the all-lowercase CLI binary
+      # names used in interop tests and CI (mosquitto_pub, mosquitto_sub).
       - linters: [misspell]
-        text: "Mosquitto"
+        text: "(?i)mosquitto"

@@ -157,6 +157,61 @@ jobs:
         if: steps.prereqs.outputs.available == 'true'
         run: docker stop mosquitto && docker rm mosquitto
 
+  # ── MQTT interop: real broker + third-party CLI peer ──────────────────────
+  # The MQTT equivalent of what CAN interop does with cangen/candump from
+  # can-utils: a real Eclipse Mosquitto broker (GitHub Actions `services:`
+  # container — no special OS privileges needed, unlike RTPS/CAN interop) plus
+  # Mosquitto's own bundled mosquitto_pub/mosquitto_sub CLI tools as an
+  # independent third-party validator of go-mqtt's wire format, in both
+  # directions (see v3/client_thirdparty_interop_test.go). Gated behind the
+  # `integration` build tag, same as test-mosquitto above, so it never runs in
+  # the fast `test` job. Probes the broker service first and skips cleanly
+  # (::notice:: + exit 0) rather than hard-failing if it's unreachable for any
+  # reason — this job must never block ordinary development on live
+  # infrastructure flakiness.
+  mqtt-interop:
+    name: MQTT interop — real Mosquitto broker + mosquitto_pub/mosquitto_sub CLI
+    runs-on: ubuntu-latest
+    services:
+      mosquitto:
+        image: eclipse-mosquitto:2
+        ports:
+          - 1883:1883
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
+
+      - name: Install mosquitto-clients (mosquitto_pub / mosquitto_sub)
+        run: sudo apt-get update && sudo apt-get install -y mosquitto-clients
+
+      - name: Probe Mosquitto broker service availability
+        id: probe
+        run: |
+          available=false
+          for i in $(seq 1 15); do
+            if timeout 1 bash -c "cat < /dev/null > /dev/tcp/127.0.0.1/1883" 2>/dev/null; then
+              available=true
+              break
+            fi
+            sleep 1
+          done
+          echo "available=$available" >> "$GITHUB_OUTPUT"
+          if [ "$available" = "false" ]; then
+            echo "::notice::Mosquitto broker service not reachable on 127.0.0.1:1883 after 15s — skipping MQTT interop tests"
+          fi
+
+      - name: Real-broker round-trip + third-party-peer interop (v3)
+        if: steps.probe.outputs.available == 'true'
+        run: |
+          go test -tags integration -v -race -timeout 60s -run \
+            '^TestIntegration_(FieldExactRoundTrip|ThirdPartySubscriberVerifiesGoMqttPublish|GoMqttSubscriberVerifiesThirdPartyPublish)$' \
+            ./v3/...
+        env:
+          MQTT_BROKER: localhost:1883
+
   # ── go generate check ─────────────────────────────────────────────────────
   generate:
     name: go generate check

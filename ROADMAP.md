@@ -51,6 +51,7 @@ a future milestone.
 | v1.0 | Stable API, safety certification artefacts |
 | v1.4 | REST bridge (`bridge/rest/`) — HTTP pub/sub gateway over MQTT ✅ |
 | v1.5 | MQTT federation bridge (`bridge/mqtt/`) — broker-to-broker topic forwarding ✅ |
+| v1.6 | Interop testing — real Mosquitto broker round-trip + third-party `mosquitto_pub`/`mosquitto_sub` CLI cross-checks, `mqtt-interop` CI job ✅ |
 
 > **Cross-protocol bridges (DDS, SOME-IP, gRPC) are not on the roadmap.** With
 > [RELAY](https://github.com/SoundMatt/RELAY), every protocol implementation
@@ -118,3 +119,53 @@ configurable filters and republishes matching messages to a remote broker
 (and vice versa). Handles reconnect, QoS downgrade policies, and topic
 prefix remapping. Equivalent to Mosquitto's built-in bridge feature but
 implemented as a portable Go library.
+
+### v1.6 — Interop testing: real broker + third-party CLI peer
+
+Every existing test in this repo runs against either the `mock` in-process
+broker or (for the `v3`/`v5` "integration"-tagged suite) a real Mosquitto
+broker driven entirely by go-mqtt's own clients on both ends — proof that
+go-mqtt agrees with itself, not that it is wire-correct against an
+independent MQTT implementation. This milestone closes that gap, mirroring
+how the x-Net ecosystem's other transports test interop (CAN's
+`cangen`/`candump` from can-utils; rust-DDS's live CycloneDDS peer): a
+genuinely independent third-party tool talking to the same broker as
+go-mqtt's own client.
+
+Unlike RTPS/CAN interop (which need real network multicast or a SocketCAN
+interface with elevated OS privileges), MQTT interop needs neither — a
+broker is just a TCP service, so a plain GitHub Actions `services:` container
+is sufficient.
+
+- **Real-broker round-trip** (`v3/client_integration_test.go`,
+  `TestIntegration_FieldExactRoundTrip`) — go-mqtt's own `v3.Client`
+  publishes and subscribes over genuine MQTT wire traffic to a real Eclipse
+  Mosquitto broker (not `mock`), and the delivered `mqtt.Message` is
+  compared field-exact (Topic, Payload, QoS) against what was published.
+- **Third-party-peer interop** (`v3/client_thirdparty_interop_test.go`) —
+  two directions against Mosquitto's own bundled `mosquitto_pub`/
+  `mosquitto_sub` CLI tools, run as real subprocesses:
+  - go-mqtt's `v3.Client` publishes; `mosquitto_sub` independently receives
+    and verifies the payload — proves go-mqtt's PUBLISH encoding is
+    wire-correct, not just self-consistent.
+  - `mosquitto_pub` publishes; go-mqtt's `v3.Client` subscribes and verifies
+    correct receipt/decoding — proves go-mqtt's SUBSCRIBE/decode path is
+    wire-correct.
+- **`mqtt-interop` CI job** (`.github/workflows/ci.yml`) — a GitHub Actions
+  `services:` container running the standard `eclipse-mosquitto:2` image
+  (port 1883, no custom config needed: the image allows anonymous
+  connections out of the box), with `mosquitto-clients` (providing
+  `mosquitto_pub`/`mosquitto_sub`) installed via `apt`. Gated behind the
+  `integration` build tag — same gate as the existing `test-mosquitto`
+  job — so it never runs in the fast `test` job. Probes the broker service
+  first and skips cleanly (`::notice::` + exit 0) rather than hard-failing
+  if it's unreachable for any reason, the same posture rust-DDS's
+  `cyclone-interop` job uses for its live CycloneDDS peer: this job must
+  never block ordinary development on live-infrastructure flakiness. The
+  third-party-peer tests also self-skip (not fail) when
+  `mosquitto_pub`/`mosquitto_sub` aren't on `PATH`, so a developer running
+  `go test -tags integration ./...` locally against a bare broker gets a
+  clean skip rather than a build/runtime error.
+
+**Done** — landed in
+[go-mqtt#56](https://github.com/SoundMatt/go-mqtt/pull/56).

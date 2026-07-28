@@ -129,3 +129,59 @@ func TestIntegration_PublishSubscribeQoS2(t *testing.T) {
 	case <-time.After(300 * time.Millisecond):
 	}
 }
+
+// TestIntegration_FieldExactRoundTrip publishes via go-mqtt's own v3.Client
+// and verifies the message the go-mqtt v3.Client subscriber receives is
+// field-exact — Topic, Payload, and QoS all match what was published — over
+// genuine MQTT wire traffic to a real Mosquitto broker (not the mock
+// in-process broker used by the rest of this repo's unit tests). This is
+// the "real-broker round-trip" half of interop testing; see
+// client_thirdparty_interop_test.go for the third-party-peer half
+// (mosquitto_pub/mosquitto_sub cross-checks).
+func TestIntegration_FieldExactRoundTrip(t *testing.T) {
+	addr := brokerAddr(t)
+
+	sub, err := v3.Dial(addr, v3.WithClientID("go-mqtt-v3-integ-fieldexact-sub"))
+	if err != nil {
+		t.Fatalf("Dial sub: %v", err)
+	}
+	t.Cleanup(func() { _ = sub.Close() })
+
+	pub, err := v3.Dial(addr, v3.WithClientID("go-mqtt-v3-integ-fieldexact-pub"))
+	if err != nil {
+		t.Fatalf("Dial pub: %v", err)
+	}
+	t.Cleanup(func() { _ = pub.Close() })
+
+	topic := "go-mqtt/v3/integ/fieldexact"
+	subscription, err := sub.Subscribe(topic, mqtt.AtLeastOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	t.Cleanup(func() { _ = subscription.Close() })
+
+	time.Sleep(50 * time.Millisecond) // allow SUBACK to arrive
+
+	wantPayload := []byte(`{"speed":123,"unit":"km/h"}`)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := pub.Publish(ctx, topic, mqtt.AtLeastOnce, wantPayload); err != nil {
+		t.Fatalf("Publish: %v", err)
+	}
+
+	select {
+	case msg := <-subscription.C():
+		if msg.Topic != topic {
+			t.Errorf("Topic: got %q, want %q", msg.Topic, topic)
+		}
+		if string(msg.Payload) != string(wantPayload) {
+			t.Errorf("Payload: got %q, want %q", msg.Payload, wantPayload)
+		}
+		if msg.QoS != mqtt.AtLeastOnce {
+			t.Errorf("QoS: got %v, want %v", msg.QoS, mqtt.AtLeastOnce)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timeout waiting for field-exact round-trip message")
+	}
+}
