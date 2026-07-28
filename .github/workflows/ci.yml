@@ -262,11 +262,11 @@ jobs:
         run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.11.0 interop --protocol MQTT --strict ./go-mqtt
 
   # ── go-FuSa full lifecycle (spec §20.1.2) ─────────────────────────────────
-  # Pinned to v0.30.0. The gating steps (check/trace/cyber/vuln/qualify) fail the
+  # Pinned to v0.36.0. The gating steps (check/trace/cyber/vuln/qualify) fail the
   # job on any ERROR finding, untraced requirement, or failed qualification case.
   # The remaining steps regenerate the §20.4/§20.5 evidence bundle.
   gofusa:
-    name: go-FuSa full lifecycle (v0.30.0)
+    name: go-FuSa full lifecycle (v0.36.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -274,7 +274,7 @@ jobs:
         with:
           go-version: "1.25"
       - name: Install go-FuSa
-        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.30.0
+        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.36.0
       # ── Gating: ERROR findings, traceability, security, vulns, qualification ──
       - name: gofusa check (gate on ERROR findings)
         run: gofusa check ./...
