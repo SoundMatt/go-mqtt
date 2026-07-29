@@ -1,9 +1,12 @@
 name: Release
 
 # Runs on every vX.Y.Z tag push.
-# Regenerates all go-FuSa safety artifacts (fmea, safety-case, sbom,
-# provenance, artifact-manifest) and commits them back to main so the
-# committed files always reflect the exact state at each release.
+# Regenerates all go-FuSa safety artifacts (check, verify, qualify, fmea,
+# safety-case, sbom, provenance, artifact-manifest) and commits them back to
+# main so the committed files always reflect the exact state at each
+# release. check/verify/qualify run before safety-case so safety-case's Sn1/
+# Sn3/Sn4 evidence items reflect this release's actual results, not an
+# absent-by-construction fallback.
 on:
   push:
     tags:
@@ -33,19 +36,36 @@ jobs:
           go-version: "1.25"
 
       - name: Install go-FuSa
-        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.36.0
+        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.47.0
+
+      # ── Core safety evidence (Sn1/Sn3/Sn4) ────────────────────────────────
+      # gofusa safety-case reads check-report.json, .fusa-evidence.json, and
+      # qualify-report.json to report whether this evidence exists — so it
+      # must be generated here, in this job, before safety-case runs.
+      # Previously these three steps were absent and safety-case fell back to
+      # its own "absent" default, falsely declaring core evidence missing
+      # for every tagged release even though CI's own gofusa job had already
+      # generated and passed all three (go-mqtt#61).
+      - name: "gofusa check (Sn1 evidence: coding-standard/static-analysis report)"
+        run: gofusa check --format json --output check-report.json
+
+      - name: "gofusa verify (Sn3 evidence: test evidence bundle)"
+        run: gofusa verify
+
+      - name: "gofusa qualify (Sn4 evidence: tool qualification report)"
+        run: gofusa qualify
 
       - name: Regenerate dFMEA table
-        run: gofusa fmea -cyber
+        run: gofusa fmea -cyber -strict
 
       - name: Regenerate component boundary diagram
         run: gofusa boundary
 
-      - name: Regenerate safety case
-        run: gofusa safety-case
-
       - name: Regenerate SBOM, provenance, and artifact manifest
         run: gofusa release
+
+      - name: Regenerate safety case
+        run: gofusa safety-case
 
       - name: Configure git
         run: |
@@ -57,7 +77,8 @@ jobs:
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
           git add -f fmea.csv fmea.json boundary.mermaid \
                      safety-case.json safety-case.md safety-case.mermaid \
-                     sbom.json provenance.json artifact-manifest.json
+                     sbom.json provenance.json artifact-manifest.json \
+                     check-report.json .fusa-evidence.json qualify-report.json
           if git diff --cached --quiet; then
             echo "No artifact changes for $TAG — nothing to commit."
           else

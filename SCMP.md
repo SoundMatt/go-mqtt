@@ -28,7 +28,7 @@ the toolchain.
 | Finding dispositions | `.fusa-dispositions.json` | Reviewer + rationale required |
 | Problem reports | `.fusa-problems.json` | Opened/closed via `gofusa pr` |
 | Generated evidence | `fmea.*`, `safety-case.*`, `sbom.json`, `provenance.json`, `boundary.mermaid`, `coupling-report.json`, `tara.*` | Regenerated and committed on release |
-| Toolchain pins | `go.mod`, CI workflow pins (go-FuSa `v0.36.0`, RELAY `v1.11.0`) | Explicit version pins |
+| Toolchain pins | `go.mod`, CI workflow pins (go-FuSa `v0.47.0`, RELAY `v1.11.0`) | Explicit version pins |
 
 ## 3. Configuration identification and baselines
 
@@ -62,7 +62,7 @@ per-release evidence commits provide the configuration status record.
 
 ## 7. Tool configuration management
 
-The verification toolchain is version-pinned: go-FuSa `v0.36.0` and RELAY
+The verification toolchain is version-pinned: go-FuSa `v0.47.0` and RELAY
 `v1.11.0` in both `.github/workflows/ci.yml` and `.github/workflows/release.yml`,
 and the RELAY dependency in `go.mod`. A tool version change is a controlled
 change subject to reverification (§4) and re-qualification (`gofusa qualify`).

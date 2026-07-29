@@ -30,10 +30,12 @@ for system-level HARA, hardware fault model (FMEDA), and allocation.
 Requirements are annotated in source code with `//fusa:req REQ-XXX-NNN`
 comments and verified by `//fusa:test` / `//fusa:sec-test` annotations,
 managed by [go-FuSa](https://github.com/SoundMatt/go-FuSa). The machine-readable
-requirement set is in `.fusa-reqs.json` (go-FuSa v0.30.0 moved the registry out
-of `.fusa.json`, which now holds only project/rule/report configuration). The
-related plans are [SVP.md](SVP.md), [SCMP.md](SCMP.md), [SQAP.md](SQAP.md), and
-the SEOOC [SAFETY_MANUAL.md](SAFETY_MANUAL.md).
+requirement set is in `.fusa-reqs.json` (the registry moved out of
+`.fusa.json` in go-FuSa v0.30.0; `.fusa.json` now holds only project/rule/
+report configuration). The CI toolchain is currently pinned to go-FuSa
+`v0.47.0` — see [SCMP.md](SCMP.md) §"Toolchain pins" for the authoritative
+pin. The related plans are [SVP.md](SVP.md), [SCMP.md](SCMP.md),
+[SQAP.md](SQAP.md), and the SEOOC [SAFETY_MANUAL.md](SAFETY_MANUAL.md).
 
 ### 2.1 Requirement families
 

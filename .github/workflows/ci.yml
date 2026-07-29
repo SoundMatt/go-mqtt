@@ -262,11 +262,12 @@ jobs:
         run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.11.0 interop --protocol MQTT --strict ./go-mqtt
 
   # ── go-FuSa full lifecycle (spec §20.1.2) ─────────────────────────────────
-  # Pinned to v0.36.0. The gating steps (check/trace/cyber/vuln/qualify) fail the
-  # job on any ERROR finding, untraced requirement, or failed qualification case.
-  # The remaining steps regenerate the §20.4/§20.5 evidence bundle.
+  # Pinned to v0.47.0. The gating steps (check/trace/cyber/vuln/qualify/fmea)
+  # fail the job on any ERROR finding, untraced requirement, failed
+  # qualification case, or (fmea) templated/boilerplate content. The
+  # remaining steps regenerate the §20.4/§20.5 evidence bundle.
   gofusa:
-    name: go-FuSa full lifecycle (v0.36.0)
+    name: go-FuSa full lifecycle (v0.47.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -274,7 +275,7 @@ jobs:
         with:
           go-version: "1.25"
       - name: Install go-FuSa
-        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.36.0
+        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.47.0
       # ── Gating: ERROR findings, traceability, security, vulns, qualification ──
       - name: gofusa check (gate on ERROR findings)
         run: gofusa check ./...
@@ -286,15 +287,27 @@ jobs:
         run: gofusa vuln
       - name: gofusa qualify (tool qualification suite)
         run: gofusa qualify
+      - name: gofusa fmea (dFMEA; gate on FUSA-STUB002 templated-content advisory)
+        run: gofusa fmea -cyber -strict
       # ── Evidence (§20.4 / §20.5): non-gating, regenerated on every run ──────
       - name: gofusa verify (test evidence bundle)
         run: gofusa verify || true
       - name: gofusa hara (validate hazard analysis loads)
         run: gofusa hara show >/dev/null
+      # gofusa tara is intentionally not `-strict`-gated and no longer masked
+      # with `|| true`: a genuine tool crash/config error now fails the job,
+      # but the FUSA-STUB002 "templated content" advisory below is a known,
+      # structural limitation for this codebase, not something -strict can
+      # fix — see the ::warning:: step for why, and go-mqtt#62 for the full
+      # analysis. Surfaced loudly rather than silently swallowed.
       - name: gofusa tara (ISO 21434 threat analysis)
-        run: gofusa tara || true
-      - name: gofusa fmea (dFMEA)
-        run: gofusa fmea -cyber || true
+        run: gofusa tara 2>&1 | tee tara-stdout.log
+      - name: Explain a non-gating tara FUSA-STUB002 finding, if present
+        if: always()
+        run: |
+          if grep -q 'FUSA-STUB002' tara-stdout.log 2>/dev/null; then
+            echo "::warning::gofusa tara reported FUSA-STUB002 (templated-content advisory): CYBER009 (integer narrowing conversion) fires on ~50 legitimate byte-level MQTT wire-encoding sites, so tara.json's threat/asset text is dominated by that one rule's fixed message — a structural property of TARA's rule-to-threat mapping for a wire-protocol codec, not authored boilerplate. Not -strict-gated; see go-mqtt#62."
+          fi
       - name: gofusa boundary (architecture diagram)
         run: gofusa boundary || true
       - name: gofusa coupling (data/control coupling)
