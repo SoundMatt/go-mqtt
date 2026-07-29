@@ -12,7 +12,22 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+
+	mqtt "github.com/SoundMatt/go-mqtt"
 )
+
+// DefaultMaxRemainingLength is the default upper bound readPacket enforces on
+// a single MQTT packet's "remaining length" field, applied *before* the body
+// buffer is allocated. The MQTT wire format's remaining-length varint can
+// legitimately encode up to 268,435,455 bytes (~256 MiB), and readPacket runs
+// for the very first packet on a connection (CONNECT), before any
+// authentication happens — so leaving this unbounded lets any TCP peer force
+// a large allocation pre-auth. 1 MiB comfortably covers ordinary telemetry/
+// IoT payloads; override with WithMaxMessageSize for workloads that
+// legitimately need larger packets.
+//
+//fusa:req REQ-SEC-010
+const DefaultMaxRemainingLength = 1 << 20 // 1 MiB
 
 // MQTT v3.1.1 packet type constants (fixed-header first nibble).
 const (
@@ -81,10 +96,14 @@ func packet(header byte, body []byte) []byte {
 	return append(pkt, body...)
 }
 
-// readPacket reads one full MQTT packet, returning the fixed-header byte and body.
+// readPacket reads one full MQTT packet, returning the fixed-header byte and
+// body. maxRemaining bounds the remaining-length field: a value that exceeds
+// it is rejected (wrapping mqtt.ErrPayloadTooLarge) before the body buffer is
+// allocated. maxRemaining <= 0 means no limit.
 //
 //fusa:req REQ-BROKER-WIRE-001
-func readPacket(r io.Reader) (byte, []byte, error) {
+//fusa:req REQ-SEC-010
+func readPacket(r io.Reader, maxRemaining int) (byte, []byte, error) {
 	var hdr [1]byte
 	if _, err := io.ReadFull(r, hdr[:]); err != nil {
 		return 0, nil, err
@@ -92,6 +111,9 @@ func readPacket(r io.Reader) (byte, []byte, error) {
 	remLen, err := readVarLen(r)
 	if err != nil {
 		return 0, nil, err
+	}
+	if maxRemaining > 0 && remLen > maxRemaining {
+		return 0, nil, fmt.Errorf("broker: remaining length %d exceeds the %d-byte limit: %w", remLen, maxRemaining, mqtt.ErrPayloadTooLarge)
 	}
 	body := make([]byte, remLen)
 	if remLen > 0 {

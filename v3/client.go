@@ -108,12 +108,34 @@ type will struct {
 }
 
 type options struct {
-	clientID    string
-	keepalive   time.Duration
-	dialTimeout time.Duration
-	will        *will
-	qos2Timeout time.Duration
-	tlsConfig   *tls.Config
+	clientID       string
+	keepalive      time.Duration
+	dialTimeout    time.Duration
+	will           *will
+	qos2Timeout    time.Duration
+	tlsConfig      *tls.Config
+	maxMessageSize int
+}
+
+// DefaultMaxRemainingLength is the default upper bound the client enforces on
+// an inbound MQTT packet's "remaining length" field, applied before the body
+// buffer is allocated. Without this, a malicious or compromised broker can
+// send a packet header claiming a remaining length up to 268,435,455 bytes
+// (~256 MiB) and force the client to allocate that much memory before the
+// packet is even parsed. Override with WithMaxMessageSize.
+//
+//fusa:req REQ-SEC-010
+const DefaultMaxRemainingLength = 1 << 20 // 1 MiB
+
+// WithMaxMessageSize sets the maximum MQTT "remaining length" the client
+// accepts on any single inbound packet; a packet claiming more is treated as
+// a protocol violation and the connection is dropped before the body is
+// read. n <= 0 disables the limit (unbounded — not recommended against an
+// untrusted broker). Defaults to DefaultMaxRemainingLength.
+//
+//fusa:req REQ-SEC-010
+func WithMaxMessageSize(n int) Option {
+	return func(o *options) { o.maxMessageSize = n }
 }
 
 // WithClientID sets the MQTT client identifier sent in the CONNECT packet.
@@ -217,10 +239,11 @@ func dial(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error)
 // newOptions applies defaults then the supplied options.
 func newOptions(opts []Option) *options {
 	o := &options{
-		clientID:    fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
-		keepalive:   30 * time.Second,
-		dialTimeout: 10 * time.Second,
-		qos2Timeout: 10 * time.Second,
+		clientID:       fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
+		keepalive:      30 * time.Second,
+		dialTimeout:    10 * time.Second,
+		qos2Timeout:    10 * time.Second,
+		maxMessageSize: DefaultMaxRemainingLength,
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -549,6 +572,12 @@ func (c *v3Client) readLoop() {
 		if err != nil {
 			return
 		}
+		if max := c.opts.maxMessageSize; max > 0 && remLen > max {
+			// A broker-controlled remaining length beyond the configured
+			// limit is treated the same as any other protocol violation:
+			// drop the connection before allocating the body buffer.
+			return
+		}
 
 		body := make([]byte, remLen)
 		if remLen > 0 {
@@ -659,10 +688,7 @@ func (c *v3Client) deliver(topic string, msg mqtt.Message) {
 	c.mu.RUnlock()
 
 	for _, sub := range matched {
-		select {
-		case sub.ch <- msg:
-		default: // drop if full
-		}
+		sub.deliver(msg)
 	}
 }
 
@@ -771,5 +797,26 @@ func (s *v3Subscription) closeOnce() {
 	if !s.closed {
 		s.closed = true
 		close(s.ch)
+	}
+}
+
+// deliver performs a non-blocking send to the subscription's channel. It
+// returns true if the message was delivered, false if dropped (channel full)
+// or if the subscription has been closed. Holding mu makes deliver safe
+// against a concurrent Close/closeOnce, preventing a send on a closed
+// channel.
+//
+//fusa:req REQ-CONC-003
+func (s *v3Subscription) deliver(msg mqtt.Message) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed {
+		return false
+	}
+	select {
+	case s.ch <- msg:
+		return true
+	default:
+		return false
 	}
 }

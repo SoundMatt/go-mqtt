@@ -14,6 +14,7 @@ import (
 	"net"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	mqtt "github.com/SoundMatt/go-mqtt"
 )
@@ -63,13 +64,25 @@ func (s *session) send(pkt []byte) error {
 	return err
 }
 
+// setReadDeadline applies the server's configured idle timeout to the next
+// packet read, so a peer that opens a connection and never completes sending
+// a packet (including CONNECT) cannot hold the session open indefinitely.
+//
+//fusa:req REQ-BROKER-011
+func (s *session) setReadDeadline() {
+	if s.server.idleTimeout > 0 {
+		_ = s.conn.SetReadDeadline(time.Now().Add(s.server.idleTimeout))
+	}
+}
+
 // serve runs the session protocol: CONNECT first, then a packet loop.
 //
 //fusa:req REQ-BROKER-004
 func (s *session) serve() {
 	defer s.cleanup()
 
-	hdr, body, err := readPacket(s.conn)
+	s.setReadDeadline()
+	hdr, body, err := readPacket(s.conn, s.server.maxMessageSize)
 	if err != nil || hdr&0xF0 != pktCONNECT&0xF0 {
 		return
 	}
@@ -79,7 +92,8 @@ func (s *session) serve() {
 	s.server.register(s)
 
 	for {
-		hdr, body, err := readPacket(s.conn)
+		s.setReadDeadline()
+		hdr, body, err := readPacket(s.conn, s.server.maxMessageSize)
 		if err != nil {
 			return
 		}
@@ -319,6 +333,7 @@ func (s *session) deliver(topic string, payload []byte, qos byte, retain bool) b
 func (s *session) cleanup() {
 	_ = s.conn.Close()
 	s.server.unregister(s)
+	s.server.connCount.Add(-1)
 	if !s.disconnected && s.will != nil {
 		s.server.publish(s.will.topic, s.will.payload, s.will.qos, s.will.retain)
 	}
