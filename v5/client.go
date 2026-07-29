@@ -115,18 +115,30 @@ import (
 type Option func(*options)
 
 type options struct {
-	clientID      string
-	keepalive     time.Duration
-	dialTimeout   time.Duration
-	sessionExpiry uint32 // 0 = session ends on disconnect
-	receiveMax    uint16 // 0 = do not send (server default applies)
+	clientID       string
+	keepalive      time.Duration
+	dialTimeout    time.Duration
+	sessionExpiry  uint32 // 0 = session ends on disconnect
+	receiveMax     uint16 // 0 = do not send (server default applies)
+	maxMessageSize int
 }
+
+// DefaultMaxRemainingLength is the default upper bound the client enforces on
+// an inbound MQTT packet's "remaining length" field, applied before the body
+// buffer is allocated. Without this, a malicious or compromised broker can
+// send a packet header claiming a remaining length up to 268,435,455 bytes
+// (~256 MiB) and force the client to allocate that much memory before the
+// packet is even parsed. Override with WithMaxMessageSize.
+//
+//fusa:req REQ-SEC-010
+const DefaultMaxRemainingLength = 1 << 20 // 1 MiB
 
 func defaultOptions() *options {
 	return &options{
-		clientID:    fmt.Sprintf("go-mqtt-v5-%d", time.Now().UnixNano()),
-		keepalive:   30 * time.Second,
-		dialTimeout: 10 * time.Second,
+		clientID:       fmt.Sprintf("go-mqtt-v5-%d", time.Now().UnixNano()),
+		keepalive:      30 * time.Second,
+		dialTimeout:    10 * time.Second,
+		maxMessageSize: DefaultMaxRemainingLength,
 	}
 }
 
@@ -135,6 +147,15 @@ func WithClientID(id string) Option { return func(o *options) { o.clientID = id 
 
 // WithKeepalive sets the MQTT keepalive interval. Default: 30s.
 func WithKeepalive(d time.Duration) Option { return func(o *options) { o.keepalive = d } }
+
+// WithMaxMessageSize sets the maximum MQTT "remaining length" the client
+// accepts on any single inbound packet; a packet claiming more is treated as
+// a protocol violation and the connection is dropped before the body is
+// read. n <= 0 disables the limit (unbounded — not recommended against an
+// untrusted broker). Defaults to DefaultMaxRemainingLength.
+//
+//fusa:req REQ-SEC-010
+func WithMaxMessageSize(n int) Option { return func(o *options) { o.maxMessageSize = n } }
 
 // WithDialTimeout sets the TCP dial timeout. Default: 10s.
 func WithDialTimeout(d time.Duration) Option { return func(o *options) { o.dialTimeout = d } }
@@ -254,6 +275,9 @@ func (c *Client) readCONNACK() error {
 	remLen, err := readVarLen(c.conn)
 	if err != nil {
 		return err
+	}
+	if max := c.opts.maxMessageSize; max > 0 && remLen > max {
+		return fmt.Errorf("mqtt/v5: CONNACK remaining length %d exceeds the %d-byte limit: %w", remLen, max, mqtt.ErrPayloadTooLarge)
 	}
 	body := make([]byte, remLen)
 	if _, err := io.ReadFull(c.conn, body); err != nil {
@@ -463,6 +487,12 @@ func (c *Client) readLoop() {
 		if err != nil {
 			return
 		}
+		if max := c.opts.maxMessageSize; max > 0 && remLen > max {
+			// A broker-controlled remaining length beyond the configured
+			// limit is treated the same as any other protocol violation:
+			// drop the connection before allocating the body buffer.
+			return
+		}
 		body := make([]byte, remLen)
 		if remLen > 0 {
 			if _, err := io.ReadFull(c.conn, body); err != nil {
@@ -584,10 +614,7 @@ func (c *Client) handlePUBLISH(hdr byte, body []byte) {
 	c.mu.RUnlock()
 
 	for _, sub := range matched {
-		select {
-		case sub.ch <- msg:
-		default: // drop if channel is full
-		}
+		sub.deliver(msg)
 	}
 }
 
@@ -635,5 +662,26 @@ func (s *v5Subscription) closeOnce() {
 	if !s.closed {
 		s.closed = true
 		close(s.ch)
+	}
+}
+
+// deliver performs a non-blocking send to the subscription's channel. It
+// returns true if the message was delivered, false if dropped (channel full)
+// or if the subscription has been closed. Holding mu makes deliver safe
+// against a concurrent Close/closeOnce, preventing a send on a closed
+// channel.
+//
+//fusa:req REQ-CONC-003
+func (s *v5Subscription) deliver(msg mqtt.Message) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed {
+		return false
+	}
+	select {
+	case s.ch <- msg:
+		return true
+	default:
+		return false
 	}
 }

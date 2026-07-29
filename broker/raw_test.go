@@ -61,7 +61,7 @@ func rawConnect(t *testing.T, addr, clientID string, w *willMsg) net.Conn {
 	if _, werr := conn.Write(packet(pktCONNECT, body)); werr != nil {
 		t.Fatalf("raw CONNECT: %v", werr)
 	}
-	hdr, _, err := readPacket(conn)
+	hdr, _, err := readPacket(conn, 0)
 	if err != nil || hdr&0xF0 != pktCONNACK&0xF0 {
 		t.Fatalf("raw CONNACK: hdr=0x%02x err=%v", hdr, err)
 	}

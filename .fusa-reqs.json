@@ -1511,6 +1511,22 @@
       "standard": "ISO 21434",
       "level": "LLR",
       "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-010",
+      "title": "Bounded remaining-length allocation",
+      "text": "A received MQTT Remaining Length must be validated against a configured maximum before the packet body buffer is allocated, in the broker (pre-authentication) and in the v3/v5 clients, preventing unbounded memory allocation from untrusted wire input.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-BROKER-011",
+      "title": "Idle read timeout",
+      "text": "A broker session's connection must have a read deadline applied before each packet read so a peer that opens a connection and never completes sending a packet cannot hold broker resources indefinitely.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
     }
   ]
 }

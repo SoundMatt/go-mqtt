@@ -35,9 +35,20 @@ import (
 	"net"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	mqtt "github.com/SoundMatt/go-mqtt"
 )
+
+// DefaultIdleTimeout bounds how long a session's connection may sit without
+// completing a single MQTT packet (including the initial CONNECT) before the
+// broker closes it. Without this, a connection that opens a socket and never
+// finishes sending a packet (a slow-loris-style peer) can hold a goroutine
+// and a listener slot indefinitely. Override with WithIdleTimeout; a
+// non-positive value disables the deadline.
+//
+//fusa:req REQ-BROKER-011
+const DefaultIdleTimeout = 60 * time.Second
 
 // Server is an MQTT broker. The zero value is not usable; call New.
 //
@@ -50,7 +61,11 @@ type Server struct {
 	listeners map[net.Listener]struct{}
 	closed    atomic.Bool
 
-	tlsConfig *tls.Config
+	tlsConfig      *tls.Config
+	maxMessageSize int
+	idleTimeout    time.Duration
+	maxConns       int
+	connCount      atomic.Int64
 
 	writeCount     atomic.Uint64
 	deliverCount   atomic.Uint64
@@ -73,15 +88,47 @@ func WithTLS(cfg *tls.Config) Option {
 	return func(s *Server) { s.tlsConfig = cfg }
 }
 
+// WithMaxMessageSize sets the maximum MQTT "remaining length" (fixed header +
+// variable header + payload) the broker accepts on any single packet,
+// including the pre-authentication CONNECT. A packet whose remaining length
+// exceeds n causes the session to be dropped before the body is read into
+// memory. n <= 0 disables the limit (unbounded — not recommended for a
+// broker reachable by untrusted peers). Defaults to
+// DefaultMaxRemainingLength.
+//
+//fusa:req REQ-SEC-010
+func WithMaxMessageSize(n int) Option {
+	return func(s *Server) { s.maxMessageSize = n }
+}
+
+// WithIdleTimeout sets how long a session's connection may sit without
+// completing a packet read before the broker closes it. d <= 0 disables the
+// deadline. Defaults to DefaultIdleTimeout.
+//
+//fusa:req REQ-BROKER-011
+func WithIdleTimeout(d time.Duration) Option {
+	return func(s *Server) { s.idleTimeout = d }
+}
+
+// WithMaxConnections caps the number of simultaneously connected sessions.
+// A connection accepted beyond the cap is closed immediately, before any
+// protocol processing, as defense in depth against connection-exhaustion
+// attacks. n <= 0 (the default) leaves the count unbounded.
+func WithMaxConnections(n int) Option {
+	return func(s *Server) { s.maxConns = n }
+}
+
 // New creates a Server.
 //
 //fusa:req REQ-BROKER-001
 func New(opts ...Option) *Server {
 	s := &Server{
-		sessions:  make(map[*session]struct{}),
-		retained:  make(map[string][]byte),
-		retainQoS: make(map[string]byte),
-		listeners: make(map[net.Listener]struct{}),
+		sessions:       make(map[*session]struct{}),
+		retained:       make(map[string][]byte),
+		retainQoS:      make(map[string]byte),
+		listeners:      make(map[net.Listener]struct{}),
+		maxMessageSize: DefaultMaxRemainingLength,
+		idleTimeout:    DefaultIdleTimeout,
 	}
 	for _, o := range opts {
 		o(s)
@@ -128,6 +175,13 @@ func (s *Server) Serve(ln net.Listener) error {
 			}
 			return err
 		}
+		if s.maxConns > 0 && s.connCount.Load() >= int64(s.maxConns) {
+			// Defense in depth: reject beyond the configured cap before any
+			// protocol processing (no CONNECT read, no allocation).
+			_ = conn.Close()
+			continue
+		}
+		s.connCount.Add(1)
 		sess := &session{conn: conn, server: s, subs: make(map[string]byte), qos2In: make(map[uint16]qos2Pending)}
 		go sess.serve()
 	}
