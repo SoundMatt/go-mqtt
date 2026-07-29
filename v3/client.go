@@ -659,10 +659,7 @@ func (c *v3Client) deliver(topic string, msg mqtt.Message) {
 	c.mu.RUnlock()
 
 	for _, sub := range matched {
-		select {
-		case sub.ch <- msg:
-		default: // drop if full
-		}
+		sub.deliver(msg)
 	}
 }
 
@@ -771,5 +768,26 @@ func (s *v3Subscription) closeOnce() {
 	if !s.closed {
 		s.closed = true
 		close(s.ch)
+	}
+}
+
+// deliver performs a non-blocking send to the subscription channel. It
+// returns true if the message was delivered, false if dropped (channel
+// full) or if the subscription has been closed. Holding mu makes deliver
+// safe against a concurrent closeOnce, preventing a send on a closed
+// channel — mirrors mockSubscription.deliver in mock/mock.go.
+//
+//fusa:req REQ-CONC-003
+func (s *v3Subscription) deliver(msg mqtt.Message) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed {
+		return false
+	}
+	select {
+	case s.ch <- msg:
+		return true
+	default:
+		return false
 	}
 }

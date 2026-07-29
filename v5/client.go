@@ -584,10 +584,7 @@ func (c *Client) handlePUBLISH(hdr byte, body []byte) {
 	c.mu.RUnlock()
 
 	for _, sub := range matched {
-		select {
-		case sub.ch <- msg:
-		default: // drop if channel is full
-		}
+		sub.deliver(msg)
 	}
 }
 
@@ -635,5 +632,26 @@ func (s *v5Subscription) closeOnce() {
 	if !s.closed {
 		s.closed = true
 		close(s.ch)
+	}
+}
+
+// deliver performs a non-blocking send to the subscription channel. It
+// returns true if the message was delivered, false if dropped (channel
+// full) or if the subscription has been closed. Holding mu makes deliver
+// safe against a concurrent closeOnce, preventing a send on a closed
+// channel — mirrors mockSubscription.deliver in mock/mock.go.
+//
+//fusa:req REQ-CONC-003
+func (s *v5Subscription) deliver(msg mqtt.Message) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed {
+		return false
+	}
+	select {
+	case s.ch <- msg:
+		return true
+	default:
+		return false
 	}
 }
