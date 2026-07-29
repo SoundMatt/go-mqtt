@@ -108,12 +108,13 @@ type will struct {
 }
 
 type options struct {
-	clientID    string
-	keepalive   time.Duration
-	dialTimeout time.Duration
-	will        *will
-	qos2Timeout time.Duration
-	tlsConfig   *tls.Config
+	clientID           string
+	keepalive          time.Duration
+	dialTimeout        time.Duration
+	will               *will
+	qos2Timeout        time.Duration
+	tlsConfig          *tls.Config
+	maxRemainingLength int
 }
 
 // WithClientID sets the MQTT client identifier sent in the CONNECT packet.
@@ -170,6 +171,18 @@ func WithWill(topic string, payload []byte, qos mqtt.QoS, retain bool) Option {
 	}
 }
 
+// WithMaxRemainingLength sets the maximum accepted MQTT "remaining length"
+// value (packet body size) in bytes. A packet from the broker declaring a
+// larger remaining length causes the read loop to stop (as with any other
+// malformed packet) rather than allocate an unbounded buffer, protecting
+// against a malicious or compromised broker forcing excessive memory use.
+// Default: mqtt.DefaultMaxRemainingLength (1 MiB).
+//
+//fusa:req REQ-SEC-010
+func WithMaxRemainingLength(n int) Option {
+	return func(o *options) { o.maxRemainingLength = n }
+}
+
 // Dial connects to the MQTT broker at addr (e.g. "localhost:1883") and
 // returns a Client ready for publish/subscribe operations.
 //
@@ -217,10 +230,11 @@ func dial(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error)
 // newOptions applies defaults then the supplied options.
 func newOptions(opts []Option) *options {
 	o := &options{
-		clientID:    fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
-		keepalive:   30 * time.Second,
-		dialTimeout: 10 * time.Second,
-		qos2Timeout: 10 * time.Second,
+		clientID:           fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
+		keepalive:          30 * time.Second,
+		dialTimeout:        10 * time.Second,
+		qos2Timeout:        10 * time.Second,
+		maxRemainingLength: mqtt.DefaultMaxRemainingLength,
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -521,6 +535,7 @@ func (c *v3Client) removeSubscription(sub *v3Subscription) {
 //fusa:req REQ-FAULT-003
 //fusa:req REQ-LEAK-001
 //fusa:req REQ-SEC-005
+//fusa:req REQ-SEC-010
 func (c *v3Client) readLoop() {
 	defer func() {
 		c.mu.RLock()
@@ -547,6 +562,12 @@ func (c *v3Client) readLoop() {
 
 		remLen, err := readVarLen(c.conn)
 		if err != nil {
+			return
+		}
+		// REQ-SEC-010: bound the allocation below a malicious or compromised
+		// broker can otherwise force with an oversized remaining-length
+		// header — treated the same as any other malformed packet.
+		if remLen > c.opts.maxRemainingLength {
 			return
 		}
 

@@ -91,6 +91,22 @@ var ErrTopicEmpty = fmt.Errorf("mqtt: topic must not be empty: %w", relay.ErrNot
 // ErrQoSUnsupported is returned when a QoS level is not supported.
 var ErrQoSUnsupported = fmt.Errorf("mqtt: QoS level not supported: %w", relay.ErrNotConnected)
 
+// DefaultMaxRemainingLength is the default upper bound, in bytes, on an MQTT
+// packet's variable-length "remaining length" field enforced by this module's
+// broker and clients before allocating a receive buffer for the packet body
+// (SAFETY_MANUAL.md §4.3, "Bounded inputs"). It is well under the MQTT wire
+// format's own 4-byte varint structural maximum (268,435,455 bytes, ~256 MiB)
+// — without a bound like this, a peer can force a ~256 MiB allocation per
+// connection from a five-byte header alone, before any authentication has
+// taken place. The value matches this module's existing 1 MiB REST gateway
+// default (bridge/rest.WithMaxBody) while remaining generous for realistic
+// vehicle-signal / IoT payloads; integrators with different needs can
+// override it (broker.WithMaxRemainingLength, v3.WithMaxRemainingLength,
+// v5.WithMaxRemainingLength).
+//
+//fusa:req REQ-SEC-010
+const DefaultMaxRemainingLength = 1 << 20 // 1 MiB
+
 // ── QoS ──────────────────────────────────────────────────────────────────────
 
 //fusa:req REQ-QOS-001

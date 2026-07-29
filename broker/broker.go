@@ -35,9 +35,19 @@ import (
 	"net"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	mqtt "github.com/SoundMatt/go-mqtt"
 )
+
+// DefaultIdleTimeout is the default read/idle deadline applied to every
+// accepted connection (REQ-SEC-010): a peer that sends nothing for this long
+// — including one that never completes CONNECT — is disconnected, so a
+// slow/partial-write attacker cannot hold a connection (and its goroutine)
+// open indefinitely. It comfortably exceeds this module's default client
+// keepalive (30s, see v3/v5 WithKeepalive) so a well-behaved client's
+// PINGREQ traffic never trips it.
+const DefaultIdleTimeout = 90 * time.Second
 
 // Server is an MQTT broker. The zero value is not usable; call New.
 //
@@ -51,6 +61,9 @@ type Server struct {
 	closed    atomic.Bool
 
 	tlsConfig *tls.Config
+
+	maxRemainingLength int           // REQ-SEC-010: bound on a packet's decoded remaining-length field
+	idleTimeout        time.Duration // REQ-SEC-010: read deadline reapplied before every packet read; <=0 disables it
 
 	writeCount     atomic.Uint64
 	deliverCount   atomic.Uint64
@@ -73,15 +86,41 @@ func WithTLS(cfg *tls.Config) Option {
 	return func(s *Server) { s.tlsConfig = cfg }
 }
 
+// WithMaxRemainingLength sets the maximum accepted MQTT "remaining length"
+// value (i.e. packet body size) in bytes. A connection that sends a packet
+// declaring a larger remaining length is disconnected before the body buffer
+// is allocated — including pre-authentication, since this bound also applies
+// to the very first packet (CONNECT) read from an accepted connection.
+// Default: mqtt.DefaultMaxRemainingLength (1 MiB).
+//
+//fusa:req REQ-SEC-010
+func WithMaxRemainingLength(n int) Option {
+	return func(s *Server) { s.maxRemainingLength = n }
+}
+
+// WithIdleTimeout sets the read deadline reapplied to a connection before
+// every packet read (including the first, pre-authentication, read). A
+// connection that sends nothing — or sends only part of a packet — for
+// longer than d is disconnected. Pass d <= 0 to disable the deadline
+// entirely (not recommended for connections reachable from an untrusted
+// network). Default: DefaultIdleTimeout (90s).
+//
+//fusa:req REQ-SEC-010
+func WithIdleTimeout(d time.Duration) Option {
+	return func(s *Server) { s.idleTimeout = d }
+}
+
 // New creates a Server.
 //
 //fusa:req REQ-BROKER-001
 func New(opts ...Option) *Server {
 	s := &Server{
-		sessions:  make(map[*session]struct{}),
-		retained:  make(map[string][]byte),
-		retainQoS: make(map[string]byte),
-		listeners: make(map[net.Listener]struct{}),
+		sessions:           make(map[*session]struct{}),
+		retained:           make(map[string][]byte),
+		retainQoS:          make(map[string]byte),
+		listeners:          make(map[net.Listener]struct{}),
+		maxRemainingLength: mqtt.DefaultMaxRemainingLength,
+		idleTimeout:        DefaultIdleTimeout,
 	}
 	for _, o := range opts {
 		o(s)

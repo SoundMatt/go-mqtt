@@ -12,6 +12,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+
+	mqtt "github.com/SoundMatt/go-mqtt"
 )
 
 // MQTT v3.1.1 packet type constants (fixed-header first nibble).
@@ -81,10 +83,17 @@ func packet(header byte, body []byte) []byte {
 	return append(pkt, body...)
 }
 
-// readPacket reads one full MQTT packet, returning the fixed-header byte and body.
+// readPacket reads one full MQTT packet, returning the fixed-header byte and
+// body. maxRemainingLength bounds the decoded remaining-length field: a
+// packet declaring more than maxRemainingLength bytes is rejected with an
+// error wrapping mqtt.ErrPayloadTooLarge before the body buffer is
+// allocated, so a peer cannot force an unbounded (up to ~256 MiB)
+// allocation from a five-byte header alone — including pre-authentication,
+// since this is also the first thing session.serve reads.
 //
 //fusa:req REQ-BROKER-WIRE-001
-func readPacket(r io.Reader) (byte, []byte, error) {
+//fusa:req REQ-SEC-010
+func readPacket(r io.Reader, maxRemainingLength int) (byte, []byte, error) {
 	var hdr [1]byte
 	if _, err := io.ReadFull(r, hdr[:]); err != nil {
 		return 0, nil, err
@@ -92,6 +101,9 @@ func readPacket(r io.Reader) (byte, []byte, error) {
 	remLen, err := readVarLen(r)
 	if err != nil {
 		return 0, nil, err
+	}
+	if remLen > maxRemainingLength {
+		return 0, nil, fmt.Errorf("broker: remaining length %d exceeds maximum %d: %w", remLen, maxRemainingLength, mqtt.ErrPayloadTooLarge)
 	}
 	body := make([]byte, remLen)
 	if remLen > 0 {
