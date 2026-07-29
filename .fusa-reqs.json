@@ -1511,6 +1511,14 @@
       "standard": "ISO 21434",
       "level": "LLR",
       "asil": "ASIL-B"
+    },
+    {
+      "id": "REQ-SEC-010",
+      "title": "Bounded remaining-length allocation",
+      "text": "The broker and the v3/v5 clients must reject an MQTT packet whose decoded remaining-length field exceeds a configured maximum before allocating a receive buffer for the packet body, so a peer cannot force an unbounded (up to ~256 MiB) allocation from a five-byte header alone.",
+      "standard": "ISO 21434",
+      "level": "LLR",
+      "asil": "ASIL-B"
     }
   ]
 }

@@ -14,6 +14,7 @@ import (
 	"net"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	mqtt "github.com/SoundMatt/go-mqtt"
 )
@@ -63,13 +64,28 @@ func (s *session) send(pkt []byte) error {
 	return err
 }
 
+// setReadDeadline reapplies the server's idle-read deadline before the next
+// packet read, so a connection that sends nothing (or only part of a
+// packet) for longer than server.idleTimeout is reaped rather than held
+// open indefinitely — including pre-authentication, since this is called
+// before the very first (CONNECT) read too.
+//
+//fusa:req REQ-SEC-010
+func (s *session) setReadDeadline() {
+	if s.server.idleTimeout > 0 {
+		_ = s.conn.SetReadDeadline(time.Now().Add(s.server.idleTimeout))
+	}
+}
+
 // serve runs the session protocol: CONNECT first, then a packet loop.
 //
 //fusa:req REQ-BROKER-004
+//fusa:req REQ-SEC-010
 func (s *session) serve() {
 	defer s.cleanup()
 
-	hdr, body, err := readPacket(s.conn)
+	s.setReadDeadline()
+	hdr, body, err := readPacket(s.conn, s.server.maxRemainingLength)
 	if err != nil || hdr&0xF0 != pktCONNECT&0xF0 {
 		return
 	}
@@ -79,7 +95,8 @@ func (s *session) serve() {
 	s.server.register(s)
 
 	for {
-		hdr, body, err := readPacket(s.conn)
+		s.setReadDeadline()
+		hdr, body, err := readPacket(s.conn, s.server.maxRemainingLength)
 		if err != nil {
 			return
 		}

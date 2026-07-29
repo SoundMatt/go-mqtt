@@ -115,18 +115,20 @@ import (
 type Option func(*options)
 
 type options struct {
-	clientID      string
-	keepalive     time.Duration
-	dialTimeout   time.Duration
-	sessionExpiry uint32 // 0 = session ends on disconnect
-	receiveMax    uint16 // 0 = do not send (server default applies)
+	clientID           string
+	keepalive          time.Duration
+	dialTimeout        time.Duration
+	sessionExpiry      uint32 // 0 = session ends on disconnect
+	receiveMax         uint16 // 0 = do not send (server default applies)
+	maxRemainingLength int
 }
 
 func defaultOptions() *options {
 	return &options{
-		clientID:    fmt.Sprintf("go-mqtt-v5-%d", time.Now().UnixNano()),
-		keepalive:   30 * time.Second,
-		dialTimeout: 10 * time.Second,
+		clientID:           fmt.Sprintf("go-mqtt-v5-%d", time.Now().UnixNano()),
+		keepalive:          30 * time.Second,
+		dialTimeout:        10 * time.Second,
+		maxRemainingLength: mqtt.DefaultMaxRemainingLength,
 	}
 }
 
@@ -147,6 +149,16 @@ func WithSessionExpiry(secs uint32) Option { return func(o *options) { o.session
 // WithReceiveMax limits the number of in-flight QoS 1 messages the client
 // will accept from the broker simultaneously. 0 means no client-side limit.
 func WithReceiveMax(n uint16) Option { return func(o *options) { o.receiveMax = n } }
+
+// WithMaxRemainingLength sets the maximum accepted MQTT "remaining length"
+// value (packet body size) in bytes. A packet from the broker declaring a
+// larger remaining length is treated as fatal (as with any other malformed
+// packet) rather than allocate an unbounded buffer, protecting against a
+// malicious or compromised broker forcing excessive memory use. Default:
+// mqtt.DefaultMaxRemainingLength (1 MiB).
+//
+//fusa:req REQ-SEC-010
+func WithMaxRemainingLength(n int) Option { return func(o *options) { o.maxRemainingLength = n } }
 
 // Client is an MQTT v5.0 client. It implements mqtt.Client and adds v5
 // extensions via PublishV5 and SubscribeV5.
@@ -254,6 +266,12 @@ func (c *Client) readCONNACK() error {
 	remLen, err := readVarLen(c.conn)
 	if err != nil {
 		return err
+	}
+	// REQ-SEC-010: bound the allocation a malicious or compromised broker
+	// can otherwise force with an oversized remaining-length header, even
+	// before the handshake completes.
+	if remLen > c.opts.maxRemainingLength {
+		return fmt.Errorf("mqtt/v5: CONNACK remaining length %d exceeds maximum %d: %w", remLen, c.opts.maxRemainingLength, mqtt.ErrPayloadTooLarge)
 	}
 	body := make([]byte, remLen)
 	if _, err := io.ReadFull(c.conn, body); err != nil {
@@ -435,6 +453,7 @@ func (c *Client) removeSubscription(sub *v5Subscription) {
 //fusa:req REQ-FAULT-002
 //fusa:req REQ-FAULT-003
 //fusa:req REQ-LEAK-001
+//fusa:req REQ-SEC-010
 func (c *Client) readLoop() {
 	defer func() {
 		c.mu.RLock()
@@ -461,6 +480,12 @@ func (c *Client) readLoop() {
 
 		remLen, err := readVarLen(c.conn)
 		if err != nil {
+			return
+		}
+		// REQ-SEC-010: bound the allocation below what a malicious or
+		// compromised broker can otherwise force with an oversized
+		// remaining-length header — treated as any other malformed packet.
+		if remLen > c.opts.maxRemainingLength {
 			return
 		}
 		body := make([]byte, remLen)

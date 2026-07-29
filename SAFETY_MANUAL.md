@@ -52,9 +52,15 @@ allocated system-level requirements, in particular:
    and client authentication (mTLS) is configured where the threat model
    requires it. See REQ-SEC-001/002/003.
 3. **Bounded inputs.** The integrator configures payload-size limits
-   (e.g. REST `WithMaxBody`) and subscription channel depths appropriate to the
-   platform's memory budget. go-mqtt rejects oversized REST bodies and applies
-   non-blocking delivery (REQ-SEC-006, REQ-SAFETY-008).
+   (e.g. REST `WithMaxBody`, broker/v3/v5 `WithMaxRemainingLength`) and
+   subscription channel depths appropriate to the platform's memory budget.
+   go-mqtt rejects oversized REST bodies and MQTT packets before allocating a
+   receive buffer for them (REQ-SEC-006, REQ-SEC-010, REQ-SAFETY-008); the
+   broker and v3/v5 clients default to `mqtt.DefaultMaxRemainingLength`
+   (1 MiB), well under the MQTT wire format's own ~256 MiB structural
+   maximum. The embedded broker also applies a read/idle deadline to every
+   accepted connection (`broker.WithIdleTimeout`, default 90s) so a
+   slow/partial-write peer cannot hold a connection open indefinitely.
 4. **Back-pressure policy.** The integrator selects a `BackPressurePolicy`
    (DropNewest/DropOldest/Block) consistent with the safety requirement; the
    default drops on a full channel and never blocks delivery.
