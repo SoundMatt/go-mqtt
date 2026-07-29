@@ -262,11 +262,12 @@ jobs:
         run: go run github.com/SoundMatt/RELAY/cmd/relay@v1.11.0 interop --protocol MQTT --strict ./go-mqtt
 
   # ── go-FuSa full lifecycle (spec §20.1.2) ─────────────────────────────────
-  # Pinned to v0.36.0. The gating steps (check/trace/cyber/vuln/qualify) fail the
+  # Pinned to v0.47.0. The gating steps (check/trace/cyber/vuln/qualify) fail the
   # job on any ERROR finding, untraced requirement, or failed qualification case.
+  # tara/fmea are also gated on a minimum evidence-coverage floor (see below).
   # The remaining steps regenerate the §20.4/§20.5 evidence bundle.
   gofusa:
-    name: go-FuSa full lifecycle (v0.36.0)
+    name: go-FuSa full lifecycle (v0.47.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -274,7 +275,7 @@ jobs:
         with:
           go-version: "1.25"
       - name: Install go-FuSa
-        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.36.0
+        run: go install github.com/SoundMatt/go-FuSa/cmd/gofusa@v0.47.0
       # ── Gating: ERROR findings, traceability, security, vulns, qualification ──
       - name: gofusa check (gate on ERROR findings)
         run: gofusa check ./...
@@ -291,10 +292,29 @@ jobs:
         run: gofusa verify || true
       - name: gofusa hara (validate hazard analysis loads)
         run: gofusa hara show >/dev/null
-      - name: gofusa tara (ISO 21434 threat analysis)
-        run: gofusa tara || true
-      - name: gofusa fmea (dFMEA)
-        run: gofusa fmea -cyber || true
+      # gofusa tara/fmea (go-mqtt#62): gated on a real minimum coverage floor
+      # instead of `|| true` (which previously could never fail regardless of
+      # coverage or content quality). fmea additionally gates -strict on the
+      # FUSA-STUB002 "blanket fallback" content-quality advisory, since its
+      # v0.47.0 output is genuinely diverse per function (see fmea.go
+      # deriveAnalysis, go-FuSa#60) — 100% coverage, 0 STUB002 findings as of
+      # this writing.
+      #
+      # tara's threat text is intentionally NOT gated -strict: the majority
+      # of this repo's CYBER findings are the same rule (CYBER009, integer
+      # narrowing conversion) recurring across the wire-protocol parsing
+      # code, so tara.threat collapses onto go-FuSa's one canned per-rule
+      # string for that finding class — a genuine reflection of the
+      # underlying findings, not a masked/templated generator bug. Forcing
+      # -strict here would require either fabricating an independent §1.6.2
+      # attestation review that did not happen, or diversifying threat text
+      # per finding instance (a go-FuSa-side change, out of scope for this
+      # repo). The coverage floor below is real and will fail if tara's
+      # asset coverage regresses.
+      - name: gofusa tara (ISO 21434 threat analysis, min 30% asset coverage)
+        run: gofusa tara -min-coverage 30
+      - name: gofusa fmea (dFMEA, min 90% coverage, strict content quality)
+        run: gofusa fmea -cyber -min-coverage 90 -strict
       - name: gofusa boundary (architecture diagram)
         run: gofusa boundary || true
       - name: gofusa coupling (data/control coupling)

@@ -32,8 +32,11 @@ comments and verified by `//fusa:test` / `//fusa:sec-test` annotations,
 managed by [go-FuSa](https://github.com/SoundMatt/go-FuSa). The machine-readable
 requirement set is in `.fusa-reqs.json` (go-FuSa v0.30.0 moved the registry out
 of `.fusa.json`, which now holds only project/rule/report configuration). The
-related plans are [SVP.md](SVP.md), [SCMP.md](SCMP.md), [SQAP.md](SQAP.md), and
-the SEOOC [SAFETY_MANUAL.md](SAFETY_MANUAL.md).
+currently pinned go-FuSa release is `v0.47.0` — see `.github/workflows/ci.yml`
+and `.github/workflows/release.yml` for the authoritative pin, and
+SAFETY_MANUAL.md §4.1 / SCMP.md for the toolchain-pin policy. The related
+plans are [SVP.md](SVP.md), [SCMP.md](SCMP.md), [SQAP.md](SQAP.md), and the
+SEOOC [SAFETY_MANUAL.md](SAFETY_MANUAL.md).
 
 ### 2.1 Requirement families
 
