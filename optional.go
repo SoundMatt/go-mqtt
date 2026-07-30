@@ -11,12 +11,12 @@ package mqtt
 //fusa:req REQ-RELAY-013
 //fusa:req REQ-RELAY-014
 
-import relay "github.com/SoundMatt/RELAY"
+import relay "github.com/SoundMatt/RELAY/v2"
 
 // ── §9 Optional interfaces ────────────────────────────────────────────────────
 //
 // These are optional per RELAY spec §9. As of RELAY v0.3 (module v0.9.x) the
-// canonical types are exported from github.com/SoundMatt/RELAY, so go-mqtt
+// canonical types are exported from github.com/SoundMatt/RELAY/v2, so go-mqtt
 // aliases them rather than redefining them (the local definitions used through
 // RELAY v0.2 are gone). A value of type mqtt.Health is therefore identical to
 // relay.Health, and an mqtt.HealthProvider is a relay.HealthProvider — so a
