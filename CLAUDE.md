@@ -1,7 +1,7 @@
 # go-mqtt — Claude session guide
 
 Repo: `github.com/SoundMatt/go-mqtt`
-Local path: `/Users/matt/Documents/Coding/SoundMatt/go-mqtt`
+Local path: repository root (clone location is environment-specific).
 
 ## Project overview
 
@@ -68,3 +68,16 @@ API, prefer slash-separated topic paths to stay idiomatic to MQTT.
 | Tag | Highlights |
 |---|---|
 | v0.1 | Foundation: interfaces, mock, v3 client, CI, Docker quickstart |
+| v0.2 | MQTT v5.0 client (`v5/`) — user properties, response topic, correlation data |
+| v0.3 | TLS / mTLS transport (v3) |
+| v0.4 | WebSocket transport (v3) |
+| v0.5 | QoS 2 (ExactlyOnce) in v3 client |
+| v0.8 | COVESA VISSR bridge (`bridge/vissr/`) |
+| v0.9 | Embedded broker (`broker/`) |
+| v0.10 | Observability — RELAY §9 `MetricsProvider` (mock + broker) |
+| v1.4 | REST bridge (`bridge/rest/`) |
+| v1.5 | MQTT federation bridge (`bridge/mqtt/`) |
+| v1.6 | Interop testing — Mosquitto round-trip + `mosquitto_pub`/`sub` cross-checks |
+
+> Keep this table in sync with `ROADMAP.md`; the authoritative shipped-milestone
+> list lives there.
