@@ -1,107 +1,180 @@
 {
+  "schemaVersion": "1.14",
+  "kind": "fmea-report",
+  "tool": "go-FuSa",
+  "toolVersion": "0.36.0",
+  "language": "go",
+  "generatedAt": "2026-07-30T21:37:29.190855743Z",
   "format": "go-FuSa dFMEA v1",
-  "generated_at": "2026-07-28T01:24:54.411164231Z",
   "module": "github.com/SoundMatt/go-mqtt",
   "entries": [
     {
+      "id": "FMEA-001",
+      "item": "broker.Addr",
       "component": "broker",
       "function": "Addr",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-002",
+      "item": "broker.Close",
       "component": "broker",
       "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-003"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-003"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-003",
+      "item": "broker.ListenAndServe",
       "component": "broker",
       "function": "ListenAndServe",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-002",
+        "REQ-BROKER-009"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-002",
-        "REQ-BROKER-009"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-004",
+      "item": "broker.Metrics",
       "component": "broker",
       "function": "Metrics",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-010"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-010"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-005",
+      "item": "broker.New",
       "component": "broker",
       "function": "New",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-001"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-001"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-006",
+      "item": "broker.RetainedCount",
       "component": "broker",
       "function": "RetainedCount",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-010"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-010"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-007",
+      "item": "broker.Serve",
       "component": "broker",
       "function": "Serve",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error; Goroutine not terminated",
+      "effect": "Silent failure propagated to caller; Memory leak or deadlock",
+      "cause": "an unhandled error path in the function body or a callee; a spawned goroutine with no cancellation, timeout, or WaitGroup join",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path",
+        "join or cancel the goroutine before the function returns"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-002"
+      ],
+      "failureModes": [
         "Returns unexpected error",
         "Goroutine not terminated"
       ],
@@ -109,145 +182,237 @@
         "Silent failure propagated to caller",
         "Memory leak or deadlock"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-002"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-008",
+      "item": "broker.SubscriberCount",
       "component": "broker",
       "function": "SubscriberCount",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-010"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-010"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-009",
+      "item": "broker.WithTLS",
       "component": "broker",
       "function": "WithTLS",
       "file": "/home/runner/work/go-mqtt/go-mqtt/broker/broker.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-BROKER-009",
+        "REQ-SEC-003"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-BROKER-009",
-        "REQ-SEC-003"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-010",
+      "item": "go-mqtt (mqtt).Adapt",
       "component": "go-mqtt (mqtt)",
       "function": "Adapt",
       "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-RELAY-007"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-RELAY-007"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-011",
+      "item": "go-mqtt (mqtt).ApplySubscriberOpts",
       "component": "go-mqtt (mqtt)",
       "function": "ApplySubscriberOpts",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-012",
+      "item": "go-mqtt (mqtt).ChanDepth",
       "component": "go-mqtt (mqtt)",
       "function": "ChanDepth",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-013",
+      "item": "go-mqtt (mqtt).Close",
       "component": "go-mqtt (mqtt)",
       "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-014",
+      "item": "go-mqtt (mqtt).CloseWithDrain",
       "component": "go-mqtt (mqtt)",
       "function": "CloseWithDrain",
       "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-RELAY-014"
-      ]
-    },
-    {
-      "component": "go-mqtt (mqtt)",
-      "function": "FromMessage",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
-      "failure_modes": [
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-RELAY-009"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-015",
+      "item": "go-mqtt (mqtt).FitsRemainingLength",
       "component": "go-mqtt (mqtt)",
-      "function": "MatchTopic",
+      "function": "FitsRemainingLength",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
+      "detectionControl": "unit tests"
+    },
+    {
+      "id": "FMEA-016",
+      "item": "go-mqtt (mqtt).FromMessage",
+      "component": "go-mqtt (mqtt)",
+      "function": "FromMessage",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-RELAY-009"
+      ],
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests"
+    },
+    {
+      "id": "FMEA-017",
+      "item": "go-mqtt (mqtt).MatchTopic",
+      "component": "go-mqtt (mqtt)",
+      "function": "MatchTopic",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
         "REQ-WILD-001",
         "REQ-WILD-002",
         "REQ-WILD-003",
@@ -256,39 +421,75 @@
         "REQ-WILD-006",
         "REQ-WILD-007",
         "REQ-WILD-008"
-      ]
-    },
-    {
-      "component": "go-mqtt (mqtt)",
-      "function": "Protocol",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
-      "failure_modes": [
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-018",
+      "item": "go-mqtt (mqtt).Protocol",
+      "component": "go-mqtt (mqtt)",
+      "function": "Protocol",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "detectionControl": "unit tests"
+    },
+    {
+      "id": "FMEA-019",
+      "item": "go-mqtt (mqtt).Send",
       "component": "go-mqtt (mqtt)",
       "function": "Send",
       "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-020",
+      "item": "go-mqtt (mqtt).Subscribe",
       "component": "go-mqtt (mqtt)",
       "function": "Subscribe",
       "file": "/home/runner/work/go-mqtt/go-mqtt/adapt.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error; Goroutine not terminated",
+      "effect": "Silent failure propagated to caller; Memory leak or deadlock",
+      "cause": "an unhandled error path in the function body or a callee; a spawned goroutine with no cancellation, timeout, or WaitGroup join",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path",
+        "join or cancel the goroutine before the function returns"
+      ],
+      "failureModes": [
         "Returns unexpected error",
         "Goroutine not terminated"
       ],
@@ -296,175 +497,275 @@
         "Silent failure propagated to caller",
         "Memory leak or deadlock"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-021",
+      "item": "go-mqtt (mqtt).ToMessage",
       "component": "go-mqtt (mqtt)",
       "function": "ToMessage",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-RELAY-008"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-RELAY-008"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-022",
+      "item": "go-mqtt (mqtt).WithBackPressure",
       "component": "go-mqtt (mqtt)",
       "function": "WithBackPressure",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-RELAY-006"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-RELAY-006"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-023",
+      "item": "go-mqtt (mqtt).WithChannelDepth",
       "component": "go-mqtt (mqtt)",
       "function": "WithChannelDepth",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mqtt.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-024",
+      "item": "mock.C",
       "component": "mock",
       "function": "C",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-025",
+      "item": "mock.Close",
       "component": "mock",
       "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "medium",
-      "detection_control": "unit tests"
-    },
-    {
-      "component": "mock",
-      "function": "Close",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
+      "detectionControl": "unit tests"
+    },
+    {
+      "id": "FMEA-026",
+      "item": "mock.Close",
+      "component": "mock",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-CONN-008",
         "REQ-FAULT-006"
-      ]
+      ],
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-027",
+      "item": "mock.CloseWithDrain",
       "component": "mock",
       "function": "CloseWithDrain",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-028",
+      "item": "mock.Dial",
       "component": "mock",
       "function": "Dial",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-029",
+      "item": "mock.Health",
       "component": "mock",
       "function": "Health",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-030",
+      "item": "mock.Metrics",
       "component": "mock",
       "function": "Metrics",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-031",
+      "item": "mock.New",
       "component": "mock",
       "function": "New",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests"
+      "detectionControl": "unit tests"
     },
     {
+      "id": "FMEA-032",
+      "item": "mock.Publish",
       "component": "mock",
       "function": "Publish",
       "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-PUB-001",
         "REQ-PUB-003",
         "REQ-PUB-004",
@@ -474,21 +775,30 @@
         "REQ-FAULT-004",
         "REQ-FAULT-007",
         "REQ-FAULT-008"
-      ]
-    },
-    {
-      "component": "mock",
-      "function": "Subscribe",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
+      "detectionControl": "requirement testing + unit tests"
+    },
+    {
+      "id": "FMEA-033",
+      "item": "mock.Subscribe",
+      "component": "mock",
+      "function": "Subscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-SUB-001",
         "REQ-SUB-002",
         "REQ-SUB-003",
@@ -499,58 +809,106 @@
         "REQ-SAFETY-005",
         "REQ-FAULT-005",
         "REQ-FAULT-007"
-      ]
-    },
-    {
-      "component": "mock",
-      "function": "Unsubscribe",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
-      "failure_modes": [
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests"
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-034",
+      "item": "mock.Unsubscribe",
+      "component": "mock",
+      "function": "Unsubscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/mock/mock.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "unit tests"
+    },
+    {
+      "id": "FMEA-035",
+      "item": "mqtt (mqttbridge).New",
       "component": "mqtt (mqttbridge)",
       "function": "New",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-FED-002"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-FED-002"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-036",
+      "item": "mqtt (mqttbridge).Pair",
       "component": "mqtt (mqttbridge)",
       "function": "Pair",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-FED-002"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-FED-002"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-037",
+      "item": "mqtt (mqttbridge).Start",
       "component": "mqtt (mqttbridge)",
       "function": "Start",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error; Goroutine not terminated",
+      "effect": "Silent failure propagated to caller; Memory leak or deadlock",
+      "cause": "an unhandled error path in the function body or a callee; a spawned goroutine with no cancellation, timeout, or WaitGroup join",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path",
+        "join or cancel the goroutine before the function returns"
+      ],
+      "requirementIds": [
+        "REQ-FED-003"
+      ],
+      "failureModes": [
         "Returns unexpected error",
         "Goroutine not terminated"
       ],
@@ -558,121 +916,180 @@
         "Silent failure propagated to caller",
         "Memory leak or deadlock"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-FED-003"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-038",
+      "item": "mqtt (mqttbridge).Stats",
       "component": "mqtt (mqttbridge)",
       "function": "Stats",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-FED-007"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-FED-007"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-039",
+      "item": "mqtt (mqttbridge).Stop",
       "component": "mqtt (mqttbridge)",
       "function": "Stop",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/mqtt/federation.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-FED-006"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-FED-006"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-040",
+      "item": "rest.Handler",
       "component": "rest",
       "function": "Handler",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-REST-001"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-REST-001"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-041",
+      "item": "rest.New",
       "component": "rest",
       "function": "New",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-REST-001"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-REST-001"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-042",
+      "item": "rest.WithMaxBody",
       "component": "rest",
       "function": "WithMaxBody",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-REST-002"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-REST-002"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-043",
+      "item": "rest.WithRetainTimeout",
       "component": "rest",
       "function": "WithRetainTimeout",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/rest/gateway.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-REST-007"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-REST-007"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-044",
+      "item": "v3.C",
       "component": "v3",
       "function": "C",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -689,108 +1106,33 @@
       ]
     },
     {
-      "component": "v3",
-      "function": "Close",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-WS-006"
-      ],
-      "cyber_risks": [
-        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
-      ]
-    },
-    {
+      "id": "FMEA-045",
+      "item": "v3.Close",
       "component": "v3",
       "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
-      "severity": "medium",
-      "detection_control": "unit tests",
-      "cyber_risks": [
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
-      ]
-    },
-    {
-      "component": "v3",
-      "function": "Close",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-CONN-006",
         "REQ-CONN-007",
         "REQ-CONN-008",
         "REQ-SAFETY-007"
       ],
-      "cyber_risks": [
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
-      ]
-    },
-    {
-      "component": "v3",
-      "function": "Dial",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-001",
-        "REQ-CONN-002",
-        "REQ-CONN-003",
-        "REQ-CONN-004",
-        "REQ-CONN-005"
-      ],
-      "cyber_risks": [
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -807,23 +1149,27 @@
       ]
     },
     {
+      "id": "FMEA-046",
+      "item": "v3.Close",
       "component": "v3",
-      "function": "DialTLS",
+      "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-TLS-001",
-        "REQ-TLS-003",
-        "REQ-SEC-002"
-      ],
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -840,47 +1186,64 @@
       ]
     },
     {
+      "id": "FMEA-047",
+      "item": "v3.Close",
       "component": "v3",
-      "function": "DialWS",
+      "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-WS-006"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-WS-001",
-        "REQ-WS-002"
-      ],
-      "cyber_risks": [
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
       ]
     },
     {
+      "id": "FMEA-048",
+      "item": "v3.Dial",
       "component": "v3",
-      "function": "New",
+      "function": "Dial",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-CONN-001",
         "REQ-CONN-002",
         "REQ-CONN-003",
         "REQ-CONN-004",
         "REQ-CONN-005"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -897,18 +1260,137 @@
       ]
     },
     {
+      "id": "FMEA-049",
+      "item": "v3.DialTLS",
       "component": "v3",
-      "function": "Publish",
+      "function": "DialTLS",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-TLS-001",
+        "REQ-TLS-003",
+        "REQ-SEC-002"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "id": "FMEA-050",
+      "item": "v3.DialWS",
+      "component": "v3",
+      "function": "DialWS",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-WS-001",
+        "REQ-WS-002"
+      ],
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
+        "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "id": "FMEA-051",
+      "item": "v3.New",
+      "component": "v3",
+      "function": "New",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-CONN-001",
+        "REQ-CONN-002",
+        "REQ-CONN-003",
+        "REQ-CONN-004",
+        "REQ-CONN-005"
+      ],
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "id": "FMEA-052",
+      "item": "v3.Publish",
+      "component": "v3",
+      "function": "Publish",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-PUB-001",
         "REQ-PUB-002",
         "REQ-PUB-003",
@@ -920,7 +1402,14 @@
         "REQ-SAFETY-004",
         "REQ-ORDER-002"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -937,40 +1426,51 @@
       ]
     },
     {
+      "id": "FMEA-053",
+      "item": "v3.Read",
       "component": "v3",
       "function": "Read",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-WS-004",
+        "REQ-WS-005"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-WS-004",
-        "REQ-WS-005"
-      ],
-      "cyber_risks": [
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
       ]
     },
     {
+      "id": "FMEA-054",
+      "item": "v3.Subscribe",
       "component": "v3",
       "function": "Subscribe",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-SUB-001",
         "REQ-SUB-002",
         "REQ-SUB-003",
@@ -980,35 +1480,14 @@
         "REQ-SAFETY-003",
         "REQ-SAFETY-005"
       ],
-      "cyber_risks": [
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
-      ]
-    },
-    {
-      "component": "v3",
-      "function": "Unsubscribe",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1025,18 +1504,64 @@
       ]
     },
     {
+      "id": "FMEA-055",
+      "item": "v3.Unsubscribe",
+      "component": "v3",
+      "function": "Unsubscribe",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "unit tests",
+      "cyberRisks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "id": "FMEA-056",
+      "item": "v3.WithClientID",
       "component": "v3",
       "function": "WithClientID",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1053,18 +1578,27 @@
       ]
     },
     {
+      "id": "FMEA-057",
+      "item": "v3.WithDialTimeout",
       "component": "v3",
       "function": "WithDialTimeout",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1081,18 +1615,27 @@
       ]
     },
     {
+      "id": "FMEA-058",
+      "item": "v3.WithKeepalive",
       "component": "v3",
       "function": "WithKeepalive",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1109,21 +1652,30 @@
       ]
     },
     {
+      "id": "FMEA-059",
+      "item": "v3.WithQoS2Timeout",
       "component": "v3",
       "function": "WithQoS2Timeout",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-QOS2-004"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-QOS2-004"
-      ],
-      "cyber_risks": [
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1140,53 +1692,31 @@
       ]
     },
     {
+      "id": "FMEA-060",
+      "item": "v3.WithTLS",
       "component": "v3",
       "function": "WithTLS",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
-        "Incorrect output"
-      ],
-      "effects": [
-        "Incorrect system behavior"
-      ],
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
         "REQ-TLS-001",
         "REQ-TLS-002"
       ],
-      "cyber_risks": [
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
-        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
-      ]
-    },
-    {
-      "component": "v3",
-      "function": "WithWill",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
-      "failure_modes": [
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-CONN-011"
-      ],
-      "cyber_risks": [
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1203,10 +1733,64 @@
       ]
     },
     {
+      "id": "FMEA-061",
+      "item": "v3.WithWill",
+      "component": "v3",
+      "function": "WithWill",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/v3/client.go",
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-CONN-011"
+      ],
+      "failureModes": [
+        "Incorrect output"
+      ],
+      "effects": [
+        "Incorrect system behavior"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
+        "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
+      ]
+    },
+    {
+      "id": "FMEA-062",
+      "item": "v3.Write",
       "component": "v3",
       "function": "Write",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v3/websocket.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error; Partial write / data corruption",
+      "effect": "Silent failure propagated to caller; Incorrect system state",
+      "cause": "an unhandled error path in the function body or a callee; an interrupted write (crash, disk full, concurrent access) leaving a partial artifact",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path",
+        "write via a temp file and atomic rename, or validate the write's result"
+      ],
+      "requirementIds": [
+        "REQ-WS-004"
+      ],
+      "failureModes": [
         "Returns unexpected error",
         "Partial write / data corruption"
       ],
@@ -1214,30 +1798,35 @@
         "Silent failure propagated to caller",
         "Incorrect system state"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-WS-004"
-      ],
-      "cyber_risks": [
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER001: import of crypto/sha1 — MD5 and SHA-1 are cryptographically broken and must not be used for security-sensitive hashing",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range"
       ]
     },
     {
+      "id": "FMEA-063",
+      "item": "v5.C",
       "component": "v5",
       "function": "C",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1247,24 +1836,33 @@
       ]
     },
     {
+      "id": "FMEA-064",
+      "item": "v5.Close",
       "component": "v5",
       "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-CONN-006",
         "REQ-CONN-007",
         "REQ-CONN-008",
         "REQ-SAFETY-007"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1274,18 +1872,27 @@
       ]
     },
     {
+      "id": "FMEA-065",
+      "item": "v5.Close",
       "component": "v5",
       "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1295,18 +1902,20 @@
       ]
     },
     {
+      "id": "FMEA-066",
+      "item": "v5.Dial",
       "component": "v5",
       "function": "Dial",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-V5-CONN-001",
         "REQ-V5-CONN-002",
         "REQ-V5-CONN-003",
@@ -1315,7 +1924,14 @@
         "REQ-CONN-004",
         "REQ-V5-SESSION-001"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1325,24 +1941,33 @@
       ]
     },
     {
+      "id": "FMEA-067",
+      "item": "v5.New",
       "component": "v5",
       "function": "New",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-V5-CONN-001",
         "REQ-V5-CONN-002",
         "REQ-V5-CONN-003",
         "REQ-V5-CONN-004"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1352,18 +1977,20 @@
       ]
     },
     {
+      "id": "FMEA-068",
+      "item": "v5.Publish",
       "component": "v5",
       "function": "Publish",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-PUB-001",
         "REQ-PUB-002",
         "REQ-PUB-003",
@@ -1372,7 +1999,14 @@
         "REQ-SAFETY-003",
         "REQ-SAFETY-004"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1382,18 +2016,20 @@
       ]
     },
     {
+      "id": "FMEA-069",
+      "item": "v5.PublishV5",
       "component": "v5",
       "function": "PublishV5",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-PUB-001",
         "REQ-PUB-002",
         "REQ-PUB-003",
@@ -1411,7 +2047,14 @@
         "REQ-SAFETY-004",
         "REQ-ORDER-002"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1421,18 +2064,20 @@
       ]
     },
     {
+      "id": "FMEA-070",
+      "item": "v5.Subscribe",
       "component": "v5",
       "function": "Subscribe",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-SUB-001",
         "REQ-SUB-002",
         "REQ-SUB-003",
@@ -1441,7 +2086,14 @@
         "REQ-SAFETY-003",
         "REQ-SAFETY-005"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1451,18 +2103,20 @@
       ]
     },
     {
+      "id": "FMEA-071",
+      "item": "v5.SubscribeV5",
       "component": "v5",
       "function": "SubscribeV5",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-SUB-001",
         "REQ-SUB-002",
         "REQ-SUB-003",
@@ -1476,7 +2130,14 @@
         "REQ-SAFETY-003",
         "REQ-SAFETY-005"
       ],
-      "cyber_risks": [
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1486,18 +2147,27 @@
       ]
     },
     {
+      "id": "FMEA-072",
+      "item": "v5.Unsubscribe",
       "component": "v5",
       "function": "Unsubscribe",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "medium",
+      "actionPriority": "medium",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "medium",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1507,18 +2177,27 @@
       ]
     },
     {
+      "id": "FMEA-073",
+      "item": "v5.WithClientID",
       "component": "v5",
       "function": "WithClientID",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1528,18 +2207,27 @@
       ]
     },
     {
+      "id": "FMEA-074",
+      "item": "v5.WithDialTimeout",
       "component": "v5",
       "function": "WithDialTimeout",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1549,18 +2237,27 @@
       ]
     },
     {
+      "id": "FMEA-075",
+      "item": "v5.WithKeepalive",
       "component": "v5",
       "function": "WithKeepalive",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1570,18 +2267,27 @@
       ]
     },
     {
+      "id": "FMEA-076",
+      "item": "v5.WithReceiveMax",
       "component": "v5",
       "function": "WithReceiveMax",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1591,18 +2297,27 @@
       ]
     },
     {
+      "id": "FMEA-077",
+      "item": "v5.WithSessionExpiry",
       "component": "v5",
       "function": "WithSessionExpiry",
       "file": "/home/runner/work/go-mqtt/go-mqtt/v5/client.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "low",
+      "actionPriority": "low",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "low",
-      "detection_control": "unit tests",
-      "cyber_risks": [
+      "detectionControl": "unit tests",
+      "cyberRisks": [
         "CYBER009: uint16(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
         "CYBER009: byte(x) — explicit narrowing conversion may silently truncate bits if x exceeds the target type's range",
@@ -1612,202 +2327,324 @@
       ]
     },
     {
+      "id": "FMEA-078",
+      "item": "vissr.Bool",
       "component": "vissr",
       "function": "Bool",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-004"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-004"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-079",
+      "item": "vissr.C",
       "component": "vissr",
       "function": "C",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-009"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-009"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-080",
+      "item": "vissr.Close",
       "component": "vissr",
       "function": "Close",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
-        "Returns unexpected error"
-      ],
-      "effects": [
-        "Silent failure propagated to caller"
-      ],
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
       "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
         "REQ-VISSR-008"
-      ]
-    },
-    {
-      "component": "vissr",
-      "function": "Close",
-      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-010"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-081",
+      "item": "vissr.Close",
+      "component": "vissr",
+      "function": "Close",
+      "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-010"
+      ],
+      "failureModes": [
+        "Returns unexpected error"
+      ],
+      "effects": [
+        "Silent failure propagated to caller"
+      ],
+      "detectionControl": "requirement testing + unit tests"
+    },
+    {
+      "id": "FMEA-082",
+      "item": "vissr.Float",
       "component": "vissr",
       "function": "Float",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-004"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-004"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-083",
+      "item": "vissr.New",
       "component": "vissr",
       "function": "New",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-005"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-005"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-084",
+      "item": "vissr.PathToTopic",
       "component": "vissr",
       "function": "PathToTopic",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-001"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-001"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-085",
+      "item": "vissr.Set",
       "component": "vissr",
       "function": "Set",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-006"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-006"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-086",
+      "item": "vissr.SetBool",
       "component": "vissr",
       "function": "SetBool",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-006"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-006"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-087",
+      "item": "vissr.SetFloat",
       "component": "vissr",
       "function": "SetFloat",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-006"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-006"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-088",
+      "item": "vissr.SetString",
       "component": "vissr",
       "function": "SetString",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-006"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-006"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-089",
+      "item": "vissr.String",
       "component": "vissr",
       "function": "String",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-004"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-004"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-090",
+      "item": "vissr.Subscribe",
       "component": "vissr",
       "function": "Subscribe",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error; Goroutine not terminated",
+      "effect": "Silent failure propagated to caller; Memory leak or deadlock",
+      "cause": "an unhandled error path in the function body or a callee; a spawned goroutine with no cancellation, timeout, or WaitGroup join",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path",
+        "join or cancel the goroutine before the function returns"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-007"
+      ],
+      "failureModes": [
         "Returns unexpected error",
         "Goroutine not terminated"
       ],
@@ -1815,43 +2652,65 @@
         "Silent failure propagated to caller",
         "Memory leak or deadlock"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-007"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-091",
+      "item": "vissr.TopicToPath",
       "component": "vissr",
       "function": "TopicToPath",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Incorrect output",
+      "effect": "Incorrect system behavior",
+      "cause": "a logic error not surfaced as an error return or panic",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add requirement-traced unit tests covering this function's documented behaviour"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-002"
+      ],
+      "failureModes": [
         "Incorrect output"
       ],
       "effects": [
         "Incorrect system behavior"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-002"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     },
     {
+      "id": "FMEA-092",
+      "item": "vissr.Unsubscribe",
       "component": "vissr",
       "function": "Unsubscribe",
       "file": "/home/runner/work/go-mqtt/go-mqtt/bridge/vissr/vissr.go",
-      "failure_modes": [
+      "failureMode": "Returns unexpected error",
+      "effect": "Silent failure propagated to caller",
+      "cause": "an unhandled error path in the function body or a callee",
+      "severity": "high",
+      "actionPriority": "high",
+      "mitigations": [
+        "add unit test coverage for every returned error path"
+      ],
+      "requirementIds": [
+        "REQ-VISSR-010"
+      ],
+      "failureModes": [
         "Returns unexpected error"
       ],
       "effects": [
         "Silent failure propagated to caller"
       ],
-      "severity": "high",
-      "detection_control": "requirement testing + unit tests",
-      "requirement_ids": [
-        "REQ-VISSR-010"
-      ]
+      "detectionControl": "requirement testing + unit tests"
     }
-  ]
+  ],
+  "summary": {
+    "total": 92,
+    "highPriority": 61,
+    "componentsAnalyzed": 92,
+    "componentsInProject": 92,
+    "coveragePct": 100,
+    "componentsInProjectMethod": "raw regex scan for top-level exported func declarations in non-test .go files under non-vendor/testdata/dot-directories (CountProjectFunctions) — independent of Scan's own go/ast parse, so a file Scan's parser rejects still counts toward the denominator; componentsAnalyzed counts entries Scan actually emitted (every exported function in every file it could parse — Scan does not curate a subset)"
+  }
 }

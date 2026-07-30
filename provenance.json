@@ -1,15 +1,16 @@
 {
-  "schemaVersion": "1.9",
+  "schemaVersion": "1.14.0",
   "kind": "provenance",
   "tool": "go-FuSa",
-  "toolVersion": "0.30.0",
+  "toolVersion": "0.36.0",
   "language": "go",
-  "generatedAt": "2026-07-28T01:24:54.783061056Z",
+  "generatedAt": "2026-07-30T21:37:29.552691716Z",
   "format": "x-FuSa provenance v1",
   "module": "github.com/SoundMatt/go-mqtt",
   "goVersion": "go1.25.12",
   "goos": "linux",
   "goarch": "amd64",
-  "vcsRevision": "ad97e2a4b3dcc71d50d2193b9384e74d680942e2",
-  "vcsModified": true
+  "vcsRevision": "a2061f38fbf92902c8be21d4cd9e718a096e6367",
+  "vcsModified": true,
+  "builder": "github-actions:SoundMatt/go-mqtt/.github/workflows/release.yml@refs/tags/v1.7.0"
 }

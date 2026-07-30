@@ -1,18 +1,18 @@
 {
-  "schemaVersion": "1.9",
+  "schemaVersion": "1.14.0",
   "kind": "sbom",
   "tool": "go-FuSa",
-  "toolVersion": "0.30.0",
+  "toolVersion": "0.36.0",
   "language": "go",
-  "generatedAt": "2026-07-28T01:24:54.776153057Z",
+  "generatedAt": "2026-07-30T21:37:29.545570588Z",
   "format": "x-FuSa SBOM v1",
   "module": "github.com/SoundMatt/go-mqtt",
   "goVersion": "1.25.0",
   "components": [
     {
       "name": "github.com/SoundMatt/RELAY",
-      "version": "v1.11.0",
-      "hash": "sha256:66a190a54fda93914d5b800e1e3b5503abcf1a32615c2c05cc02021e51e33451"
+      "version": "v1.14.1-0.20260730210258-0d471bebcb11",
+      "hash": "sha256:e5f8fecc2ebdd7a38e78b34a969221b5bbeb596541e93c366494e3eb565e0151"
     }
   ]
 }
