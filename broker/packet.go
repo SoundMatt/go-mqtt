@@ -55,10 +55,13 @@ func encodeVarLen(n int) []byte {
 		return []byte{0}
 	}
 	var buf []byte
-	for n > 0 {
+	// MQTT §2.2.3 bounds a variable-byte integer to 4 bytes (268,435,455).
+	// Cap the loop at 4 bytes so an out-of-range n can never emit an
+	// on-the-wire-invalid 5+ byte field.
+	for n > 0 && len(buf) < 4 {
 		b := byte(n % 128)
 		n /= 128
-		if n > 0 {
+		if n > 0 && len(buf) < 3 {
 			b |= 0x80
 		}
 		buf = append(buf, b)

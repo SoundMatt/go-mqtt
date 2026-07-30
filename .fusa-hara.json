@@ -51,7 +51,7 @@
         "severity": "S3",
         "exposure": "E2",
         "controllability": "C2",
-        "asil": "ASIL-B"
+        "asil": "ASIL-A"
       },
       "safetyGoals": [
         "SG-002"
@@ -87,7 +87,7 @@
         "severity": "S3",
         "exposure": "E2",
         "controllability": "C2",
-        "asil": "ASIL-B"
+        "asil": "ASIL-A"
       },
       "safetyGoals": [
         "SG-004"
@@ -140,7 +140,7 @@
         "severity": "S3",
         "exposure": "E2",
         "controllability": "C2",
-        "asil": "ASIL-B"
+        "asil": "ASIL-A"
       },
       "safetyGoals": [
         "SG-007"
@@ -181,7 +181,7 @@
       "hazards": [
         "H-002"
       ],
-      "asil": "ASIL-B",
+      "asil": "ASIL-A",
       "safeState": "FromMessage(ToMessage(m)) reproduces topic, QoS, retained and payload exactly",
       "fssrRefs": [
         "REQ-MSG-001",
@@ -212,7 +212,7 @@
       "hazards": [
         "H-004"
       ],
-      "asil": "ASIL-B",
+      "asil": "ASIL-A",
       "safeState": "Malformed packets rejected with a sentinel error; the connection is not left in an ambiguous state",
       "fssrRefs": [
         "REQ-WIRE-001",
@@ -281,7 +281,7 @@
       "hazards": [
         "H-007"
       ],
-      "asil": "ASIL-B",
+      "asil": "ASIL-A",
       "safeState": "Concurrent operations are correctly synchronised; -race is clean and no message is torn",
       "fssrRefs": [
         "REQ-CONC-001",

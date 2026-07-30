@@ -7,13 +7,35 @@ package mock_test
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
 
+	relay "github.com/SoundMatt/RELAY"
 	mqtt "github.com/SoundMatt/go-mqtt"
 	"github.com/SoundMatt/go-mqtt/mock"
 )
+
+// TestPublishRejectsOversizedPayload verifies that a payload exceeding the
+// wire maximum (MQTT §2.2.3 / RELAY §16, mqtt.MaxPayloadSize) is rejected with
+// mqtt.ErrPayloadTooLarge, which wraps relay.ErrPayloadTooLarge.
+//
+//fusa:test REQ-SAFETY-004
+func TestPublishRejectsOversizedPayload(t *testing.T) {
+	b := mock.New()
+	c := b.Dial()
+	t.Cleanup(func() { _ = c.Close() })
+
+	payload := make([]byte, mqtt.MaxPayloadSize+1)
+	err := c.Publish(context.Background(), "over/size", mqtt.AtMostOnce, payload)
+	if !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Fatalf("Publish oversized = %v, want ErrPayloadTooLarge", err)
+	}
+	if !errors.Is(err, relay.ErrPayloadTooLarge) {
+		t.Errorf("Publish oversized error does not wrap relay.ErrPayloadTooLarge")
+	}
+}
 
 // Requirements verified by this mock-broker test suite: retained store/replace/
 // delete + replay, MatchTopic fan-out, Dial connectivity, and concurrent-use

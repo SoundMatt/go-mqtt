@@ -31,7 +31,7 @@ const toolName = "go-mqtt"
 // keep it in sync with the latest release tag as part of the release
 // process, the same way SpecVersion is kept in sync via the RELAY module
 // dependency.
-var toolVersion = "1.5.0"
+var toolVersion = "1.7.0"
 
 func main() {
 	if len(os.Args) < 2 {

@@ -34,6 +34,16 @@ func TestEncodeVarLen(t *testing.T) {
 	}
 }
 
+// TestEncodeVarLenBounded verifies that a value beyond the MQTT §2.2.3 maximum
+// (268,435,455) never produces an on-the-wire-invalid 5+ byte field.
+func TestEncodeVarLenBounded(t *testing.T) {
+	for _, n := range []int{268435456, 1 << 30, 1 << 40} {
+		if got := encodeVarLen(n); len(got) > 4 {
+			t.Errorf("encodeVarLen(%d) = %x (%d bytes), want <= 4 bytes", n, got, len(got))
+		}
+	}
+}
+
 func TestReadVarLen(t *testing.T) {
 	cases := []struct {
 		encoded []byte

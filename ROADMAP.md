@@ -13,8 +13,8 @@ The project focuses on:
 - Broker-agnostic design (Mosquitto, HiveMQ, EMQX, AWS IoT, …)
 - Zero CGo, zero mandatory external dependencies
 
-go-mqtt is not a broker — it is a client library. Embedded broker support is
-a future milestone.
+go-mqtt is primarily a client library, with an optional embedded broker for
+edge and test harnesses (`broker/`, shipped in v0.9).
 
 ---
 

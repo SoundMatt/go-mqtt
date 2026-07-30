@@ -172,6 +172,13 @@ func (s *session) handlePublish(hdr byte, body []byte) {
 	payload := make([]byte, len(body)-off)
 	copy(payload, body[off:])
 
+	// Defensive: never route a payload larger than the wire maximum
+	// (MQTT §2.2.3 / RELAY §16). Inbound remaining length is already bounded
+	// by readVarLen, so this only guards against internal misuse.
+	if len(payload) > mqtt.MaxPayloadSize {
+		return
+	}
+
 	switch qos {
 	case 0:
 		s.server.publish(topic, payload, 0, retain)

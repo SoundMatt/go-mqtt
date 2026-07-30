@@ -77,7 +77,7 @@ Total: **≥ 120 atomic SEOOC requirements** annotated in source code.
 | REQ-FAULT-004 | Publish after Close() must return ErrClosed |
 | REQ-FAULT-009 | Full subscription channel must drop silently, not block |
 | REQ-FAULT-010 | Concurrent Close() and Publish() must not panic |
-| REQ-RELAY-001 | SpecVersion must equal "0.2" |
+| REQ-RELAY-001 | SpecVersion must equal `mqtt.SpecVersion` (RELAY spec v2.0) |
 | REQ-RELAY-002..003 | Error sentinels must wrap relay.Err* sentinels via %w |
 
 ---
@@ -154,6 +154,7 @@ provisioning, rotation, and trust-anchor management.
 
 ## 6. RELAY conformance
 
-go-mqtt is RELAY-conformant at spec v0.2 (see `mqtt.SpecVersion`).
+go-mqtt is RELAY-conformant at the spec version reported by `mqtt.SpecVersion`
+(currently v2.0, bound to the pinned RELAY module — the single source of truth).
 Conformance requirements are tracked in the REQ-RELAY family (14 requirements).
 See `optional.go` for HealthProvider, MetricsProvider, and Drainer implementations.

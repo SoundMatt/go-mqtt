@@ -373,6 +373,13 @@ func (c *v3Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payl
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
 	}
+	// FitsRemainingLength checks the payload together with the topic and
+	// (for QoS>0) packet-ID overhead that will also be encoded into the wire
+	// Remaining Length — a bare payload-size check is not sufficient (see
+	// FitsRemainingLength doc).
+	if !mqtt.FitsRemainingLength(topic, len(payload), qos != mqtt.AtMostOnce) {
+		return mqtt.ErrPayloadTooLarge
+	}
 	select {
 	case <-c.done:
 		return mqtt.ErrClosed

@@ -24,7 +24,8 @@ requirements.
 
 go-mqtt is a pure-Go MQTT v3.1.1 / v5.0 client and in-process broker with
 swappable transports (TCP, TLS/mTLS, WebSocket) and RELAY conformance. It
-provides message publish/subscribe with QoS 0/1/2, topic-filter matching
+provides message publish/subscribe with QoS 0/1/2 (QoS 2 in the v3 client
+only — the v5 client rejects QoS 2 with ErrQoSUnsupported), topic-filter matching
 (§4.7), retained messages, and last-will. It performs **no hardware access** and
 holds **no global mutable state** beyond per-connection objects.
 
@@ -46,7 +47,7 @@ allocated system-level requirements, in particular:
 ## 4. Assumptions of use (the integrator MUST ensure)
 
 1. **Trusted toolchain.** Built with Go 1.25+ and the pinned go-FuSa `v0.36.0`
-   and RELAY `v1.11.0`; no `InsecureSkipVerify` is introduced downstream.
+   and RELAY `v2.0.3`; no `InsecureSkipVerify` is introduced downstream.
 2. **TLS for untrusted networks.** When the broker link crosses a trust
    boundary, TLS (≥1.2) is used; certificate verification is **not** disabled,
    and client authentication (mTLS) is configured where the threat model
