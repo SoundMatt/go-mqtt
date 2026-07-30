@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	relay "github.com/SoundMatt/RELAY"
+	relay "github.com/SoundMatt/RELAY/v2"
 )
 
 func TestConvertGoldenVector(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"errors"
 	"testing"
 
-	relay "github.com/SoundMatt/RELAY"
+	relay "github.com/SoundMatt/RELAY/v2"
 	mqtt "github.com/SoundMatt/go-mqtt"
 	"github.com/SoundMatt/go-mqtt/mock"
 )
