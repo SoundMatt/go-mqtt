@@ -312,6 +312,16 @@ func (c *Client) PublishV5(ctx context.Context, topic string, qos mqtt.QoS, payl
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
 	}
+	// FitsRemainingLength checks the payload together with the topic and
+	// (for QoS>0) packet-ID overhead that will also be encoded into the wire
+	// Remaining Length — a bare payload-size check is not sufficient (see
+	// FitsRemainingLength doc). This does not account for PublishProps
+	// encoding size (variable, user-controlled via UserProperties); very
+	// large property sets combined with a near-max payload can still
+	// overflow the encoder — tracked separately, out of scope here.
+	if !mqtt.FitsRemainingLength(topic, len(payload), qos != mqtt.AtMostOnce) {
+		return mqtt.ErrPayloadTooLarge
+	}
 	if qos == mqtt.ExactlyOnce {
 		return mqtt.ErrQoSUnsupported
 	}

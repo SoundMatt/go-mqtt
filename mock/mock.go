@@ -151,6 +151,9 @@ func (c *mockClient) Publish(ctx context.Context, topic string, qos mqtt.QoS, pa
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
 	}
+	if len(payload) > mqtt.MaxPayloadSize {
+		return mqtt.ErrPayloadTooLarge
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}

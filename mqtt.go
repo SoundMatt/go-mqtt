@@ -68,6 +68,33 @@ import (
 //fusa:req REQ-RELAY-001
 const SpecVersion = relay.SpecVersion
 
+// MaxPayloadSize is the maximum MQTT application-message payload size. It is
+// derived from the 4-byte Remaining Length maximum (MQTT §2.2.3, RELAY §16):
+// 268,435,455 bytes. Payloads larger than this cannot be represented on the
+// wire and are rejected with ErrPayloadTooLarge on the send path.
+const MaxPayloadSize = 268_435_455
+
+// FitsRemainingLength reports whether a PUBLISH built from the given topic,
+// payload size, and packet-identifier presence (QoS 1/2 add a 2-byte packet
+// ID; QoS 0 does not) can be represented within the MQTT §2.2.3 4-byte
+// Remaining Length limit (268,435,455 bytes).
+//
+// A bare payload-size check against MaxPayloadSize is not sufficient on its
+// own: the wire Remaining Length also includes the 2-byte topic-length
+// prefix, the topic itself, and (for QoS>0) the packet identifier, so a
+// payload right at MaxPayloadSize combined with a non-trivial topic can still
+// overflow the 4-byte encoding even though the payload check alone passed.
+// v3 and v5 Publish paths call this before encoding to reject that
+// combination with ErrPayloadTooLarge instead of silently truncating the
+// wire-encoded length.
+func FitsRemainingLength(topic string, payloadLen int, hasPacketID bool) bool {
+	overhead := 2 + len(topic) // 2-byte length prefix + topic bytes
+	if hasPacketID {
+		overhead += 2
+	}
+	return payloadLen <= MaxPayloadSize-overhead
+}
+
 // ── Sentinel errors ───────────────────────────────────────────────────────────
 
 //fusa:req REQ-RELAY-002
@@ -108,10 +135,23 @@ const (
 
 	// AtLeastOnce (QoS 1) — acknowledged delivery. The message is delivered at
 	// least once; duplicates are possible.
+	//
+	// Delivery guarantees are connection-scoped: go-mqtt does not persist or
+	// retransmit unacknowledged QoS>0 PUBLISH packets across a transport drop
+	// (the DUP flag is never set), per the no-persistence Assumption of Use in
+	// SAFETY_MANUAL §4.5/§4.7. A dropped connection may lose an in-flight QoS 1
+	// message.
 	AtLeastOnce QoS = 1
 
 	// ExactlyOnce (QoS 2) — exactly-once delivery. Highest overhead. Use for
 	// actuator commands where duplicates cause incorrect behaviour.
+	//
+	// Only the v3 client supports QoS 2; the v5 client (Client.Publish /
+	// PublishV5) rejects ExactlyOnce with ErrQoSUnsupported. As with QoS 1,
+	// the exactly-once guarantee is connection-scoped — it holds only within a
+	// live connection and is not preserved across a transport drop, per the
+	// no-reconnect / no-persistence Assumptions of Use in SAFETY_MANUAL
+	// §4.5/§4.7.
 	ExactlyOnce QoS = 2
 )
 
@@ -333,22 +373,25 @@ func MatchTopic(filter, topic string) bool {
 		return !topicIsSystem
 	}
 
-	// 'filter/subtree/#' — matches filter/subtree and anything beneath it.
-	if strings.HasSuffix(filter, "/#") {
-		prefix := filter[:len(filter)-2]
-		if topicIsSystem && !strings.HasPrefix(prefix, "$") {
-			return false
-		}
-		return topic == prefix || strings.HasPrefix(topic, prefix+"/")
-	}
-
-	// No '#' — match level-by-level with '+' as single-level wildcard.
+	// Match level-by-level. '+' is a single-level wildcard; '#' is a
+	// multi-level wildcard that matches the remaining levels. '#' is folded
+	// into the loop (rather than special-cased on the raw filter string) so
+	// that earlier '+' levels are still expanded, e.g. "a/+/#" matches
+	// "a/b/c" per MQTT §4.7.1.
 	fParts := strings.Split(filter, "/")
 	tParts := strings.Split(topic, "/")
-	if len(fParts) != len(tParts) {
-		return false
-	}
 	for i, f := range fParts {
+		if f == "#" {
+			// '#' at the first level does not match '$' topics.
+			if i == 0 && topicIsSystem {
+				return false
+			}
+			// '#' matches the parent level and everything beneath it.
+			return true
+		}
+		if i >= len(tParts) {
+			return false
+		}
 		if f == "+" {
 			// '+' at the first level does not match '$' topics.
 			if i == 0 && topicIsSystem {
@@ -360,5 +403,5 @@ func MatchTopic(filter, topic string) bool {
 			return false
 		}
 	}
-	return true
+	return len(fParts) == len(tParts)
 }

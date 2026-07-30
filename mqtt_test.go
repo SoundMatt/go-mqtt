@@ -50,6 +50,14 @@ func TestMatchTopicWildcards(t *testing.T) {
 		{"a/+/c", "a/b/d/c", false, "WILD-006"},
 		{"a/+", "a/b", true, "WILD-006"},
 		{"a/+", "a/b/c", false, "WILD-006"},
+		// REQ-WILD-004/006: combined single- and multi-level wildcards
+		// ("+" earlier levels must still expand under a trailing "/#").
+		{"a/+/#", "a/b/c", true, "WILD-004+006"},
+		{"a/+/#", "a/b", true, "WILD-004+006"},
+		{"a/+/#", "a/b/c/d", true, "WILD-004+006"},
+		{"a/+/#", "x/b/c", false, "WILD-004+006"},
+		{"sport/+/#", "sport/tennis/player1/ranking", true, "WILD-004+006"},
+		{"sport/+/#", "sport", false, "WILD-004+006"},
 		// REQ-WILD-007: leading "+" does not match $-prefixed topics.
 		{"+/monitor", "$SYS/monitor", false, "WILD-007"},
 		// REQ-WILD-008: exact literal match with no wildcard.
@@ -133,5 +141,52 @@ func TestMessageFields(t *testing.T) {
 	// REQ-MSG-002: a nil payload is a valid zero-length body.
 	if zero.Payload != nil {
 		t.Errorf("default Payload = %v, want nil", zero.Payload)
+	}
+}
+
+// ── FitsRemainingLength boundary (MQTT §2.2.3) ────────────────────────────────
+
+// TestFitsRemainingLength verifies that the combined topic + optional
+// packet-ID + payload size is checked against the MQTT §2.2.3 4-byte
+// Remaining Length maximum (268,435,455), not the payload alone. A payload
+// right at mqtt.MaxPayloadSize combined with a non-empty topic must be
+// rejected, since the topic and packet-ID bytes also count toward the wire
+// Remaining Length that encodeVarLen has to represent.
+//
+//fusa:test REQ-RELAY-001
+func TestFitsRemainingLength(t *testing.T) {
+	// Empty topic ("" — not valid in practice, ErrTopicEmpty rejects it
+	// earlier, but this isolates the arithmetic), no packet ID: payload may
+	// use the entire budget.
+	if !mqtt.FitsRemainingLength("", mqtt.MaxPayloadSize-2, false) {
+		t.Error("FitsRemainingLength(\"\", MaxPayloadSize-2, false) = false, want true (exactly at the boundary)")
+	}
+	if mqtt.FitsRemainingLength("", mqtt.MaxPayloadSize-1, false) {
+		t.Error("FitsRemainingLength(\"\", MaxPayloadSize-1, false) = true, want false (one byte over)")
+	}
+
+	// A payload of exactly MaxPayloadSize with ANY non-empty topic must be
+	// rejected: the topic's 2-byte length prefix plus its bytes push the
+	// total Remaining Length past 268,435,455 even though the payload alone
+	// is within MaxPayloadSize.
+	if mqtt.FitsRemainingLength("a", mqtt.MaxPayloadSize, false) {
+		t.Error("FitsRemainingLength(\"a\", MaxPayloadSize, false) = true, want false (topic overhead overflows the wire limit)")
+	}
+
+	// QoS>0 adds a 2-byte packet identifier; a payload that fits at QoS 0
+	// with a given topic may no longer fit at QoS 1/2.
+	topic := "sensors/temp"
+	overhead := 2 + len(topic)
+	if !mqtt.FitsRemainingLength(topic, mqtt.MaxPayloadSize-overhead, false) {
+		t.Errorf("FitsRemainingLength(%q, MaxPayloadSize-%d, false) = false, want true", topic, overhead)
+	}
+	if mqtt.FitsRemainingLength(topic, mqtt.MaxPayloadSize-overhead+1, false) {
+		t.Errorf("FitsRemainingLength(%q, MaxPayloadSize-%d+1, false) = true, want false", topic, overhead)
+	}
+	if !mqtt.FitsRemainingLength(topic, mqtt.MaxPayloadSize-overhead-2, true) {
+		t.Errorf("FitsRemainingLength(%q, ..., true) with packet ID = false, want true", topic)
+	}
+	if mqtt.FitsRemainingLength(topic, mqtt.MaxPayloadSize-overhead-1, true) {
+		t.Errorf("FitsRemainingLength(%q, ..., true) with packet ID = true, want false (packet ID overhead not accounted)", topic)
 	}
 }
