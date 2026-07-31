@@ -6,6 +6,8 @@
 package mqtt_test
 
 import (
+	"errors"
+	"strings"
 	"testing"
 
 	mqtt "github.com/SoundMatt/go-mqtt"
@@ -188,5 +190,36 @@ func TestFitsRemainingLength(t *testing.T) {
 	}
 	if mqtt.FitsRemainingLength(topic, mqtt.MaxPayloadSize-overhead-1, true) {
 		t.Errorf("FitsRemainingLength(%q, ..., true) with packet ID = true, want false (packet ID overhead not accounted)", topic)
+	}
+}
+
+// ── CheckStringLen / CheckBinLen (§1.5.4, §1.5.6) ──────────────────────────
+
+// TestCheckStringLen is a regression test for go-mqtt-01: a UTF-8 string
+// field above the 2-byte length-prefix bound (65,535 bytes) must be rejected
+// with ErrPayloadTooLarge, not silently truncated (mod 65,536) on encode.
+//
+//fusa:test REQ-RELAY-002
+func TestCheckStringLen(t *testing.T) {
+	if err := mqtt.CheckStringLen(strings.Repeat("a", mqtt.MaxStringLen)); err != nil {
+		t.Errorf("CheckStringLen(%d bytes) = %v, want nil (exactly at the boundary)", mqtt.MaxStringLen, err)
+	}
+	err := mqtt.CheckStringLen(strings.Repeat("a", mqtt.MaxStringLen+1))
+	if !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("CheckStringLen(%d bytes) = %v, want ErrPayloadTooLarge (one byte over)", mqtt.MaxStringLen+1, err)
+	}
+}
+
+// TestCheckBinLen mirrors TestCheckStringLen for MQTT Binary Data fields
+// (§1.5.6), which share the same 2-byte length-prefix bound.
+//
+//fusa:test REQ-RELAY-002
+func TestCheckBinLen(t *testing.T) {
+	if err := mqtt.CheckBinLen(make([]byte, mqtt.MaxStringLen)); err != nil {
+		t.Errorf("CheckBinLen(%d bytes) = %v, want nil (exactly at the boundary)", mqtt.MaxStringLen, err)
+	}
+	err := mqtt.CheckBinLen(make([]byte, mqtt.MaxStringLen+1))
+	if !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("CheckBinLen(%d bytes) = %v, want ErrPayloadTooLarge (one byte over)", mqtt.MaxStringLen+1, err)
 	}
 }

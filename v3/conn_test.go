@@ -12,8 +12,10 @@ package v3
 
 import (
 	"context"
+	"errors"
 	"net"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -440,6 +442,137 @@ func TestGoroutinesExitAfterClose(t *testing.T) {
 		time.Sleep(20 * time.Millisecond)
 	}
 	t.Errorf("goroutines did not return after Close: before=%d now=%d", before, runtime.NumGoroutine())
+}
+
+// TestPublishTopicTooLarge is a regression test for go-mqtt-01: a topic
+// longer than mqtt.MaxStringLen (65,535 bytes, the 2-byte length-prefix
+// bound, §1.5.4) must be rejected with ErrPayloadTooLarge before it reaches
+// encodeStr, not silently truncated (mod 65,536) into a misframed packet.
+//
+//fusa:test REQ-WIRE-004
+func TestPublishTopicTooLarge(t *testing.T) {
+	fb := newFakeBroker(t)
+	defer fb.close()
+	fb.serve(t, func() {})
+
+	c, err := Dial(fb.addr(), WithClientID("big"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	hugeTopic := strings.Repeat("a", mqtt.MaxStringLen+1)
+	if err := c.Publish(context.Background(), hugeTopic, mqtt.AtMostOnce, []byte("x")); !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Publish with a %d-byte topic: err = %v, want ErrPayloadTooLarge", len(hugeTopic), err)
+	}
+}
+
+// TestSubscribeTopicTooLarge mirrors TestPublishTopicTooLarge for the
+// SUBSCRIBE topic filter, which is encoded the same way.
+//
+//fusa:test REQ-WIRE-004
+func TestSubscribeTopicTooLarge(t *testing.T) {
+	fb := newFakeBroker(t)
+	defer fb.close()
+	fb.serve(t, func() {})
+
+	c, err := Dial(fb.addr(), WithClientID("big"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	hugeFilter := strings.Repeat("a", mqtt.MaxStringLen+1)
+	if _, err := c.Subscribe(hugeFilter, mqtt.AtMostOnce); !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Subscribe with a %d-byte filter: err = %v, want ErrPayloadTooLarge", len(hugeFilter), err)
+	}
+}
+
+// TestDialClientIDTooLarge verifies Dial rejects an oversized client ID
+// before ever attempting a TCP connection (checkConnectFieldLens runs before
+// dialTCP), since the client ID is encoded the same length-prefixed way.
+//
+//fusa:test REQ-WIRE-004
+//fusa:test REQ-CONN-011
+func TestDialClientIDTooLarge(t *testing.T) {
+	hugeID := strings.Repeat("a", mqtt.MaxStringLen+1)
+	if _, err := Dial("127.0.0.1:0", WithClientID(hugeID)); !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Dial with a %d-byte client ID: err = %v, want ErrPayloadTooLarge", len(hugeID), err)
+	}
+}
+
+// TestDialWillTopicTooLarge and TestDialWillPayloadTooLarge verify Dial
+// rejects an oversized will topic/payload the same way — both are encoded
+// into CONNECT with a 2-byte length prefix (§1.5.4 topic, §1.5.6 payload).
+//
+//fusa:test REQ-WIRE-004
+//fusa:test REQ-CONN-011
+func TestDialWillTopicTooLarge(t *testing.T) {
+	hugeTopic := strings.Repeat("a", mqtt.MaxStringLen+1)
+	_, err := Dial("127.0.0.1:0", WithClientID("w"), WithWill(hugeTopic, []byte("bye"), mqtt.AtMostOnce, false))
+	if !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Dial with a %d-byte will topic: err = %v, want ErrPayloadTooLarge", len(hugeTopic), err)
+	}
+}
+
+func TestDialWillPayloadTooLarge(t *testing.T) {
+	hugePayload := make([]byte, mqtt.MaxStringLen+1)
+	_, err := Dial("127.0.0.1:0", WithClientID("w"), WithWill("status", hugePayload, mqtt.AtMostOnce, false))
+	if !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Dial with a %d-byte will payload: err = %v, want ErrPayloadTooLarge", len(hugePayload), err)
+	}
+}
+
+// TestReadLoopRejectsOversizedInboundFrame is a regression test for
+// go-mqtt-04: readVarLen only enforces the wire-format ceiling
+// (268,435,455, §2.2.3), which is not a resource-safety bound. Before this
+// fix, the client allocated `make([]byte, remLen)` directly from an
+// untrusted broker-declared length; a single crafted frame could force a
+// ~268MB allocation. The client must now reject any inbound Remaining Length
+// above its configured cap before allocating a body buffer at all — this
+// test declares a length far above the default 1 MiB cap and confirms the
+// client disconnects (and does not hang or panic) rather than allocating.
+//
+//fusa:test REQ-FAULT-001
+//fusa:sec-test REQ-SEC-004
+func TestReadLoopRejectsOversizedInboundFrame(t *testing.T) {
+	fb := newFakeBroker(t)
+	defer fb.close()
+
+	subDone := make(chan struct{})
+	fb.serve(t, func() {
+		_, _ = fb.readPacket(t) // drain SUBSCRIBE
+		// Declare a PUBLISH with Remaining Length just over the default 1 MiB
+		// cap (encodeVarLen(2_000_000)), but never write that many body
+		// bytes — if the client allocated make([]byte, remLen) unconditionally
+		// and then blocked in io.ReadFull, this test would hang instead of
+		// observing the connection close below.
+		_, _ = fb.conn.Write(append([]byte{pktPUBLISH}, encodeVarLen(2_000_000)...))
+		close(subDone)
+	})
+
+	c, err := Dial(fb.addr(), WithClientID("cap"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("t", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+
+	<-subDone
+	// The readLoop must reject the oversized frame and return, which closes
+	// every subscription's channel.
+	select {
+	case _, ok := <-sub.C():
+		if ok {
+			t.Error("expected the subscription channel to close after an oversized inbound frame, got a message instead")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for the subscription channel to close after an oversized inbound frame")
+	}
 }
 
 // containsBytes reports whether sub appears within b.

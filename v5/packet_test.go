@@ -332,7 +332,7 @@ func TestReadPropSetRemainingBytes(t *testing.T) {
 // ── buildCONNECT ───────────────────────────────────────────────────────────
 
 func TestBuildCONNECT_Basic(t *testing.T) {
-	p := buildCONNECT("test-client", 30, 0, 0)
+	p := buildCONNECT("test-client", 30, 0, 0, 0, 0)
 	if p[0] != pktCONNECT {
 		t.Errorf("first byte: got 0x%02x, want 0x%02x", p[0], pktCONNECT)
 	}
@@ -359,7 +359,7 @@ func TestBuildCONNECT_Basic(t *testing.T) {
 }
 
 func TestBuildCONNECT_SessionExpiry(t *testing.T) {
-	p := buildCONNECT("sess-client", 30, 300, 0)
+	p := buildCONNECT("sess-client", 30, 300, 0, 0, 0)
 	_, n, _ := decodeVarLen(p[1:])
 	body := p[1+n:]
 	// Props start at body[10].
@@ -373,7 +373,7 @@ func TestBuildCONNECT_SessionExpiry(t *testing.T) {
 }
 
 func TestBuildCONNECT_ReceiveMax(t *testing.T) {
-	p := buildCONNECT("rm-client", 30, 0, 100)
+	p := buildCONNECT("rm-client", 30, 0, 100, 0, 0)
 	_, n, _ := decodeVarLen(p[1:])
 	body := p[1+n:]
 	props, _, err := readPropSet(body[10:])
@@ -382,6 +382,85 @@ func TestBuildCONNECT_ReceiveMax(t *testing.T) {
 	}
 	if props.receiveMax == nil || *props.receiveMax != 100 {
 		t.Errorf("receive max: got %v", props.receiveMax)
+	}
+}
+
+// TestBuildCONNECT_MaxPacketSize verifies buildCONNECT emits the Maximum
+// Packet Size property (§3.1.2.11) when a non-zero cap is configured, so a
+// compliant broker can self-limit what it sends this client. With
+// sessionExpiry and receiveMax both 0, Maximum Packet Size is the only
+// property CONNECT emits, so the property block is exactly id + 4-byte value.
+func TestBuildCONNECT_MaxPacketSize(t *testing.T) {
+	p := buildCONNECT("mps-client", 30, 0, 0, 1<<20, 0)
+	_, n, _ := decodeVarLen(p[1:])
+	body := p[1+n:]
+	propLen, pn, err := decodeVarLen(body[10:])
+	if err != nil {
+		t.Fatalf("decode prop length: %v", err)
+	}
+	if propLen != 5 {
+		t.Fatalf("prop length: got %d, want 5 (id + 4-byte value)", propLen)
+	}
+	props := body[10+pn : 10+pn+propLen]
+	if props[0] != propMaxPacketSize {
+		t.Fatalf("property id: got 0x%02x, want 0x%02x", props[0], propMaxPacketSize)
+	}
+	if v := binary.BigEndian.Uint32(props[1:5]); v != 1<<20 {
+		t.Errorf("max packet size: got %d, want %d", v, 1<<20)
+	}
+}
+
+// TestBuildCONNECT_NoMaxPacketSize verifies buildCONNECT omits the Maximum
+// Packet Size property entirely when maxPacketSize is 0 (disabled).
+func TestBuildCONNECT_NoMaxPacketSize(t *testing.T) {
+	p := buildCONNECT("no-mps-client", 30, 0, 0, 0, 0)
+	_, n, _ := decodeVarLen(p[1:])
+	body := p[1+n:]
+	props, _, err := readPropSet(body[10:])
+	if err != nil {
+		t.Fatalf("readPropSet: %v", err)
+	}
+	if props.sessionExpiry != nil || props.receiveMax != nil {
+		t.Errorf("expected no properties, got sessionExpiry=%v receiveMax=%v", props.sessionExpiry, props.receiveMax)
+	}
+}
+
+// TestBuildCONNECT_TopicAliasMax verifies buildCONNECT emits the Topic Alias
+// Maximum property (§3.1.2.3.4) when a non-zero value is configured, so the
+// server knows the bound the client will enforce on inbound Topic Aliases.
+func TestBuildCONNECT_TopicAliasMax(t *testing.T) {
+	p := buildCONNECT("tam-client", 30, 0, 0, 0, 16)
+	_, n, _ := decodeVarLen(p[1:])
+	body := p[1+n:]
+	propLen, pn, err := decodeVarLen(body[10:])
+	if err != nil {
+		t.Fatalf("decode prop length: %v", err)
+	}
+	if propLen != 3 {
+		t.Fatalf("prop length: got %d, want 3 (id + 2-byte value)", propLen)
+	}
+	props := body[10+pn : 10+pn+propLen]
+	if props[0] != propTopicAliasMax {
+		t.Fatalf("property id: got 0x%02x, want 0x%02x", props[0], propTopicAliasMax)
+	}
+	if v := binary.BigEndian.Uint16(props[1:3]); v != 16 {
+		t.Errorf("topic alias max: got %d, want 16", v)
+	}
+}
+
+// TestBuildCONNECT_NoTopicAliasMax verifies buildCONNECT omits the Topic
+// Alias Maximum property when it is 0 — equivalent per §3.1.2.3.4's own
+// default, and matches "the client does not accept any Topic Alias".
+func TestBuildCONNECT_NoTopicAliasMax(t *testing.T) {
+	p := buildCONNECT("no-tam-client", 30, 0, 0, 0, 0)
+	_, n, _ := decodeVarLen(p[1:])
+	body := p[1+n:]
+	props, _, err := readPropSet(body[10:])
+	if err != nil {
+		t.Fatalf("readPropSet: %v", err)
+	}
+	if props.topicAliasMax != nil {
+		t.Errorf("expected no Topic Alias Maximum property, got %v", *props.topicAliasMax)
 	}
 }
 

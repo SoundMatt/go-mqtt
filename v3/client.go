@@ -108,12 +108,13 @@ type will struct {
 }
 
 type options struct {
-	clientID    string
-	keepalive   time.Duration
-	dialTimeout time.Duration
-	will        *will
-	qos2Timeout time.Duration
-	tlsConfig   *tls.Config
+	clientID      string
+	keepalive     time.Duration
+	dialTimeout   time.Duration
+	will          *will
+	qos2Timeout   time.Duration
+	tlsConfig     *tls.Config
+	maxPacketSize uint32 // inbound cap enforced before allocating a packet body buffer
 }
 
 // WithClientID sets the MQTT client identifier sent in the CONNECT packet.
@@ -155,6 +156,17 @@ func WithTLS(cfg *tls.Config) Option {
 //fusa:req REQ-QOS2-004
 func WithQoS2Timeout(d time.Duration) Option {
 	return func(o *options) { o.qos2Timeout = d }
+}
+
+// WithMaxPacketSize bounds the Remaining Length the client will accept on any
+// single inbound packet before allocating a buffer for its body. MQTT §2.2.3
+// bounds Remaining Length by wire encoding to 268,435,455 bytes, but that is
+// a wire-format ceiling, not a resource-safety one: a single crafted or
+// corrupt frame (or a compromised broker) could otherwise force a ~268MB
+// allocation, repeatably. Default: mqtt.DefaultMaxInboundPacketSize (1 MiB).
+// n == 0 disables the cap check (the 4-byte wire ceiling still applies).
+func WithMaxPacketSize(n uint32) Option {
+	return func(o *options) { o.maxPacketSize = n }
 }
 
 // WithWill configures a last-will-and-testament message. The broker publishes
@@ -204,6 +216,9 @@ func New(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error) 
 // dial is the shared implementation behind Dial and New.
 func dial(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error) {
 	o := newOptions(opts)
+	if err := checkConnectFieldLens(o); err != nil {
+		return nil, err
+	}
 
 	dialCtx, cancel := context.WithTimeout(ctx, o.dialTimeout)
 	defer cancel()
@@ -217,15 +232,36 @@ func dial(ctx context.Context, addr string, opts ...Option) (mqtt.Client, error)
 // newOptions applies defaults then the supplied options.
 func newOptions(opts []Option) *options {
 	o := &options{
-		clientID:    fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
-		keepalive:   30 * time.Second,
-		dialTimeout: 10 * time.Second,
-		qos2Timeout: 10 * time.Second,
+		clientID:      fmt.Sprintf("go-mqtt-%d", time.Now().UnixNano()),
+		keepalive:     30 * time.Second,
+		dialTimeout:   10 * time.Second,
+		qos2Timeout:   10 * time.Second,
+		maxPacketSize: mqtt.DefaultMaxInboundPacketSize,
 	}
 	for _, opt := range opts {
 		opt(o)
 	}
 	return o
+}
+
+// checkConnectFieldLens validates every UTF-8 string / binary field that will
+// be encoded into the CONNECT packet (§1.5.4, §1.5.6): the client ID and, if
+// a will is configured, the will topic and will payload. Each is carried by a
+// 2-byte length prefix on the wire, so a value above mqtt.MaxStringLen cannot
+// be represented and must be rejected before buildCONNECT encodes it.
+func checkConnectFieldLens(o *options) error {
+	if err := mqtt.CheckStringLen(o.clientID); err != nil {
+		return err
+	}
+	if o.will != nil {
+		if err := mqtt.CheckStringLen(o.will.topic); err != nil {
+			return err
+		}
+		if err := mqtt.CheckBinLen(o.will.payload); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // dialTCP establishes a TCP connection to addr, upgrading to TLS when configured.
@@ -373,6 +409,12 @@ func (c *v3Client) Publish(ctx context.Context, topic string, qos mqtt.QoS, payl
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
 	}
+	// An MQTT topic is a UTF-8 string with a 2-byte length prefix (§1.5.4):
+	// a topic longer than MaxStringLen cannot be represented on the wire and
+	// would truncate the length prefix, so reject it before encoding.
+	if err := mqtt.CheckStringLen(topic); err != nil {
+		return err
+	}
 	// FitsRemainingLength checks the payload together with the topic and
 	// (for QoS>0) packet-ID overhead that will also be encoded into the wire
 	// Remaining Length — a bare payload-size check is not sufficient (see
@@ -466,6 +508,11 @@ func (c *v3Client) Subscribe(topic string, qos mqtt.QoS, opts ...mqtt.Subscriber
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
 	}
+	// A topic filter is a UTF-8 string with a 2-byte length prefix (§1.5.4),
+	// same bound as a publish topic; reject before encoding into SUBSCRIBE.
+	if err := mqtt.CheckStringLen(topic); err != nil {
+		return nil, err
+	}
 	select {
 	case <-c.done:
 		return nil, mqtt.ErrClosed
@@ -554,6 +601,14 @@ func (c *v3Client) readLoop() {
 
 		remLen, err := readVarLen(c.conn)
 		if err != nil {
+			return
+		}
+		// readVarLen only enforces the wire-format ceiling (268,435,455,
+		// §2.2.3); bound the allocation itself against the configured cap
+		// before trusting an untrusted broker's declared length (see
+		// mqtt.DefaultMaxInboundPacketSize). A crafted or corrupt frame
+		// otherwise forces a ~268MB allocation, repeatably, on every frame.
+		if c.opts.maxPacketSize > 0 && remLen > int(c.opts.maxPacketSize) {
 			return
 		}
 

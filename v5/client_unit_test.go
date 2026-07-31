@@ -11,8 +11,10 @@ package v5
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -22,9 +24,21 @@ import (
 // fakeBrokerV5 is a minimal in-process TCP server speaking just enough MQTT v5.0
 // to drive the client: it completes CONNECT/CONNACK (with caller-supplied CONNACK
 // properties), drains client→broker packets, and lets the test inject frames.
+//
+// By default it answers every client SUBSCRIBE with a success (0x00) SUBACK
+// and every QoS 1 client PUBLISH with a success (0x00) PUBACK, so tests that
+// don't care about ack handling aren't affected by SubscribeV5/PublishV5(QoS1)
+// now blocking on the ack (see TestV5Subscribe*ReasonCode below for tests
+// that do care, via subAckReason/pubAckReason).
 type fakeBrokerV5 struct {
 	ln   net.Listener
 	conn net.Conn
+
+	// subAckReason/pubAckReason are the Reason Code the drain goroutine
+	// echoes back for every SUBSCRIBE/QoS-1-PUBLISH it sees. Set before
+	// calling accept (or acceptNoAck); zero value 0x00 = Success.
+	subAckReason byte
+	pubAckReason byte
 }
 
 func newFakeBrokerV5(t *testing.T) *fakeBrokerV5 {
@@ -59,7 +73,10 @@ func connack(reason byte, props []byte) []byte {
 }
 
 // accept waits for one client, completes the handshake with the given CONNACK,
-// then starts draining client→broker packets so client writes never block.
+// then drains client→broker packets, answering SUBSCRIBE with a SUBACK
+// (reason fb.subAckReason) and QoS 1 PUBLISH with a PUBACK (reason
+// fb.pubAckReason) so client writes never block and SubscribeV5/PublishV5
+// don't hang waiting for an ack that never arrives.
 func (fb *fakeBrokerV5) accept(t *testing.T, ca []byte) {
 	t.Helper()
 	conn, err := fb.ln.Accept()
@@ -75,11 +92,85 @@ func (fb *fakeBrokerV5) accept(t *testing.T, ca []byte) {
 	}
 	go func() {
 		for {
+			hdr, body, ok := readOnePacketBody(conn)
+			if !ok {
+				return
+			}
+			switch hdr & 0xF0 {
+			case pktSUBSCRIBE & 0xF0:
+				if len(body) >= 2 {
+					packetID := uint16(body[0])<<8 | uint16(body[1])
+					_, _ = conn.Write(testSUBACK(packetID, fb.subAckReason))
+				}
+			case pktPUBLISH & 0xF0:
+				qos := (hdr >> 1) & 0x03
+				if qos == 1 && len(body) >= 2 {
+					topicLen := int(body[0])<<8 | int(body[1])
+					off := 2 + topicLen
+					if len(body) >= off+2 {
+						packetID := uint16(body[off])<<8 | uint16(body[off+1])
+						_, _ = conn.Write(testPUBACK(packetID, fb.pubAckReason))
+					}
+				}
+			}
+		}
+	}()
+}
+
+// acceptNoAck is like accept but never answers SUBSCRIBE or QoS 1 PUBLISH —
+// it only drains them — for tests exercising the SubscribeV5/PublishV5 ack
+// timeout path.
+func (fb *fakeBrokerV5) acceptNoAck(t *testing.T, ca []byte) {
+	t.Helper()
+	conn, err := fb.ln.Accept()
+	if err != nil {
+		t.Errorf("accept: %v", err)
+		return
+	}
+	fb.conn = conn
+	readOnePacket(conn)
+	if _, err := conn.Write(ca); err != nil {
+		return
+	}
+	go func() {
+		for {
 			if _, _, ok := readOnePacketBody(conn); !ok {
 				return
 			}
 		}
 	}()
+}
+
+// testSUBACK builds a minimal single-reason-code SUBACK for the fake broker
+// to answer a client SUBSCRIBE with (this client always requests exactly one
+// Topic Filter per SUBSCRIBE, so one reason code suffices, §3.9).
+func testSUBACK(packetID uint16, reason byte) []byte {
+	body := []byte{byte(packetID >> 8), byte(packetID), 0x00, reason} // propsLen=0, then the one reason code
+	pkt := []byte{pktSUBACK}
+	pkt = append(pkt, encodeVarLen(len(body))...)
+	return append(pkt, body...)
+}
+
+// testPUBACK builds a PUBACK with an explicit Reason Code for the fake broker
+// to answer a client QoS 1 PUBLISH with (§3.4.2).
+func testPUBACK(packetID uint16, reason byte) []byte {
+	body := []byte{byte(packetID >> 8), byte(packetID), reason}
+	pkt := []byte{pktPUBACK}
+	pkt = append(pkt, encodeVarLen(len(body))...)
+	return append(pkt, body...)
+}
+
+// testPublishWithTopicAlias builds a QoS 0 PUBLISH carrying an explicit Topic
+// Alias property, including alias 0. buildPUBLISH can't be used for this: it
+// intentionally omits the Topic Alias property when TopicAlias == 0 (correct
+// for the client's own send path), so a test simulating a broker that sends
+// an out-of-spec alias-0 property needs to construct the packet directly.
+func testPublishWithTopicAlias(t *testing.T, topic, payload string, alias uint16) []byte {
+	t.Helper()
+	body := encodeStr(topic)
+	body = append(body, encodeProps(propU16(propTopicAlias, alias))...)
+	body = append(body, []byte(payload)...)
+	return pkt(pktPUBLISH, body)
 }
 
 // readOnePacket reads and discards a single MQTT packet.
@@ -274,6 +365,367 @@ func TestV5QoS2Unsupported(t *testing.T) {
 	}
 	if _, err := c.Subscribe("t", mqtt.ExactlyOnce); err != mqtt.ErrQoSUnsupported {
 		t.Errorf("Subscribe QoS2 err = %v, want ErrQoSUnsupported", err)
+	}
+}
+
+// TestV5SubscribeReasonCodeFailure verifies SubscribeV5 surfaces a SUBACK
+// failure Reason Code (§3.9, e.g. 0x87 Not authorized) as an error instead of
+// silently returning a Subscription whose channel would never deliver — a
+// regression test for go-mqtt-02 (SUBACK reason code was never inspected).
+//
+//fusa:test REQ-V5-SUB-001
+func TestV5SubscribeReasonCodeFailure(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	fb.subAckReason = 0x87 // Not authorized
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("u"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("forbidden/topic", mqtt.AtMostOnce)
+	if err == nil {
+		t.Fatal("Subscribe with a refused SUBACK returned nil error, want an error")
+	}
+	if sub != nil {
+		t.Errorf("Subscribe with a refused SUBACK returned non-nil Subscription: %v", sub)
+	}
+	if !errors.Is(err, mqtt.ErrSubscribeRefused) {
+		t.Errorf("err = %v, want it to wrap mqtt.ErrSubscribeRefused", err)
+	}
+
+	// The refused subscription must not be left dangling in the client's
+	// filter table — previously it stayed registered forever, its channel
+	// never delivering and never closing until the whole client closed.
+	c.mu.RLock()
+	leftover := len(c.subs["forbidden/topic"])
+	c.mu.RUnlock()
+	if leftover != 0 {
+		t.Errorf(`subs["forbidden/topic"] has %d entries after refusal, want 0`, leftover)
+	}
+}
+
+// TestV5SubscribeSuccessReasonCode verifies SubscribeV5 accepts a granted
+// SUBACK reason code (0x01 = Granted QoS 1, still < 0x80 so not a failure).
+//
+//fusa:test REQ-V5-SUB-001
+func TestV5SubscribeSuccessReasonCode(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	fb.subAckReason = 0x01 // Granted QoS 1
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("u"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("granted/topic", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	if sub == nil {
+		t.Fatal("Subscribe returned a nil Subscription on a granted SUBACK")
+	}
+}
+
+// TestV5SubscribeAckTimeout verifies SubscribeV5 fails with ErrTimeout, and
+// cleans up its filter-table entry, when no SUBACK ever arrives.
+//
+//fusa:test REQ-V5-SUB-001
+//fusa:test REQ-FAULT-001
+func TestV5SubscribeAckTimeout(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.acceptNoAck(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("u"), WithKeepalive(0), WithAckTimeout(50*time.Millisecond))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("never/acked", mqtt.AtMostOnce)
+	if !errors.Is(err, mqtt.ErrTimeout) {
+		t.Errorf("err = %v, want it to wrap mqtt.ErrTimeout", err)
+	}
+	if sub != nil {
+		t.Errorf("Subscribe with no SUBACK returned non-nil Subscription: %v", sub)
+	}
+	c.mu.RLock()
+	leftover := len(c.subs["never/acked"])
+	c.mu.RUnlock()
+	if leftover != 0 {
+		t.Errorf(`subs["never/acked"] has %d entries after timeout, want 0`, leftover)
+	}
+}
+
+// TestV5PublishQoS1ReasonCodeFailure verifies PublishV5 (QoS 1) surfaces a
+// PUBACK failure Reason Code (§3.4.2, e.g. 0x97 Quota exceeded) as an error
+// instead of silently reporting success — a regression test for go-mqtt-02
+// on the publish side.
+//
+//fusa:test REQ-V5-PUB-001
+func TestV5PublishQoS1ReasonCodeFailure(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	fb.pubAckReason = 0x97 // Quota exceeded
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("u"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	err = c.Publish(context.Background(), "t", mqtt.AtLeastOnce, []byte("x"))
+	if !errors.Is(err, mqtt.ErrPublishRefused) {
+		t.Errorf("err = %v, want it to wrap mqtt.ErrPublishRefused", err)
+	}
+}
+
+// TestV5PublishQoS1AckTimeout verifies PublishV5 (QoS 1) fails with
+// ErrTimeout when no PUBACK ever arrives.
+//
+//fusa:test REQ-V5-PUB-001
+//fusa:test REQ-FAULT-001
+func TestV5PublishQoS1AckTimeout(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.acceptNoAck(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("u"), WithKeepalive(0), WithAckTimeout(50*time.Millisecond))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	err = c.Publish(context.Background(), "t", mqtt.AtLeastOnce, []byte("x"))
+	if !errors.Is(err, mqtt.ErrTimeout) {
+		t.Errorf("err = %v, want it to wrap mqtt.ErrTimeout", err)
+	}
+}
+
+// TestV5TopicAliasZeroProtocolError verifies a PUBLISH carrying Topic Alias 0
+// is treated as a Protocol Error (§3.3.2.3.4: 0 is never a valid alias) and
+// closes the connection rather than being silently accepted or resolved — a
+// regression test for go-mqtt-03.
+//
+//fusa:test REQ-V5-ALIAS-001
+//fusa:sec-test REQ-SEC-009
+func TestV5TopicAliasZeroProtocolError(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("u"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("sensors/#", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	time.Sleep(20 * time.Millisecond)
+
+	// buildPUBLISH omits the Topic Alias property entirely when TopicAlias
+	// == 0 (correct for the send path: 0 means "no alias"), so an explicit
+	// alias-0 property — which a misbehaving/malicious broker could still
+	// send — has to be constructed by hand here to exercise the parser.
+	if _, err := fb.conn.Write(testPublishWithTopicAlias(t, "sensors/temp", "x", 0)); err != nil {
+		t.Fatalf("write publish: %v", err)
+	}
+
+	select {
+	case m, ok := <-sub.C():
+		if ok {
+			t.Errorf("expected the subscription channel to close on protocol error, got message %v", m)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for the connection to close after a Topic Alias 0 protocol error")
+	}
+}
+
+// TestV5TopicAliasExceedsMaxProtocolError verifies a PUBLISH carrying a Topic
+// Alias greater than what the client advertised via Topic Alias Maximum in
+// CONNECT is a Protocol Error, not silently accepted — a regression test for
+// go-mqtt-03.
+//
+//fusa:test REQ-V5-ALIAS-001
+//fusa:sec-test REQ-SEC-009
+func TestV5TopicAliasExceedsMaxProtocolError(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("u"), WithKeepalive(0), WithTopicAliasMax(4))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("sensors/#", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	time.Sleep(20 * time.Millisecond)
+
+	// alias 5 > advertised max of 4.
+	if _, err := fb.conn.Write(buildPUBLISH("sensors/temp", []byte("x"), 0, false, 0, PublishProps{TopicAlias: 5})); err != nil {
+		t.Fatalf("write publish: %v", err)
+	}
+
+	select {
+	case m, ok := <-sub.C():
+		if ok {
+			t.Errorf("expected the subscription channel to close on protocol error, got message %v", m)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for the connection to close after an out-of-bound Topic Alias protocol error")
+	}
+}
+
+// TestV5PublishTopicTooLarge is a regression test for go-mqtt-01: a topic
+// longer than mqtt.MaxStringLen (65,535 bytes, the 2-byte length-prefix
+// bound, §1.5.4) must be rejected with ErrPayloadTooLarge before it reaches
+// encodeStr, not silently truncated (mod 65,536) into a misframed packet.
+//
+//fusa:test REQ-V5-WIRE-004
+func TestV5PublishTopicTooLarge(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("big"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	hugeTopic := strings.Repeat("a", mqtt.MaxStringLen+1)
+	err = c.Publish(context.Background(), hugeTopic, mqtt.AtMostOnce, []byte("x"))
+	if !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Publish with a %d-byte topic: err = %v, want ErrPayloadTooLarge", len(hugeTopic), err)
+	}
+}
+
+// TestV5SubscribeTopicTooLarge mirrors TestV5PublishTopicTooLarge for the
+// SUBSCRIBE topic filter, which is encoded the same way.
+//
+//fusa:test REQ-V5-WIRE-004
+func TestV5SubscribeTopicTooLarge(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("big"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	hugeFilter := strings.Repeat("a", mqtt.MaxStringLen+1)
+	if _, err := c.Subscribe(hugeFilter, mqtt.AtMostOnce); !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Subscribe with a %d-byte filter: err = %v, want ErrPayloadTooLarge", len(hugeFilter), err)
+	}
+}
+
+// TestV5PublishPropsFieldTooLarge is a regression test for the go-mqtt-01
+// follow-up: PublishV5's ResponseTopic/ContentType/CorrelationData/
+// UserProperties fields were left unguarded even after the topic itself was
+// fixed. Each is encoded the same length-prefixed way (§1.5.4, §1.5.6) and
+// must be rejected before buildPUBLISH truncates its length prefix.
+//
+//fusa:test REQ-V5-PUB-001
+//fusa:test REQ-V5-PUB-002
+func TestV5PublishPropsFieldTooLarge(t *testing.T) {
+	huge := strings.Repeat("a", mqtt.MaxStringLen+1)
+	hugeBin := make([]byte, mqtt.MaxStringLen+1)
+
+	cases := []struct {
+		name  string
+		props PublishProps
+	}{
+		{"ResponseTopic", PublishProps{ResponseTopic: huge}},
+		{"ContentType", PublishProps{ContentType: huge}},
+		{"CorrelationData", PublishProps{CorrelationData: hugeBin}},
+		{"UserProperty key", PublishProps{UserProperties: []mqtt.UserProperty{{Key: huge, Value: "v"}}}},
+		{"UserProperty value", PublishProps{UserProperties: []mqtt.UserProperty{{Key: "k", Value: huge}}}},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			fb := newFakeBrokerV5(t)
+			go fb.accept(t, connack(0x00, nil))
+
+			c, err := Dial(fb.addr(), WithClientID("props"), WithKeepalive(0))
+			if err != nil {
+				t.Fatalf("Dial: %v", err)
+			}
+			defer func() { _ = c.Close() }()
+
+			err = c.PublishV5(context.Background(), "t", mqtt.AtMostOnce, []byte("x"), tc.props)
+			if !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+				t.Errorf("PublishV5 with oversized %s: err = %v, want ErrPayloadTooLarge", tc.name, err)
+			}
+		})
+	}
+}
+
+// TestV5DialClientIDTooLarge verifies Dial rejects an oversized client ID
+// before ever attempting a TCP connection, since the client ID is encoded
+// the same length-prefixed way (§1.5.4).
+//
+//fusa:test REQ-V5-WIRE-004
+//fusa:test REQ-V5-CONN-001
+func TestV5DialClientIDTooLarge(t *testing.T) {
+	hugeID := strings.Repeat("a", mqtt.MaxStringLen+1)
+	if _, err := Dial("127.0.0.1:0", WithClientID(hugeID)); !errors.Is(err, mqtt.ErrPayloadTooLarge) {
+		t.Errorf("Dial with a %d-byte client ID: err = %v, want ErrPayloadTooLarge", len(hugeID), err)
+	}
+}
+
+// TestV5ReadLoopRejectsOversizedInboundFrame is a regression test for
+// go-mqtt-04: readVarLen only enforces the wire-format ceiling
+// (268,435,455, §2.2.3), which is not a resource-safety bound. Before this
+// fix, the client allocated `make([]byte, remLen)` directly from an
+// untrusted broker-declared length; a single crafted frame could force a
+// ~268MB allocation. The client must now reject any inbound Remaining Length
+// above its configured cap before allocating a body buffer at all — this
+// test declares a length far above the default 1 MiB cap and confirms the
+// client disconnects (and does not hang or panic) rather than allocating.
+//
+//fusa:test REQ-FAULT-001
+//fusa:sec-test REQ-SEC-004
+func TestV5ReadLoopRejectsOversizedInboundFrame(t *testing.T) {
+	fb := newFakeBrokerV5(t)
+	go fb.accept(t, connack(0x00, nil))
+
+	c, err := Dial(fb.addr(), WithClientID("cap"), WithKeepalive(0))
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer func() { _ = c.Close() }()
+
+	sub, err := c.Subscribe("t", mqtt.AtMostOnce)
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	time.Sleep(20 * time.Millisecond) // let the SUBACK settle
+
+	// Declare a PUBLISH with Remaining Length just over the default 1 MiB
+	// cap, but never write that many body bytes — if the client allocated
+	// make([]byte, remLen) unconditionally and then blocked in
+	// io.ReadFull, this test would hang instead of observing the
+	// connection close below.
+	if _, err := fb.conn.Write(append([]byte{pktPUBLISH}, encodeVarLen(2_000_000)...)); err != nil {
+		t.Fatalf("write oversized frame header: %v", err)
+	}
+
+	select {
+	case _, ok := <-sub.C():
+		if ok {
+			t.Error("expected the subscription channel to close after an oversized inbound frame, got a message instead")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for the subscription channel to close after an oversized inbound frame")
 	}
 }
 
