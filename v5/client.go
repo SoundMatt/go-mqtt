@@ -29,8 +29,9 @@
 //	sub, _ := client.Subscribe("Vehicle/#", mqtt.AtMostOnce)
 //	msg := <-sub.C()
 //
-// QoS 0 (AtMostOnce) and QoS 1 (AtLeastOnce) are supported. QoS 2 returns
-// ErrQoSUnsupported and will be added in v0.5.
+// QoS 0 (AtMostOnce) and QoS 1 (AtLeastOnce) are supported. QoS 2 is not
+// supported by this client — a permanent limitation, not a near-term gap —
+// and Publish/PublishV5/Subscribe/SubscribeV5 return ErrQoSUnsupported for it.
 package v5
 
 //fusa:req REQ-V5-CONN-001
@@ -120,13 +121,27 @@ type options struct {
 	dialTimeout   time.Duration
 	sessionExpiry uint32 // 0 = session ends on disconnect
 	receiveMax    uint16 // 0 = do not send (server default applies)
+	ackTimeout    time.Duration
+	maxPacketSize uint32 // inbound cap (client-enforced) and advertised to the server
+	topicAliasMax uint16 // 0 = does not accept inbound Topic Aliases (§3.1.2.3.4 default)
 }
+
+// defaultTopicAliasMax is the client's default advertised Topic Alias
+// Maximum (§3.1.2.3.4): the number of distinct inbound topic-alias mappings
+// the client will track. A conservative non-zero default lets alias
+// resolution work out of the box while keeping the per-connection alias
+// table bounded; callers with different needs can override via
+// WithTopicAliasMax.
+const defaultTopicAliasMax = 16
 
 func defaultOptions() *options {
 	return &options{
-		clientID:    fmt.Sprintf("go-mqtt-v5-%d", time.Now().UnixNano()),
-		keepalive:   30 * time.Second,
-		dialTimeout: 10 * time.Second,
+		clientID:      fmt.Sprintf("go-mqtt-v5-%d", time.Now().UnixNano()),
+		keepalive:     30 * time.Second,
+		dialTimeout:   10 * time.Second,
+		ackTimeout:    10 * time.Second,
+		maxPacketSize: mqtt.DefaultMaxInboundPacketSize,
+		topicAliasMax: defaultTopicAliasMax,
 	}
 }
 
@@ -147,6 +162,26 @@ func WithSessionExpiry(secs uint32) Option { return func(o *options) { o.session
 // WithReceiveMax limits the number of in-flight QoS 1 messages the client
 // will accept from the broker simultaneously. 0 means no client-side limit.
 func WithReceiveMax(n uint16) Option { return func(o *options) { o.receiveMax = n } }
+
+// WithAckTimeout sets how long SubscribeV5 waits for a SUBACK, and PublishV5
+// (QoS 1) waits for a PUBACK, before giving up with ErrTimeout. Default: 10s.
+func WithAckTimeout(d time.Duration) Option { return func(o *options) { o.ackTimeout = d } }
+
+// WithMaxPacketSize bounds the Remaining Length the client will accept on any
+// single inbound packet (CONNACK or otherwise) before allocating a buffer for
+// its body, and is sent to the server as the Maximum Packet Size property in
+// CONNECT (§3.1.2.11) so a compliant server also self-limits. Default:
+// mqtt.DefaultMaxInboundPacketSize (1 MiB). n == 0 disables the client's own
+// cap check (readVarLen's own 4-byte wire ceiling of 268,435,455 still
+// applies) and omits the CONNECT property.
+func WithMaxPacketSize(n uint32) Option { return func(o *options) { o.maxPacketSize = n } }
+
+// WithTopicAliasMax sets the Topic Alias Maximum this client advertises to
+// the server in CONNECT (§3.1.2.3.4): the number of distinct Topic Alias
+// values [1, n] the server may use in a PUBLISH to this client. Default: 16.
+// n == 0 means the client does not accept any inbound Topic Alias at all —
+// any inbound alias is then a Protocol Error and closes the connection.
+func WithTopicAliasMax(n uint16) Option { return func(o *options) { o.topicAliasMax = n } }
 
 // Client is an MQTT v5.0 client. It implements mqtt.Client and adds v5
 // extensions via PublishV5 and SubscribeV5.
@@ -169,6 +204,15 @@ type Client struct {
 	// incoming topic alias table: alias → topic
 	aliasMu sync.RWMutex
 	aliases map[uint16]string
+
+	// pending SUBACK/PUBACK trackers keyed by packet ID, guarded by ackMu.
+	// SubscribeV5 registers a channel here before sending SUBSCRIBE so the
+	// SUBACK's per-filter Reason Code (§3.9) can be inspected instead of
+	// assuming success; PublishV5 (QoS 1) does the same for the PUBACK
+	// Reason Code (§3.4).
+	ackMu       sync.Mutex
+	pendingSubs map[uint16]chan []byte
+	pendingPubs map[uint16]chan byte
 }
 
 // Dial connects to the MQTT v5.0 broker at addr (e.g. "localhost:1883") and
@@ -211,6 +255,11 @@ func dial(ctx context.Context, addr string, opts ...Option) (*Client, error) {
 	for _, opt := range opts {
 		opt(o)
 	}
+	// The client ID is encoded into CONNECT as a UTF-8 string with a 2-byte
+	// length prefix (§1.5.4); reject an oversized value before dialing.
+	if err := mqtt.CheckStringLen(o.clientID); err != nil {
+		return nil, fmt.Errorf("mqtt/v5: client ID: %w", err)
+	}
 
 	dialCtx, cancel := context.WithTimeout(ctx, o.dialTimeout)
 	defer cancel()
@@ -220,14 +269,16 @@ func dial(ctx context.Context, addr string, opts ...Option) (*Client, error) {
 	}
 
 	c := &Client{
-		conn:    conn,
-		opts:    o,
-		subs:    make(map[string][]*v5Subscription),
-		done:    make(chan struct{}),
-		aliases: make(map[uint16]string),
+		conn:        conn,
+		opts:        o,
+		subs:        make(map[string][]*v5Subscription),
+		done:        make(chan struct{}),
+		aliases:     make(map[uint16]string),
+		pendingSubs: make(map[uint16]chan []byte),
+		pendingPubs: make(map[uint16]chan byte),
 	}
 
-	if err := c.send(buildCONNECT(o.clientID, uint16(o.keepalive.Seconds()), o.sessionExpiry, o.receiveMax)); err != nil {
+	if err := c.send(buildCONNECT(o.clientID, uint16(o.keepalive.Seconds()), o.sessionExpiry, o.receiveMax, o.maxPacketSize, o.topicAliasMax)); err != nil {
 		_ = conn.Close()
 		return nil, fmt.Errorf("mqtt/v5: send CONNECT: %w", err)
 	}
@@ -254,6 +305,12 @@ func (c *Client) readCONNACK() error {
 	remLen, err := readVarLen(c.conn)
 	if err != nil {
 		return err
+	}
+	// readVarLen only enforces the wire-format ceiling (268,435,455, §2.2.3);
+	// bound the allocation itself against the configured cap before trusting
+	// an untrusted broker's declared length (see DefaultMaxInboundPacketSize).
+	if c.opts.maxPacketSize > 0 && remLen > int(c.opts.maxPacketSize) {
+		return fmt.Errorf("mqtt/v5: CONNACK remaining length %d exceeds max packet size %d", remLen, c.opts.maxPacketSize)
 	}
 	body := make([]byte, remLen)
 	if _, err := io.ReadFull(c.conn, body); err != nil {
@@ -312,6 +369,18 @@ func (c *Client) PublishV5(ctx context.Context, topic string, qos mqtt.QoS, payl
 	if topic == "" {
 		return mqtt.ErrTopicEmpty
 	}
+	// An MQTT topic is a UTF-8 string with a 2-byte length prefix (§1.5.4):
+	// a topic longer than MaxStringLen cannot be represented on the wire and
+	// would truncate the length prefix, so reject it before encoding.
+	if err := mqtt.CheckStringLen(topic); err != nil {
+		return err
+	}
+	// ResponseTopic/ContentType are UTF-8 strings (§1.5.4) and CorrelationData
+	// / each UserProperty key+value are also length-prefixed (§1.5.4, §1.5.6):
+	// reject any oversized property field before it reaches encodeStr/encodeBin.
+	if err := checkPublishPropsLen(props); err != nil {
+		return err
+	}
 	// FitsRemainingLength checks the payload together with the topic and
 	// (for QoS>0) packet-ID overhead that will also be encoded into the wire
 	// Remaining Length — a bare payload-size check is not sufficient (see
@@ -332,11 +401,65 @@ func (c *Client) PublishV5(ctx context.Context, topic string, qos mqtt.QoS, payl
 		return ctx.Err()
 	default:
 	}
-	var packetID uint16
-	if qos == mqtt.AtLeastOnce {
-		packetID = c.nextID()
+	if qos == mqtt.AtMostOnce {
+		return c.send(buildPUBLISH(topic, payload, byte(qos), false, 0, props))
 	}
-	return c.send(buildPUBLISH(topic, payload, byte(qos), false, packetID, props))
+
+	// QoS 1: register the packet ID before sending so a PUBACK that arrives
+	// on the readLoop goroutine before we start waiting is not missed, then
+	// wait for its Reason Code (§3.4) — a broker refusal (0x80-0xFF, e.g.
+	// 0x87 Not authorized, 0x97 Quota exceeded) must be surfaced to the
+	// caller instead of being silently dropped as it was previously.
+	packetID := c.nextID()
+	ackCh := c.registerPubAck(packetID)
+	if err := c.send(buildPUBLISH(topic, payload, byte(qos), false, packetID, props)); err != nil {
+		c.dropPubAck(packetID)
+		return err
+	}
+	reasonCode, err := c.waitPubAck(ctx, packetID, ackCh)
+	if err != nil {
+		return fmt.Errorf("mqtt/v5: PUBACK: %w", err)
+	}
+	if reasonCode >= reasonCodeFailure {
+		return fmt.Errorf("mqtt/v5: PUBACK reason 0x%02x: %w", reasonCode, mqtt.ErrPublishRefused)
+	}
+	return nil
+}
+
+// registerPubAck records a pending PUBACK wait for packetID. Callers MUST
+// call this before send()ing the PUBLISH so a fast PUBACK from the readLoop
+// goroutine cannot arrive before the tracking entry exists.
+func (c *Client) registerPubAck(packetID uint16) chan byte {
+	ch := make(chan byte, 1)
+	c.ackMu.Lock()
+	c.pendingPubs[packetID] = ch
+	c.ackMu.Unlock()
+	return ch
+}
+
+func (c *Client) dropPubAck(packetID uint16) {
+	c.ackMu.Lock()
+	delete(c.pendingPubs, packetID)
+	c.ackMu.Unlock()
+}
+
+// waitPubAck blocks until the PUBACK for packetID arrives, ctx is canceled,
+// the client closes, or the configured ack timeout elapses (whichever is
+// first), and always releases the tracking entry before returning.
+func (c *Client) waitPubAck(ctx context.Context, packetID uint16, ch chan byte) (byte, error) {
+	defer c.dropPubAck(packetID)
+	timer := time.NewTimer(c.opts.ackTimeout)
+	defer timer.Stop()
+	select {
+	case code := <-ch:
+		return code, nil
+	case <-c.done:
+		return 0, mqtt.ErrClosed
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	case <-timer.C:
+		return 0, mqtt.ErrTimeout
+	}
 }
 
 //fusa:req REQ-SUB-001
@@ -366,6 +489,11 @@ func (c *Client) SubscribeV5(topic string, qos mqtt.QoS, sopts SubscribeOpts, op
 	if topic == "" {
 		return nil, mqtt.ErrTopicEmpty
 	}
+	// A topic filter is a UTF-8 string with a 2-byte length prefix (§1.5.4);
+	// reject before encoding into SUBSCRIBE.
+	if err := mqtt.CheckStringLen(topic); err != nil {
+		return nil, err
+	}
 	if qos == mqtt.ExactlyOnce {
 		return nil, mqtt.ErrQoSUnsupported
 	}
@@ -386,11 +514,76 @@ func (c *Client) SubscribeV5(topic string, qos mqtt.QoS, sopts SubscribeOpts, op
 	c.subs[topic] = append(c.subs[topic], sub)
 	c.mu.Unlock()
 
-	if err := c.send(buildSUBSCRIBE(topic, byte(qos), c.nextID(), sopts)); err != nil {
+	// Register the packet ID before sending so a fast SUBACK from the
+	// readLoop goroutine cannot arrive before the tracking entry exists.
+	packetID := c.nextID()
+	ackCh := c.registerSubAck(packetID)
+
+	if err := c.send(buildSUBSCRIBE(topic, byte(qos), packetID, sopts)); err != nil {
+		c.dropSubAck(packetID)
 		c.removeSubscription(sub)
+		sub.closeOnce()
 		return nil, fmt.Errorf("mqtt/v5: SUBSCRIBE: %w", err)
 	}
+
+	// Wait for the SUBACK and inspect its Reason Code (§3.9) instead of
+	// reporting success as soon as the write completes: a broker refusal
+	// (0x80-0xFF, e.g. 0x87 Not authorized, 0x8F Topic Filter invalid) must
+	// not be indistinguishable from a granted subscription. On any failure
+	// path below, the subscription is removed and its channel closed so it
+	// is not left dangling — previously it stayed open, undelivered, and
+	// unclosed until the whole client closed.
+	reasonCodes, err := c.waitSubAck(packetID, ackCh)
+	if err != nil {
+		c.removeSubscription(sub)
+		sub.closeOnce()
+		return nil, fmt.Errorf("mqtt/v5: SUBACK: %w", err)
+	}
+	// This client always requests exactly one Topic Filter per SUBSCRIBE
+	// (buildSUBSCRIBE takes a single filter), so exactly one Reason Code is
+	// expected per §3.9; only the first is inspected.
+	if reasonCodes[0] >= reasonCodeFailure {
+		c.removeSubscription(sub)
+		sub.closeOnce()
+		return nil, fmt.Errorf("mqtt/v5: SUBACK reason 0x%02x: %w", reasonCodes[0], mqtt.ErrSubscribeRefused)
+	}
 	return sub, nil
+}
+
+// registerSubAck records a pending SUBACK wait for packetID. Callers MUST
+// call this before send()ing the SUBSCRIBE so a fast SUBACK from the
+// readLoop goroutine cannot arrive before the tracking entry exists.
+func (c *Client) registerSubAck(packetID uint16) chan []byte {
+	ch := make(chan []byte, 1)
+	c.ackMu.Lock()
+	c.pendingSubs[packetID] = ch
+	c.ackMu.Unlock()
+	return ch
+}
+
+func (c *Client) dropSubAck(packetID uint16) {
+	c.ackMu.Lock()
+	delete(c.pendingSubs, packetID)
+	c.ackMu.Unlock()
+}
+
+// waitSubAck blocks until the SUBACK for packetID arrives, the client
+// closes, or the configured ack timeout elapses (whichever is first), and
+// always releases the tracking entry before returning. SubscribeV5 has no
+// ctx parameter (matching the mqtt.Client.Subscribe interface), so unlike
+// waitPubAck this has no ctx.Done() case.
+func (c *Client) waitSubAck(packetID uint16, ch chan []byte) ([]byte, error) {
+	defer c.dropSubAck(packetID)
+	timer := time.NewTimer(c.opts.ackTimeout)
+	defer timer.Stop()
+	select {
+	case codes := <-ch:
+		return codes, nil
+	case <-c.done:
+		return nil, mqtt.ErrClosed
+	case <-timer.C:
+		return nil, mqtt.ErrTimeout
+	}
 }
 
 //fusa:req REQ-CONN-006
@@ -473,6 +666,15 @@ func (c *Client) readLoop() {
 		if err != nil {
 			return
 		}
+		// readVarLen only enforces the wire-format ceiling (268,435,455,
+		// §2.2.3); bound the allocation itself against the configured cap
+		// before trusting an untrusted broker's declared length (see
+		// DefaultMaxInboundPacketSize). A crafted or corrupt frame otherwise
+		// forces a ~268MB allocation, repeatably, on every such frame.
+		if c.opts.maxPacketSize > 0 && remLen > int(c.opts.maxPacketSize) {
+			_ = c.send(buildDISCONNECTReason(0x95)) // Packet too large (§2.4)
+			return
+		}
 		body := make([]byte, remLen)
 		if remLen > 0 {
 			if _, err := io.ReadFull(c.conn, body); err != nil {
@@ -484,9 +686,9 @@ func (c *Client) readLoop() {
 		case pktPUBLISH & 0xF0:
 			c.handlePUBLISH(hdr, body)
 		case pktPUBACK & 0xF0:
-			// QoS 1 ACK — no in-flight tracking in v0.2
+			c.handlePUBACK(body)
 		case pktSUBACK & 0xF0:
-			// SUBACK — no pending verification in v0.2
+			c.handleSUBACK(body)
 		case pktUNSUBACK & 0xF0:
 			// acknowledged
 		case pktPINGRESP & 0xF0:
@@ -494,6 +696,52 @@ func (c *Client) readLoop() {
 		case pktDISCONNECT & 0xF0:
 			return // broker-initiated disconnect
 		}
+	}
+}
+
+// handleSUBACK delivers a SUBACK's per-Topic-Filter Reason Codes (§3.9) to
+// the SubscribeV5 call awaiting them, if any. A malformed SUBACK (short body,
+// bad property block, or no reason codes) is dropped: it cannot be attributed
+// to a pending SubscribeV5 call, which will instead time out.
+//
+//fusa:req REQ-V5-SUB-001
+func (c *Client) handleSUBACK(body []byte) {
+	packetID, codes, err := parseSUBACK(body)
+	if err != nil {
+		return
+	}
+	c.ackMu.Lock()
+	ch := c.pendingSubs[packetID]
+	c.ackMu.Unlock()
+	if ch == nil {
+		return
+	}
+	select {
+	case ch <- codes:
+	default: // no one waiting (already timed out) — drop
+	}
+}
+
+// handlePUBACK delivers a PUBACK's Reason Code (§3.4.2) to the PublishV5
+// (QoS 1) call awaiting it, if any. A malformed PUBACK (short body) is
+// dropped: it cannot be attributed to a pending PublishV5 call, which will
+// instead time out.
+//
+//fusa:req REQ-V5-PUB-001
+func (c *Client) handlePUBACK(body []byte) {
+	packetID, reasonCode, err := parsePUBACK(body)
+	if err != nil {
+		return
+	}
+	c.ackMu.Lock()
+	ch := c.pendingPubs[packetID]
+	c.ackMu.Unlock()
+	if ch == nil {
+		return
+	}
+	select {
+	case ch <- reasonCode:
+	default: // no one waiting (already timed out) — drop
 	}
 }
 
@@ -546,9 +794,23 @@ func (c *Client) handlePUBLISH(hdr byte, body []byte) {
 		return
 	}
 
-	// Resolve topic alias per MQTT v5 §3.3.2.3.4.
+	// Resolve topic alias per MQTT v5 §3.3.2.3.4. A Topic Alias of 0, or one
+	// greater than the Topic Alias Maximum we advertised in CONNECT (0 if we
+	// advertised none at all, i.e. WithTopicAliasMax(0) or the default when
+	// disabled), is a Protocol Error: the server "MUST NOT send a Topic Alias
+	// ... greater than the Topic Alias Maximum". Silently accepting it would
+	// let an out-of-bound alias grow the alias table unboundedly and/or
+	// resolve to a topic the client never agreed to track. §4.13 requires
+	// closing the Network Connection on a Protocol Error, so send DISCONNECT
+	// with reason 0x82 (Protocol Error) and stop reading — the closed conn
+	// then makes readLoop's next io.ReadFull fail and return.
 	if props.topicAlias != nil {
 		alias := *props.topicAlias
+		if alias == 0 || alias > c.opts.topicAliasMax {
+			_ = c.send(buildDISCONNECTReason(0x82)) // Protocol Error
+			_ = c.conn.Close()
+			return
+		}
 		if topic != "" {
 			c.aliasMu.Lock()
 			c.aliases[alias] = topic

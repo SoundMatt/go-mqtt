@@ -487,6 +487,33 @@ type PublishProps struct {
 	TopicAlias      uint16              // 0 = no alias; must be ≤ server TopicAliasMax
 }
 
+// checkPublishPropsLen validates every UTF-8 string / binary data field in
+// props against mqtt.MaxStringLen (MQTT §1.5.4, §1.5.6). Each is carried by a
+// 2-byte length prefix on the wire (see propStr/propBin/propUserProp below),
+// so a field above the limit cannot be represented and must be rejected
+// before buildPUBLISH encodes it — otherwise the prefix silently truncates
+// (mod 65,536) and the encoded packet is misframed.
+func checkPublishPropsLen(props PublishProps) error {
+	if err := mqtt.CheckStringLen(props.ResponseTopic); err != nil {
+		return err
+	}
+	if err := mqtt.CheckStringLen(props.ContentType); err != nil {
+		return err
+	}
+	if err := mqtt.CheckBinLen(props.CorrelationData); err != nil {
+		return err
+	}
+	for _, up := range props.UserProperties {
+		if err := mqtt.CheckStringLen(up.Key); err != nil {
+			return err
+		}
+		if err := mqtt.CheckStringLen(up.Value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // SubscribeOpts holds MQTT v5 subscription options for SubscribeV5.
 //
 //fusa:req REQ-V5-SUB-001
@@ -503,13 +530,26 @@ type SubscribeOpts struct {
 //fusa:req REQ-WIRE-005
 //fusa:req REQ-V5-WIRE-004
 //fusa:req REQ-V5-SESSION-001
-func buildCONNECT(clientID string, keepaliveSecs uint16, sessionExpiry uint32, receiveMax uint16) []byte {
+func buildCONNECT(clientID string, keepaliveSecs uint16, sessionExpiry uint32, receiveMax uint16, maxPacketSize uint32, topicAliasMax uint16) []byte {
 	var connProps [][]byte
 	if sessionExpiry > 0 {
 		connProps = append(connProps, propU32(propSessionExpiry, sessionExpiry))
 	}
 	if receiveMax > 0 {
 		connProps = append(connProps, propU16(propReceiveMax, receiveMax))
+	}
+	if maxPacketSize > 0 {
+		// §3.1.2.11: tells the server the largest packet it may send us, so
+		// it can self-limit instead of relying solely on our own inbound cap.
+		connProps = append(connProps, propU32(propMaxPacketSize, maxPacketSize))
+	}
+	if topicAliasMax > 0 {
+		// §3.1.2.3.4: bounds what alias values the server may subsequently
+		// use in a PUBLISH to us. If omitted, the spec's own default is 0
+		// ("does not accept any Topic Alias"), matching a caller who leaves
+		// this unset — the client then MUST treat any inbound alias as a
+		// Protocol Error (enforced in handlePUBLISH), never accept it.
+		connProps = append(connProps, propU16(propTopicAliasMax, topicAliasMax))
 	}
 
 	body := []byte{
@@ -602,9 +642,60 @@ func buildPUBACK(packetID uint16) []byte {
 	return pkt(pktPUBACK, body)
 }
 
+// reasonCodeFailure is the lowest MQTT v5.0 Reason Code value (§2.4) that
+// indicates failure: codes 0x00-0x7F are success/normal variants (e.g. 0x00
+// Success, 0x01 Granted QoS 1), codes 0x80-0xFF are all failures (e.g. 0x87
+// Not authorized, 0x8F Topic Filter invalid, 0x97 Quota exceeded).
+const reasonCodeFailure = 0x80
+
+// parseSUBACK extracts the packet identifier and per-Topic-Filter Reason
+// Codes from a SUBACK packet body (§3.9): 2-byte packet ID, then a
+// Property-Length-prefixed property block, then one Reason Code byte per
+// Topic Filter that was requested in the matching SUBSCRIBE. A Reason Code
+// >= reasonCodeFailure means that filter's subscription was refused, not
+// granted — the caller MUST NOT treat a non-error return from this function
+// alone as subscription success.
+func parseSUBACK(body []byte) (packetID uint16, reasonCodes []byte, err error) {
+	if len(body) < 2 {
+		return 0, nil, fmt.Errorf("mqtt/v5: short SUBACK (%d bytes)", len(body))
+	}
+	packetID = binary.BigEndian.Uint16(body[:2])
+	_, remaining, err := readPropSet(body[2:])
+	if err != nil {
+		return 0, nil, fmt.Errorf("mqtt/v5: SUBACK properties: %w", err)
+	}
+	if len(remaining) == 0 {
+		return 0, nil, fmt.Errorf("mqtt/v5: SUBACK carries no reason codes")
+	}
+	return packetID, remaining, nil
+}
+
+// parsePUBACK extracts the packet identifier and Reason Code from a PUBACK
+// packet body (§3.4.2). Per §3.4.2.1 the Reason Code and Properties MAY be
+// omitted entirely when the Reason Code is 0x00 (Success) and there are no
+// Properties, so a 2-byte body (packet ID only) is treated as Success.
+func parsePUBACK(body []byte) (packetID uint16, reasonCode byte, err error) {
+	if len(body) < 2 {
+		return 0, 0, fmt.Errorf("mqtt/v5: short PUBACK (%d bytes)", len(body))
+	}
+	packetID = binary.BigEndian.Uint16(body[:2])
+	if len(body) == 2 {
+		return packetID, 0x00, nil
+	}
+	return packetID, body[2], nil
+}
+
 // buildDISCONNECT builds an MQTT v5 DISCONNECT with reason 0x00 (Normal disconnect).
 func buildDISCONNECT() []byte {
-	return []byte{pktDISCONNECT, 0x02, 0x00, 0x00} // remaining=2, reason=0, propsLen=0
+	return buildDISCONNECTReason(0x00)
+}
+
+// buildDISCONNECTReason builds an MQTT v5 DISCONNECT with the given Reason
+// Code (§2.4) and no properties, e.g. 0x95 (Packet too large) when the client
+// rejects an inbound packet whose Remaining Length exceeds its configured
+// Maximum Packet Size.
+func buildDISCONNECTReason(reason byte) []byte {
+	return []byte{pktDISCONNECT, 0x02, reason, 0x00} // remaining=2, propsLen=0
 }
 
 var pingReq = []byte{pktPINGREQ, 0x00}

@@ -74,6 +74,50 @@ const SpecVersion = relay.SpecVersion
 // wire and are rejected with ErrPayloadTooLarge on the send path.
 const MaxPayloadSize = 268_435_455
 
+// DefaultMaxInboundPacketSize is the default upper bound a client places on
+// the Remaining Length of a single inbound packet before allocating a buffer
+// for its body. MQTT v5.0 §2.2.3 bounds Remaining Length by wire encoding to
+// 268,435,455 bytes, but that is a wire-format ceiling, not a resource-safety
+// one: readVarLen accepts any value up to that ceiling from an untrusted
+// broker, so allocating a buffer sized directly from it would let a single
+// crafted or corrupt frame force a ~268MB allocation, repeatably. v3 and v5
+// clients reject any inbound Remaining Length above this cap (configurable
+// via WithMaxPacketSize) before allocating; v5 also advertises it to the
+// broker via the CONNECT Maximum Packet Size property (§3.1.2.11) so a
+// compliant broker self-limits what it sends.
+const DefaultMaxInboundPacketSize = 1 << 20 // 1 MiB
+
+// MaxStringLen is the maximum length in bytes of an MQTT UTF-8 encoded string
+// or binary data field (MQTT §1.5.4, §1.5.6): the length is carried in a 2-byte
+// prefix, so values above 65,535 cannot be represented on the wire. Encoding a
+// longer topic or property would silently truncate the length prefix and emit a
+// misframed packet, so the send path rejects such inputs with ErrPayloadTooLarge.
+const MaxStringLen = 65_535
+
+// CheckStringLen reports ErrPayloadTooLarge if s cannot be encoded as an MQTT
+// UTF-8 Encoded String (§1.5.4): the 2-byte length prefix cannot represent
+// more than MaxStringLen bytes. Send paths call this before encoding any
+// string field (topic, client ID, will topic, v5 properties, …) to reject an
+// oversized value instead of silently truncating its wire length prefix.
+func CheckStringLen(s string) error {
+	if len(s) > MaxStringLen {
+		return ErrPayloadTooLarge
+	}
+	return nil
+}
+
+// CheckBinLen reports ErrPayloadTooLarge if b cannot be encoded as MQTT
+// Binary Data (§1.5.6): the 2-byte length prefix cannot represent more than
+// MaxStringLen bytes. Send paths call this before encoding any binary field
+// (will payload, v5 CorrelationData, …) to reject an oversized value instead
+// of silently truncating its wire length prefix.
+func CheckBinLen(b []byte) error {
+	if len(b) > MaxStringLen {
+		return ErrPayloadTooLarge
+	}
+	return nil
+}
+
 // FitsRemainingLength reports whether a PUBLISH built from the given topic,
 // payload size, and packet-identifier presence (QoS 1/2 add a 2-byte packet
 // ID; QoS 0 does not) can be represented within the MQTT §2.2.3 4-byte
@@ -117,6 +161,18 @@ var ErrTopicEmpty = fmt.Errorf("mqtt: topic must not be empty: %w", relay.ErrNot
 
 // ErrQoSUnsupported is returned when a QoS level is not supported.
 var ErrQoSUnsupported = fmt.Errorf("mqtt: QoS level not supported: %w", relay.ErrNotConnected)
+
+// ErrSubscribeRefused is returned when a broker rejects a subscription
+// request via a failure Reason Code (0x80-0xFF) in the SUBACK, per MQTT v5.0
+// §3.9. errors.Is matches this sentinel; the concrete error also reports the
+// specific Reason Code the broker returned.
+var ErrSubscribeRefused = fmt.Errorf("mqtt: broker refused subscription: %w", relay.ErrNotConnected)
+
+// ErrPublishRefused is returned when a broker rejects a QoS 1 publish via a
+// failure Reason Code (0x80-0xFF) in the PUBACK, per MQTT v5.0 §3.4.
+// errors.Is matches this sentinel; the concrete error also reports the
+// specific Reason Code the broker returned.
+var ErrPublishRefused = fmt.Errorf("mqtt: broker refused publish: %w", relay.ErrNotConnected)
 
 // ── QoS ──────────────────────────────────────────────────────────────────────
 
