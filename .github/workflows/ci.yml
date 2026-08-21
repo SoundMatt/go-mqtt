@@ -169,6 +169,13 @@ jobs:
   # (::notice:: + exit 0) rather than hard-failing if it's unreachable for any
   # reason — this job must never block ordinary development on live
   # infrastructure flakiness.
+  #
+  # Hardened (SoundMatt/RELAY THEME-K #125, INTEROP-05): the broker's
+  # `services:` container has been confirmed reachable on 6/6 recent runs
+  # of this job on this exact runner — this is no longer an environment
+  # dependency ordinary CI should tolerate silently failing. The probe step
+  # now hard-fails the job on this canonical `ubuntu-latest` runner instead
+  # of skipping, so a real broker regression is red, not silently green.
   mqtt-interop:
     name: MQTT interop — real Mosquitto broker + mosquitto_pub/mosquitto_sub CLI
     runs-on: ubuntu-latest
@@ -200,11 +207,11 @@ jobs:
           done
           echo "available=$available" >> "$GITHUB_OUTPUT"
           if [ "$available" = "false" ]; then
-            echo "::notice::Mosquitto broker service not reachable on 127.0.0.1:1883 after 15s — skipping MQTT interop tests"
+            echo "::error::Mosquitto broker service not reachable on 127.0.0.1:1883 after 15s on the canonical ubuntu-latest runner — this broker has been reliably reachable on every recent run, so treating this as a genuine regression rather than an environment gap (SoundMatt/RELAY THEME-K INTEROP-05)"
+            exit 1
           fi
 
       - name: Real-broker round-trip + third-party-peer interop (v3)
-        if: steps.probe.outputs.available == 'true'
         run: |
           go test -tags integration -v -race -timeout 60s -run \
             '^TestIntegration_(FieldExactRoundTrip|ThirdPartySubscriberVerifiesGoMqttPublish|GoMqttSubscriberVerifiesThirdPartyPublish)$' \
